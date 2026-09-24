@@ -107,9 +107,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(width: 10),
                     const Expanded(
                       child: Text(
-                        'Selección local y sin conexión. Tu documento permanece '
-                        'en el dispositivo. El procesamiento estará disponible '
-                        'desde el Sprint 2.',
+                        'Selección local y sin conexión..',
                       ),
                     ),
                   ],

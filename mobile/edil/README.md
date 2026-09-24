@@ -48,9 +48,10 @@ el formato declarado por el nombre; no analiza el contenido clínico del archivo
 ## Ejecución
 
 Requisitos: Flutter 3.41.1 o compatible con Dart 3.11, Android SDK con sus licencias
-aceptadas, JDK 21 instalado y un dispositivo o emulador Android. El archivo
-`android/gradle/gradle-daemon-jvm.properties` solicita JDK 21 para que Gradle 8.14
-funcione incluso si Android Studio incluye Java 25. No contiene rutas de equipo.
+aceptadas, Oracle JDK 21 completo instalado (con `bin/jlink`) y un dispositivo o
+emulador Android. El archivo `android/gradle/gradle-daemon-jvm.properties` solicita
+Oracle JDK 21 para que Gradle 8.14 no seleccione Java 25 de Android Studio ni el
+runtime reducido de la extensión Java de VS Code. No contiene rutas de equipo.
 La compilación incremental de Kotlin está desactivada en este proyecto para evitar
 errores de caché en Windows cuando Pub y el repositorio están en discos distintos.
 
