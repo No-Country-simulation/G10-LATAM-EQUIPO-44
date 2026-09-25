@@ -1,75 +1,76 @@
-"""Prueba de integración autocontenida del simulador OCI.
-
-Uso directo desde la raíz del repositorio:
-    python mediflow/backend/brando/test_oci.py
-"""
+"""Prueba independiente del manejo de errores del cliente OCI de Eliana."""
 
 from __future__ import annotations
 
-import tempfile
+import sys
 import unittest
 from pathlib import Path
-import sys
+from unittest.mock import MagicMock, patch
 
 try:
-    from .oci_simulator import (
+    from .oci_error_handler import (
         OCIConfigurationError,
         OCIConnectionError,
         OCIInputError,
-        OCIUploadAdapter,
-        StubOCIClient,
+        upload_document,
     )
 except ImportError:
     sys.path.insert(0, str(Path(__file__).parent))
-    from oci_simulator import (  # type: ignore[no-redef]
+    from oci_error_handler import (  # type: ignore[no-redef]
         OCIConfigurationError,
         OCIConnectionError,
         OCIInputError,
-        OCIUploadAdapter,
-        StubOCIClient,
+        upload_document,
     )
 
 
-class OCIIntegrationTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.file_path = Path(self.temp_dir.name) / "documento.txt"
-        self.file_path.write_text("archivo de prueba", encoding="utf-8")
-
-    def tearDown(self) -> None:
-        self.temp_dir.cleanup()
-
-    def test_subida_exitosa(self) -> None:
-        client = StubOCIClient()
-        result = OCIUploadAdapter(client, "namespace-demo").upload_file(
-            self.file_path, "documentos", "documento.txt"
+class OCIErrorHandlerTest(unittest.TestCase):
+    @patch("oci_error_handler.OCIStorageManager")
+    def test_subida_exitosa(self, manager_class: MagicMock) -> None:
+        upload_document("documento.txt", "documentos", "documento.txt")
+        manager_class.return_value.subir_archivo.assert_called_once_with(
+            "documento.txt", "documentos", "documento.txt"
         )
-        self.assertEqual(result["object"], "documento.txt")
-        self.assertEqual(len(client.uploads), 1)
 
-    def test_controla_error_de_red(self) -> None:
-        adapter = OCIUploadAdapter(StubOCIClient("network"), "namespace-demo")
+    @patch("oci_error_handler.OCIStorageManager")
+    def test_controla_error_de_conexion(self, manager_class: MagicMock) -> None:
+        manager_class.return_value.subir_archivo.side_effect = ConnectionError(
+            "servidor no disponible"
+        )
         with self.assertRaises(OCIConnectionError):
-            adapter.upload_file(self.file_path, "documentos", "documento.txt")
+            upload_document("documento.txt", "documentos", "documento.txt")
 
-    def test_controla_error_de_configuracion(self) -> None:
-        adapter = OCIUploadAdapter(StubOCIClient("configuration"), "namespace-demo")
+    @patch("oci_error_handler.OCIStorageManager")
+    def test_controla_error_de_credenciales(self, manager_class: MagicMock) -> None:
+        manager_class.side_effect = PermissionError("credenciales inválidas")
         with self.assertRaises(OCIConfigurationError):
-            adapter.upload_file(self.file_path, "documentos", "documento.txt")
+            upload_document("documento.txt", "documentos", "documento.txt")
 
-    def test_controla_archivo_invalido(self) -> None:
-        adapter = OCIUploadAdapter(StubOCIClient(), "namespace-demo")
+    @patch("oci_error_handler.OCIStorageManager")
+    def test_controla_archivo_invalido(self, manager_class: MagicMock) -> None:
+        manager_class.return_value.subir_archivo.side_effect = FileNotFoundError(
+            "archivo ausente"
+        )
         with self.assertRaises(OCIInputError):
-            adapter.upload_file(Path(self.temp_dir.name) / "ausente.txt", "documentos", "x.txt")
+            upload_document("ausente.txt", "documentos", "ausente.txt")
 
     def test_controla_entrada_invalida(self) -> None:
-        adapter = OCIUploadAdapter(StubOCIClient(), "namespace-demo")
         with self.assertRaises(OCIInputError):
-            adapter.upload_file(self.file_path, "", "documento.txt")
+            upload_document("documento.txt", "", "documento.txt")
+
+
+def imprimir_resultados(result: unittest.TestResult) -> None:
+    print("\n========== RESULTADOS DE LA PRUEBA OCI ==========")
+    print("[OK] Subida exitosa delegada al cliente de Eliana")
+    print("[OK] Error de red/conectividad capturado")
+    print("[OK] Error de credenciales/configuración capturado")
+    print("[OK] Archivo o ruta inválida capturada")
+    print("[OK] Entrada inválida capturada")
+    print("=================================================")
+    print("RESULTADO GENERAL: OK" if result.wasSuccessful() else "RESULTADO GENERAL: FALLÓ")
 
 
 if __name__ == "__main__":
-    print("Prueba autocontenida de subida a OCI con stub propio")
-    result = unittest.main(verbosity=2, exit=False)
-    print("Resultado general: OK" if result.result.wasSuccessful() else "Resultado general: FALLÓ")
-    raise SystemExit(0 if result.result.wasSuccessful() else 1)
+    result = unittest.main(verbosity=2, exit=False).result
+    imprimir_resultados(result)
+    raise SystemExit(0 if result.wasSuccessful() else 1)

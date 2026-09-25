@@ -1,47 +1,38 @@
 # Manejo de errores OCI - Brando
 
-Implementación propia y autocontenida para simular una subida a Oracle Cloud
-Infrastructure (OCI). No usa el código de otro integrante, no necesita acceso
-a OCI y no requiere credenciales reales.
+Este módulo es una capa de manejo de errores sobre el cliente OCI creado por
+Eliana durante el Sprint 1. No modifica ese cliente: lo importa y delega en su
+método `OCIStorageManager.subir_archivo(...)`.
 
 ## Archivos
 
-- `oci_simulator.py`: adaptador `OCIUploadAdapter`, excepciones específicas y
-	`StubOCIClient`.
-- `test_oci.py`: script de prueba de integración con `unittest`.
+- `oci_error_handler.py`: wrapper que valida entradas, llama al cliente de
+  Eliana y traduce errores a excepciones propias.
+- `test_oci.py`: prueba independiente con `unittest.mock`; no requiere
+  credenciales, bucket ni conexión real a OCI.
 
 ## Escenarios cubiertos
 
-- Subida exitosa y registro del objeto subido por el stub.
-- `OCIConnectionError` para desconexiones y timeouts.
-- `OCIConfigurationError` para cliente, namespace, credenciales o permisos
-	inválidos.
-- `OCIInputError` para archivos inexistentes, rutas ilegibles, bucket vacío o
-	nombre de objeto vacío.
-
-El adaptador concentra los bloques `try/except` y expone excepciones propias,
-para que una API pueda decidir cómo responder sin depender de excepciones del
-SDK. El patrón queda listo para integrar el cliente OCI real desde Sprint 2:
-se reemplaza `StubOCIClient` por un cliente con el método `put_object` y se
-mantiene `OCIUploadAdapter`.
+- Subida exitosa mediante `OCIStorageManager.subir_archivo`.
+- Problemas de red o conectividad: `ConnectionError`, `TimeoutError` y errores
+  de comunicación del SDK se convierten en `OCIConnectionError`.
+- Configuración o credenciales inválidas: permisos, configuración ausente o
+  inválida se convierten en `OCIConfigurationError`.
+- Archivos corruptos, rutas inexistentes o entradas inválidas: errores de
+  archivo, rutas, tipos y valores se convierten en `OCIInputError`.
 
 ## Ejecución paso a paso
 
-1. Abrir una terminal en la raíz del repositorio.
-2. Activar el entorno virtual, si existe:
+Desde la raíz del repositorio:
 
-	 ```bash
-	 source venv/bin/activate
-	 ```
+```bash
+source venv/bin/activate
+python mediflow/backend/brando/test_oci.py
+```
 
-3. Ejecutar el script:
+También se puede ejecutar con `./venv/bin/python` si el entorno virtual ya
+existe. El script imprime cada escenario y termina con `RESULTADO GENERAL: OK`
+cuando todas las pruebas pasan.
 
-	 ```bash
-	 python mediflow/backend/brando/test_oci.py
-	 ```
-
-	 En este entorno también puede usarse `./venv/bin/python` si `python` no
-	 está disponible en el `PATH`.
-
-4. Confirmar cinco líneas `ok`, el resumen `Ran 5 tests` y
-	 `Resultado general: OK`.
+Las pruebas simulan las excepciones del cliente de Eliana mediante
+`unittest.mock`, por lo que no realizan una subida real a OCI.
