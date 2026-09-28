@@ -74,10 +74,10 @@ class OCIStorageManager:
         print(f"Archivo guardado exitosamente en '{ruta_descarga}'.")
 
     def mover_archivo(self, nombre_archivo: str, bucket_origen: str, bucket_destino: str):
-        """Mueve un archivo entre buckets (útil para el enrutamiento de la IA)."""
+        """Mueve un archivo entre buckets (copia y elimina el original tras confirmar)."""
+        import time
         print(f"Moviendo '{nombre_archivo}' de '{bucket_origen}' a '{bucket_destino}'...")
         
-        # OCI no tiene un "mover" directo; se requiere copiar y luego borrar el original
         detalle_copia = oci.object_storage.models.CopyObjectDetails(
             source_object_name=nombre_archivo,
             destination_region=self.config["region"],
@@ -86,9 +86,23 @@ class OCIStorageManager:
             destination_object_name=nombre_archivo
         )
         
-        # 1. Copiar al nuevo destino
+        # 1. Iniciar la solicitud de copia en OCI
         self.object_storage.copy_object(self.namespace, bucket_origen, detalle_copia)
-        # 2. Borrar del origen
-        self.object_storage.delete_object(self.namespace, bucket_origen, nombre_archivo)
         
+        # 2. Esperar confirmación de que el objeto llegó al destino
+        print("   Esperando confirmación del copiado en OCI...")
+        copiado = False
+        for _ in range(10):
+            time.sleep(1.5)
+            res = self.object_storage.list_objects(self.namespace, bucket_destino)
+            nombres = [obj.name for obj in res.data.objects]
+            if nombre_archivo in nombres:
+                copiado = True
+                break
+        
+        if not copiado:
+            raise Exception(f"No se pudo completar la copia de '{nombre_archivo}' hacia '{bucket_destino}'.")
+            
+        # 3. Borrar del origen únicamente cuando ya existe en el destino
+        self.object_storage.delete_object(self.namespace, bucket_origen, nombre_archivo)
         print("Movimiento completado con éxito.")
