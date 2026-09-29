@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 03 — Panel de auditoria</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="wf-docbar">
+  <span class="wf-docbar__tag">Puntos 4 y 5</span>
+  <span class="wf-docbar__title">Panel de auditoria</span>
+  <span class="wf-docbar__sep"></span>
+  <a href="index.html">Indice</a>
+  <a href="../03-panel-auditoria.md">Vista</a>
+  <a href="../04-acciones.md">Acciones</a>
+</div>
+
+<div class="wf">
+
+  <header class="wf__header">
+    <div class="wf__brand"><span class="wf__logo">M</span> MediFlow</div>
+    <span class="wf-sub wf-dim">Portal clinico</span>
+    <div class="wf__search"></div>
+    <div class="wf__avatar">MV</div>
+  </header>
+
+  <nav class="wf__sidebar">
+    <a class="wf__navitem" href="#" onclick="return false"><span>Ingesta</span></a>
+    <a class="wf__navitem" href="#" onclick="return false"><span>Resultado</span></a>
+    <a class="wf__navitem" href="#" onclick="return false"><span>Colas</span><span class="wf__navbadge">54</span></a>
+    <a class="wf__navitem wf__navitem--active" href="#" aria-current="page"><span>Auditoria</span><span class="wf__navbadge wf__navbadge--alerta">5</span></a>
+    <a class="wf__navitem" href="listado.html"><span>Historial</span></a>
+    <div style="margin-top:14px">
+      <div class="wf__navitem wf__navitem--ghost"><span>Configuracion</span></div>
+      <div class="wf__navitem wf__navitem--ghost"><span>Soporte HIS</span></div>
+    </div>
+  </nav>
+
+  <main class="wf__main">
+
+    <div class="wf-note">
+      <div><strong>Orden de lectura deliberado:</strong> estado agregado &rarr; control del lote
+      &rarr; detalle individual &rarr; confirmacion. Se decide de lo particular a lo agregado.</div>
+    </div>
+
+    <!-- BANDA 1 -->
+    <div class="wf-region" style="margin-bottom:16px">
+      <span class="wf-region__n">1 · BANNER DE ESTADO</span>
+      <div class="wf-row" style="margin-bottom:10px;flex-wrap:wrap">
+        <h1 class="wf-h1" style="font-size:18px">Auditoria algoritmica</h1>
+        <span class="wf-chip wf-chip--auditoria"><span class="wf-chip__dot"></span>Confianza sobre umbral</span>
+        <span class="wf-spacer"></span>
+        <span class="wf-sub wf-dim">Latencia 112 ms · Protocolo: MTS v5.2</span>
+      </div>
+      <div class="wf-kpis">
+        <div class="wf-kpi"><div class="wf-kpi__v">5</div><div class="wf-kpi__k">Pendientes</div></div>
+        <div class="wf-kpi"><div class="wf-kpi__v">2</div><div class="wf-kpi__k">Bajo umbral</div></div>
+        <div class="wf-kpi wf-kpi--alerta"><div class="wf-kpi__v">1</div><div class="wf-kpi__k">Criticos</div></div>
+        <div class="wf-kpi"><div class="wf-kpi__v">1</div><div class="wf-kpi__k">Discrepancias</div></div>
+        <div class="wf-kpi"><div class="wf-kpi__v">0</div><div class="wf-kpi__k">En revision</div></div>
+      </div>
+      <p class="wf-sub wf-dim" style="margin-top:8px;font-size:11.5px">
+        Los cinco KPIsanswered &laquo;¿cuanto trabajo hay y es urgente?&raquo; antes de leer una sola
+        tarjeta. El de Criticos es el unico que puede justificar interrumpir el resto.
+      </p>
+    </div>
+
+    <!-- BANDA 2 -->
+    <div class="wf-region wf-region--outline" style="margin-bottom:16px;padding-top:16px">
+      <span class="wf-region__n">2 · BARRA DE HERRAMIENTAS</span>
+      <div class="wf-row wf-row--wrap" style="padding:4px 12px 12px;gap:8px">
+        <div class="wf-tabs">
+          <span class="wf-tab wf-tab--on">Todos <span class="wf-tab__n">5</span></span>
+          <span class="wf-tab">Criticos <span class="wf-tab__n">1</span></span>
+          <span class="wf-tab">Discrepancias <span class="wf-tab__n">1</span></span>
+          <span class="wf-tab">En revision <span class="wf-tab__n">2</span></span>
+        </div>
+        <span class="wf-spacer"></span>
+        <span class="wf-btn wf-btn--sm">Reanalizar Lote</span>
+        <span class="wf-btn wf-btn--sm wf-btn--primary">Aprobacion Rapida Asistida</span>
+      </div>
+      <div class="wf-note wf-note--nuevo" style="margin:0 12px 12px">
+        <div><strong>Reinterpretacion de las pestañas.</strong> Hoy filtran por el campo
+        <span class="wf-mono">estado</span> de la tarjeta, con valores que son un vocabulario
+        paralelo al del listado. Este wireframe las convierte en <strong>filtros por motivo de
+        entrada</strong> (D1, D2, D3), lo que las hace coherentes con el ciclo de vida unico sin
+        cambiar su comportamiento observable. Ver
+        <a href="estados.html">estados</a>.</div>
+      </div>
+    </div>
+
+    <!-- BANDA 3 -->
+    <div class="wf-region" style="margin-bottom:14px">
+      <span class="wf-region__n">3 · TARJETA — 4 ZONAS</span>
+      <div class="wf-sub" style="margin-bottom:10px">
+        5 pendientes en cola, ordenadas por necesidad de intervencion: primero lo mas grave y,
+        a igualdad, lo que menos confianza tiene.
+      </div>
+
+      <div class="wf-card wf-audit">
+
+        <!-- ZONA A -->
+        <div class="wf-region" style="padding:12px">
+          <span class="wf-region__n" style="top:-6px">ZONA A · IDENTIFICACION</span>
+          <div class="wf-row wf-row--wrap" style="gap:8px">
+            <span class="wf-chip wf-chip--recibido-alt" style="background:var(--mts-rojo-bg);border-color:var(--mts-rojo-border);color:var(--mts-rojo-ink)">
+              Color · Nivel 1 (0 min) &ndash; Inmediato
+            </span>
+            <span class="wf-docid">AUD-0001</span>
+            <span class="wf-chip wf-chip--auditoria" style="font-size:10.5px"><span class="wf-chip__dot"></span>Editado por humano</span>
+            <span class="wf-spacer"></span>
+            <span class="wf-sub">Urgencias &middot; Box 3</span>
+            <span class="wf-sub wf-dim">HIS &middot; turnillaje</span>
+          </div>
+          <div class="wf-row" style="margin-top:9px;gap:14px;flex-wrap:wrap">
+            <strong style="font-size:14px">Nombre del paciente</strong>
+            <span class="wf-sub wf-dim">Edad y DNI reservados</span>
+            <span class="wf-spacer"></span>
+            <span class="wf-timer">Espera: 14 / 0 min max</span>
+            <span class="wf-timer--late">TIEMPO AGOTADO: 14 min de retraso</span>
+          </div>
+          <p class="wf-sub wf-dim" style="margin-top:7px;font-size:11.5px">
+            <strong>El temporizador es la pieza mas importante de la tarjeta.</strong> Convierte el
+            objetivo temporal del protocolo MTS en un contador visible y, al superarlo, anade un
+            mensaje explicito. Responde a la pregunta que un profesional en turno se hace sin
+            parar: ¿deberia haber atendido ya este caso?
+          </p>
+        </div>
+
+        <div class="wf-region" style="padding:0 12px 12px">
+          <div class="wf-zone">
+            <div class="wf-zone__label">Zona B &middot; Signos vitales</div>
+            <div class="wf-vitals">
+              <div class="wf-vital"><div class="wf-vital__k">PA</div><div class="wf-vital__v">90/60</div><div class="wf-vital__r">mmHg · 100-180 / 60-90</div></div>
+              <div class="wf-vital wf-vital--mal"><div class="wf-vital__k">FC</div><div class="wf-vital__v">118</div><div class="wf-vital__r">lpm · 60-100 lpm</div></div>
+              <div class="wf-vital wf-vital--crit"><div class="wf-vital__k">SpO2</div><div class="wf-vital__v">88 %</div><div class="wf-vital__r">&ge; 95 %</div></div>
+              <div class="wf-vital"><div class="wf-vital__k">FR</div><div class="wf-vital__v">22</div><div class="wf-vital__r">rpm · 12-20 rpm</div></div>
+              <div class="wf-vital"><div class="wf-vital__k">T</div><div class="wf-vital__v">37.1</div><div class="wf-vital__r">&deg;C · 36.0-37.5</div></div>
+              <div class="wf-vital"><div class="wf-vital__k">Glasgow</div><div class="wf-vital__v">15</div><div class="wf-vital__r">3-15</div></div>
+              <div class="wf-vital"><div class="wf-vital__k">Pupilas</div><div class="wf-vital__v" style="font-size:12px">Isocoreas</div><div class="wf-vital__r">5 valores</div></div>
+              <div class="wf-vital"><div class="wf-vital__k">GLUC</div><div class="wf-vital__v">—</div><div class="wf-vital__r">mg/dL</div></div>
+            </div>
+            <p class="wf-sub" style="margin-top:9px;font-size:11.5px">
+              <strong>Antecedentes:</strong> <span class="wf-dim">marcador generico de antecedentes del episodio</span>
+            </p>
+            <p class="wf-sub wf-dim" style="margin-top:10px;font-size:11px">
+              <strong style="color:var(--mts-rojo-ink)">rojo</strong> = fuera de critLo/critHi (fuera del rango
+              de seguridad) &nbsp;&middot;&nbsp;
+              <strong style="color:var(--mts-amarillo-ink)">amarillo</strong> = marcado como anormal por el modelo.
+              Dos niveles distintos, y la diferencia importa.
+            </p>
+          </div>
+        </div>
+
+        <div class="wf-region" style="padding:0 12px 12px">
+          <div class="wf-zone">
+            <div class="wf-zone__label">Zona C &middot; Inferencia del modelo</div>
+            <div class="wf-row" style="margin-bottom:8px"><span class="wf-chip wf-chip--auditoria" style="font-size:10.5px"><span class="wf-chip__dot"></span>Estado de la inferencia</span></div>
+            <div class="wf-dx wf-dx--a">
+              <div class="wf-dx__k">Diagnostico A &middot; alerta</div>
+              <div><span class="wf-dim">marcador generico de diagnostico A</span></div>
+            </div>
+            <div class="wf-dx__vs">&mdash; vs &mdash;</div>
+            <div class="wf-dx wf-dx--b">
+              <div class="wf-dx__k">Diagnostico B &middot; alternativo</div>
+              <div><span class="wf-dim">marcador generico de diagnostico B</span></div>
+            </div>
+            <p class="wf-sub" style="margin-top:9px;font-size:11.5px">
+              <strong>Razonamiento discriminador:</strong>
+              <span class="wf-dim">marcador generico del razonamiento que separa A de B</span>
+            </p>
+            <p class="wf-sub" style="margin-top:6px;font-size:11.5px;color:var(--mts-rojo-ink)">
+              <strong>Advertencia:</strong> <span class="wf-dim">marcador generico de advertencia</span>
+            </p>
+            <p class="wf-sub wf-dim" style="margin-top:9px;font-size:11px">
+              El par A/B con separador no es decoracion: el valor del modelo esta en el contraste
+              entre las dos hipotesis, no en la primera. Mostrar ambas es lo que permite detectar un
+              error de razonamiento, no solo un error de resultado.
+            </p>
+          </div>
+        </div>
+
+        <div class="wf-region" style="padding:0 12px 12px">
+          <div class="wf-zone">
+            <div class="wf-zone__label">Zona D &middot; Confianza del algoritmo</div>
+            <div class="wf-row" style="gap:10px">
+              <span class="wf-conf__band" style="color:var(--mts-azul-ink)">Confianza baja</span>
+              <span class="wf-sub" style="color:var(--mts-naranja-ink)">Por debajo del umbral</span>
+            </div>
+            <div class="wf-conf__track">
+              <div class="wf-conf__fill" style="width:41%"></div>
+              <div class="wf-conf__marker" style="left:60%"></div>
+            </div>
+            <div class="wf-conf__scale"><span>Baja</span><span>Media</span><span>Alta</span></div>
+            <p class="wf-sub wf-dim" style="margin-top:6px;font-size:10.5px">
+              Umbral de corte aplicado en validacion.
+              <strong>El score no se muestra como numero</strong>: un numero invita a reinterpretarlo
+              como probabilidad; una banda con umbral explicito invita a decidir. La marca vertical
+              materializa el corte, y por eso «media» y «sobre el umbral» no son lo mismo.
+            </p>
+            <div class="wf-row" style="margin-top:12px;gap:7px;flex-wrap:wrap">
+              <span class="wf-btn wf-btn--sm">Editar datos</span>
+              <span class="wf-btn wf-btn--sm wf-btn--outline-danger">Rechazar</span>
+              <span class="wf-btn wf-btn--sm wf-btn--danger">Aprobar</span>
+              <span class="wf-spacer"></span>
+              <a class="wf-btn wf-btn--sm" href="detalle.html" style="border-style:dashed">Ver detalle completo &rarr;</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="wf-note wf-note--nuevo" style="margin-top:10px">
+        <div><strong>El boton de Aprobar es rojo porque el nivel MTS es rojo.</strong> Con nivel
+        rojo, <span class="wf-mono">pedirAprobar()</span> cambia el boton, el icono, el titulo del
+        dialogo y anade una casilla obligatoria. Aprobar un caso rojo nunca es un clic accidental.
+        El enlace <em>Ver detalle completo</em> es la accion N1 y no existe todavia en el codigo.</div>
+      </div>
+    </div>
+
+    <!-- BANDA 4: DIALOGOS -->
+    <div class="wf-region">
+      <span class="wf-region__n">4 · DIALOGOS DE DECISION</span>
+      <div class="wf-sub" style="margin-bottom:12px">
+        Los cuatro comparten trampa de foco ciclica, cierre con <span class="wf-mono">Escape</span>,
+        cierre por clic en el overlay y bloqueo de scroll. El foco inicial va siempre al campo de
+        mayor riesgo, nunca al boton de firmar.
+      </div>
+
+      <div class="wf-cardgrid">
+
+        <div class="wf-modal">
+          <div class="wf-modal__head">
+            <span class="wf-chip wf-chip--auditoria" style="background:var(--mts-rojo-bg);border-color:var(--mts-rojo-border);color:var(--mts-rojo-ink)">
+              <span class="wf-chip__dot"></span>Nivel rojo
+            </span>
+            <strong>Confirmar aprobacion de triaje</strong>
+          </div>
+          <div class="wf-modal__body">
+            <dl class="wf-dl">
+              <dt>Documento</dt><dd>AUD-0001</dd>
+              <dt>Paciente</dt><dd>Nombre del paciente</dd>
+              <dt>Nivel MTS</dt><dd style="color:var(--mts-rojo-ink)">Rojo &middot; Inmediato</dd>
+              <dt>Ubicacion</dt><dd>Urgencias &middot; Box 3</dd>
+              <dt>Diagnostico A</dt><dd>marcador generico</dd>
+              <dt>Confianza</dt><dd>Baja</dd>
+            </dl>
+            <label class="wf-check">
+              <input type="checkbox">
+              <span>Confirmo que he revisado el caso y que la sala de <strong>valoracion no esta</strong>
+              atendida antes de liberar este nivel.</span>
+            </label>
+            <p class="wf-sub wf-dim" style="font-size:11px">
+              El boton de firma arranca deshabilitado y no se habilita hasta marcar la casilla.
+            </p>
+          </div>
+          <div class="wf-modal__foot">
+            <span class="wf-btn wf-btn--sm">Cancelar</span>
+            <span class="wf-btn wf-btn--sm wf-btn--danger" style="opacity:.45">Firmar y aprobar nivel Rojo</span>
+          </div>
+        </div>
+
+        <div class="wf-modal">
+          <div class="wf-modal__head">
+            <strong>Rechazar inferencia y devolver a triage</strong>
+          </div>
+          <div class="wf-modal__body">
+            <div class="wf-field">
+              <span class="wf-field__k">Motivo del rechazo <strong style="color:var(--mts-rojo-ink)">(obligatorio, min. 10 caracteres)</strong></span>
+              <div class="wf-input wf-input--area wf-input--error"></div>
+              <span class="wf-field__k">0 / 999 &middot; minimo 10</span>
+              <span class="wf-sub" style="color:var(--mts-rojo-ink);font-size:11.5px">
+                Indica el motivo del rechazo. Son 10 caracteres minimos.
+              </span>
+            </div>
+            <p class="wf-sub wf-dim" style="font-size:11px">
+              El motivo obligatorio es la razon de que exista el registro de auditoria: un rechazo
+              sin explicacion es indistinguible de un fallo. T6 devuelve el documento a
+              <strong>Recibido</strong>.
+            </p>
+          </div>
+          <div class="wf-modal__foot">
+            <span class="wf-btn wf-btn--sm">Cancelar</span>
+            <span class="wf-btn wf-btn--sm wf-btn--outline-danger">Firmar y rechazar</span>
+          </div>
+        </div>
+
+        <div class="wf-modal">
+          <div class="wf-modal__head"><strong>Editar datos clinicos del episodio</strong></div>
+          <div class="wf-modal__body">
+            <div class="wf-grid2">
+              <div class="wf-field"><span class="wf-field__k">Nivel MTS</span><select class="wf-input"><option>Rojo &mdash; Inmediato</option><option>Naranja &mdash; Muy Urgente</option><option>Amarillo &mdash; Urgente</option></select></div>
+              <div class="wf-field"><span class="wf-field__k">Ubicacion / box</span><div class="wf-input"></div></div>
+            </div>
+            <div class="wf-grid2">
+              <div class="wf-field"><span class="wf-field__k">Diagnostico A (alerta)</span><div class="wf-input"></div></div>
+              <div class="wf-field"><span class="wf-field__k">Diagnostico B (alternativo)</span><div class="wf-input"></div></div>
+            </div>
+            <div class="wf-field"><span class="wf-field__k">Discriminador clinico MTS</span><div class="wf-input wf-input--area"></div></div>
+            <div class="wf-field">
+              <span class="wf-field__k">Signos vitales</span>
+              <div class="wf-row" style="gap:6px">
+                <div class="wf-input" style="width:64px"></div><div class="wf-input" style="width:64px"></div><div class="wf-input" style="width:64px"></div><div class="wf-input" style="width:64px"></div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-modal__foot">
+            <span class="wf-btn wf-btn--sm">Cancelar</span>
+            <span class="wf-btn wf-btn--sm wf-btn--primary">Guardar y recalcular</span>
+          </div>
+        </div>
+        <div class="wf-note wf-note--hueco" style="margin:0">
+          <div><strong>H9.</strong> El selector ofrece 3 niveles; el catalogo del listado tiene 5.
+          Verde y azul no se pueden asignar. <strong>H10.</strong> Valida con
+          <span class="wf-mono">plausMin/plausMax</span>, no con
+          <span class="wf-mono">critLo/critHi</span>: un SpO2 de 94 se acepta sin aviso.</div>
+        </div>
+
+        <div class="wf-modal">
+          <div class="wf-modal__head"><strong>Aprobacion rapida asistida</strong></div>
+          <div class="wf-modal__body">
+            <p class="wf-sub">Documentos elegibles: confianza &ge; 0.55 y nivel distinto de rojo.</p>
+            <div class="wf-zone">
+              <div class="wf-listitem"><span class="wf-docid" style="width:70px">AUD-0004</span><span>Nombre del paciente</span><span class="wf-spacer"></span><span class="wf-chip wf-chip--procesado" style="font-size:10.5px"><span class="wf-chip__dot"></span>Alta</span></div>
+              <div class="wf-listitem"><span class="wf-docid" style="width:70px">AUD-0005</span><span>Nombre del paciente</span><span class="wf-spacer"></span><span class="wf-chip wf-chip--procesado" style="font-size:10.5px"><span class="wf-chip__dot"></span>Alta</span></div>
+            </div>
+            <p class="wf-sub wf-dim" style="font-size:11px">
+              Es la unica accion en lote: firma N decisiones en un solo gesto. Tres barreras
+              (exclusion de rojos, umbral, lista explicita) y una propuesta de cuarta en P4.1.
+            </p>
+          </div>
+          <div class="wf-modal__foot">
+            <span class="wf-btn wf-btn--sm">Cancelar</span>
+            <span class="wf-btn wf-btn--sm wf-btn--primary">Aprobar 2 documento(s)</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <p class="wf-sub wf-dim" style="margin-top:20px">
+      Volver al <a href="index.html">indice</a> · Ver el
+      <a href="detalle.html">detalle</a> y los <a href="estados.html">estados</a>
+      · Especificacion: <a href="../03-panel-auditoria.md">03</a> ·
+      <a href="../04-acciones.md">04-acciones.md</a>
+    </p>
+
+  </main>
+</div>
+
+</body>
+</html>
