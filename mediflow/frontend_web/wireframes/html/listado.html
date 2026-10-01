@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 01 — Listado de documentos</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="wf-docbar">
+  <span class="wf-docbar__tag">Puntos 1 y 2</span>
+  <span class="wf-docbar__title">Listado de documentos</span>
+  <span class="wf-docbar__sep"></span>
+  <a href="index.html">Indice</a>
+  <a href="../01-listado.md">Especificacion</a>
+</div>
+
+<div class="wf">
+
+  <header class="wf__header">
+    <div class="wf__brand"><span class="wf__logo">M</span> MediFlow</div>
+    <span class="wf-sub wf-dim">Portal clinico</span>
+    <div class="wf__search"></div>
+    <div class="wf__avatar">MV</div>
+  </header>
+
+  <nav class="wf__sidebar">
+    <a class="wf__navitem" href="#" onclick="return false"><span>Ingesta</span></a>
+    <a class="wf__navitem" href="#" onclick="return false"><span>Resultado</span></a>
+    <a class="wf__navitem" href="#" onclick="return false"><span>Colas</span><span class="wf__navbadge">54</span></a>
+    <a class="wf__navitem" href="#" onclick="return false"><span>Auditoria</span><span class="wf__navbadge wf__navbadge--alerta">5</span></a>
+    <a class="wf__navitem wf__navitem--active" href="#" aria-current="page"><span>Historial</span></a>
+    <div style="margin-top:14px">
+      <div class="wf__navitem wf__navitem--ghost"><span>Configuracion</span></div>
+      <div class="wf__navitem wf__navitem--ghost"><span>Soporte HIS</span></div>
+    </div>
+  </nav>
+
+  <main class="wf__main">
+
+    <div class="wf-note">
+      <div><strong>Zona 1 — Cabecera.</strong> Titulo, buscador y el boton <em>Nuevo Ingreso</em>,
+      que hoy es un boton sin efecto: es el hallazgo H4 y queda como P5.1 en Sprint 2.</div>
+    </div>
+
+    <div class="wf-region" style="margin-bottom:16px">
+      <span class="wf-region__n">1 · CABECERA</span>
+      <div class="wf-row" style="flex-wrap:wrap;gap:12px">
+        <div>
+          <h1 class="wf-h1">Historial de documentos</h1>
+          <p class="wf-sub" id="contador">4 documentos · 1 en auditoria</p>
+        </div>
+        <span class="wf-spacer"></span>
+        <div class="wf-btn wf-btn--primary" style="opacity:.45" title="H4: sin efecto">+ Nuevo Ingreso</div>
+      </div>
+    </div>
+
+    <div class="wf-region wf-region--outline" style="margin-bottom:16px;padding-top:14px">
+      <span class="wf-region__n">2 · FILTROS Y ORDEN</span>
+      <div class="wf-row wf-row--wrap" style="padding:6px 12px 12px">
+        <div class="wf-btn wf-btn--sm" style="width:220px;justify-content:flex-start;color:var(--muted)">Buscar documento o paciente…</div>
+        <select class="wf-btn wf-btn--sm"><option>Nivel MTS: todos</option><option>Rojo</option><option>Naranja</option><option>Amarillo</option><option>Verde</option><option>Azul</option></select>
+        <select class="wf-btn wf-btn--sm"><option>Estado: todos</option><option>Recibido</option><option>Procesado</option><option>Auditoria</option></select>
+        <span class="wf-spacer"></span>
+        <span class="wf-sub wf-dim">Orden: ID de documento &uarr;</span>
+      </div>
+    </div>
+
+    <div class="wf-region wf-region--outline wf-region--outline-hueco" style="margin-bottom:6px">
+      <span class="wf-region__n" style="background:var(--mts-rojo)">3 · 7 COLUMNAS</span>
+      <div style="padding:14px 12px 0">
+        <div class="wf-note wf-note--hueco" style="margin-bottom:12px">
+          <div><strong>Halo rojo = hueco resuelto por estos wireframes.</strong> Hoy la fila
+          <em>no</em> es clicable: el <span class="wf-mono">&lt;tr&gt;</span> no tiene handler y el
+          unico listener delegado atiende solo el boton de copiar ruta. El area punteada azul marca
+          la nueva zona activable de la fila completa (punto 6).</div>
+        </div>
+
+        <table class="wf-table">
+          <thead>
+            <tr>
+              <th style="width:130px">ID de documento &uarr;</th>
+              <th style="width:210px">Paciente &uarr;</th>
+              <th style="width:170px">Tipo de documento &uarr;</th>
+              <th style="width:110px">Nivel MTS &uarr;</th>
+              <th style="width:130px">Estado &uarr;</th>
+              <th style="width:100px">Fecha &uarr;</th>
+              <th>Ruta de almacenamiento &uarr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="is-linked is-target">
+              <td>
+                <span class="wf-docid">DOC-0001</span>
+                <span class="wf-docid__year">- 01 feb</span>
+                <div class="wf-mono wf-dim" style="margin-top:4px;font-size:10px">Fila completa -&gt; detalle</div>
+              </td>
+              <td>
+                <div class="wf-idcell">
+                  <span class="wf-idcell__av">NP</span>
+                  <span>
+                    Nombre del paciente
+                    <span class="wf-idcell__meta">00.000.000-0 · Ingreso reservado</span>
+                  </span>
+                </div>
+              </td>
+              <td><span class="wf-sub">Tipo de documento</span></td>
+              <td><span class="wf-mts wf-mts--rojo"><span class="wf-mts__dot"></span>Rojo</span><span class="wf-idcell__meta">0 min</span></td>
+              <td><span class="wf-chip wf-chip--recibido"><span class="wf-chip__dot"></span>Recibido</span></td>
+              <td>01/02/2026<span class="wf-fecha__sub">09:00</span></td>
+              <td class="wf-mono wf-dim">his://ruta/reservada <span class="wf-btn wf-btn--sm">Copiar</span></td>
+            </tr>
+
+            <tr class="is-linked">
+              <td><span class="wf-docid">DOC-0002</span><span class="wf-docid__year">- 01 feb</span></td>
+              <td>
+                <div class="wf-idcell">
+                  <span class="wf-idcell__av">NP</span>
+                  <span>Nombre del paciente<span class="wf-idcell__meta">00.000.000-0 · Ingreso reservado</span></span>
+                </div>
+              </td>
+              <td><span class="wf-sub">Tipo de documento</span></td>
+              <td><span class="wf-mts wf-mts--naranja"><span class="wf-mts__dot"></span>Naranja</span><span class="wf-idcell__meta">10 min</span></td>
+              <td><span class="wf-chip wf-chip--procesado"><span class="wf-chip__dot"></span>Procesado</span></td>
+              <td>01/02/2026<span class="wf-fecha__sub">10:00</span></td>
+              <td class="wf-mono wf-dim">his://ruta/reservada <span class="wf-btn wf-btn--sm">Copiar</span></td>
+            </tr>
+
+            <tr class="is-linked">
+              <td><span class="wf-docid">DOC-0003</span><span class="wf-docid__year">- 01 feb</span></td>
+              <td>
+                <div class="wf-idcell">
+                  <span class="wf-idcell__av">NP</span>
+                  <span>Nombre del paciente<span class="wf-idcell__meta">00.000.000-0 · Ingreso reservado</span></span>
+                </div>
+              </td>
+              <td><span class="wf-sub">Tipo de documento</span></td>
+              <td><span class="wf-mts wf-mts--amarillo"><span class="wf-mts__dot"></span>Amarillo</span><span class="wf-idcell__meta">60 min</span></td>
+              <td><span class="wf-chip wf-chip--auditoria"><span class="wf-chip__dot"></span>Auditoria</span></td>
+              <td>01/02/2026<span class="wf-fecha__sub">11:00</span></td>
+              <td class="wf-mono wf-dim">his://ruta/reservada <span class="wf-btn wf-btn--sm">Copiar</span></td>
+            </tr>
+
+            <tr class="is-linked">
+              <td><span class="wf-docid">DOC-0004</span><span class="wf-docid__year">- 01 feb</span></td>
+              <td>
+                <div class="wf-idcell">
+                  <span class="wf-idcell__av">NP</span>
+                  <span>Nombre del paciente<span class="wf-idcell__meta">00.000.000-0 · Ingreso reservado</span></span>
+                </div>
+              </td>
+              <td><span class="wf-sub">Tipo de documento</span></td>
+              <td><span class="wf-mts wf-mts--verde"><span class="wf-mts__dot"></span>Verde</span><span class="wf-idcell__meta">120 min</span></td>
+              <td>
+                <span class="wf-chip wf-chip--recibido-alt"><span class="wf-chip__dot"></span>Recibido</span>
+                <span class="wf-motivo" style="display:block;margin-top:4px;width:fit-content">variante azul · D1 sin definir</span>
+              </td>
+              <td>01/02/2026<span class="wf-fecha__sub">12:00</span></td>
+              <td class="wf-mono wf-dim">his://ruta/reservada <span class="wf-btn wf-btn--sm">Copiar</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="wf-row" style="padding:12px">
+        <span class="wf-sub wf-dim">Mostrando 4 de 4</span>
+        <span class="wf-spacer"></span>
+        <select class="wf-btn wf-btn--sm"><option>10 por pagina</option><option>25</option><option>50</option></select>
+        <span class="wf-btn wf-btn--sm" style="opacity:.45">Anterior</span>
+        <span class="wf-btn wf-btn--sm" style="opacity:.45">Siguiente</span>
+      </div>
+    </div>
+
+    <div class="wf-grid2" style="margin-top:16px">
+      <div class="wf-note wf-note--nuevo" style="margin:0">
+        <div>
+          <strong>Lectura de la columna Estado.</strong> Los 4 registros cubren los 3 estados y
+          la variante azul, para que se vea el rango completo de un vistazo. En produccion el
+          listado mostrara decenas de filas.
+        </div>
+      </div>
+      <div class="wf-note wf-note--hueco" style="margin:0">
+        <div>
+          <strong>Por que no hay columna de acciones.</strong> Dependeria del estado, y la
+          mayoria de las filas no tendria nada que aprobar. La accion vive en el detalle y la
+          fila completa lleva a el.
+        </div>
+      </div>
+    </div>
+
+    <p class="wf-sub wf-dim" style="margin-top:18px">
+      Ver <a href="detalle.html">el detalle al que lleva la fila</a> ·
+      <a href="estados.html">los criterios de cada estado</a> ·
+      Especificacion: <a href="../01-listado.md">01-listado.md</a>
+    </p>
+
+  </main>
+</div>
+
+</body>
+</html>

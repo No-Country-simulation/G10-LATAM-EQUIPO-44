@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuevo Ingreso · MediFlow Clinical Portal</title>
+<meta name="description" content="Registro de ingreso en urgencias ED-1 con triaje según el sistema Manchester (MTS).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body data-screen="ingesta">
+
+<!-- Sprite de iconos (reutilizado por header, sidebar y contenido) -->
+<svg class="visually-hidden" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <symbol id="i-cross" viewBox="0 0 24 24"><path d="M10 2h4a2 2 0 0 1 2 2v4h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h4V4a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></symbol>
+  <symbol id="i-signal" viewBox="0 0 24 24"><path d="M12 20v-7"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5.5 13.5a9 9 0 0 1 13 0"/><circle cx="12" cy="7" r="2"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.3-2.8 4"/><path d="M12 17.5h.01"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.7 4H7.3a2 2 0 0 0-1.8 1.1z"/></symbol>
+  <symbol id="i-file-check" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 3v6h6"/><path d="M3.5 13a9 9 0 1 0 2.6-6.4L3 9"/><path d="M12 8v4l3 2"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-support" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="m5.6 5.6 4.2 4.2M18.4 5.6l-4.2 4.2M5.6 18.4l4.2-4.2M18.4 18.4l-4.2-4.2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-stethoscope" viewBox="0 0 24 24"><path d="M5 3v6a4 4 0 0 0 8 0V3"/><path d="M3 3h4M11 3h4"/><path d="M9 13v3a5 5 0 0 0 10 0v-1"/><circle cx="19" cy="12" r="2"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 1 0-7.1 7.1L12 21.5l8.8-8.8a5 5 0 0 0 0-7.1z"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 15h12v6H6z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-.6 4"/><path d="M20 4v7h-7"/></symbol>
+  <symbol id="i-user-plus" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 11-5.7"/><path d="M19 8v6M22 11h-6"/></symbol>
+</defs>
+</svg>
+
+<div class="app">
+
+  <!-- ================= HEADER ================= -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="brand__mark" aria-hidden="true"><svg class="icon"><use href="#i-cross"></use></svg></span>
+      <span class="brand__text">
+        <span class="brand__name">MediFlow Clinical Portal</span>
+        <span class="conn" title="Sincronización activa con el HIS de la unidad ED-1"><span class="conn__dot" aria-hidden="true"></span>HIS Connected</span>
+      </span>
+    </div>
+
+    <div class="topbar__search">
+      <label class="sr-only" for="q">Buscar paciente por cédula, nombre o número de ingreso</label>
+      <svg class="icon topbar__search-icon" aria-hidden="true"><use href="#i-search"></use></svg>
+      <input id="q" class="input" type="search" autocomplete="off"
+             placeholder="Buscar cédula, nombre o N.º de ingreso…">
+      <kbd>Ctrl K</kbd>
+    </div>
+
+    <div class="topbar__actions">
+      <button type="button" class="btn btn--danger" data-toast="Escalación de emergencia enviada a la Jefatura de ED-1 (canal rojo).">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-alert"></use></svg>
+        <span class="nowrap">Emergency Escalation</span>
+      </button>
+      <button type="button" class="icon-btn" title="Notificaciones: 3 nuevas" aria-label="Notificaciones, 3 nuevas">
+        <svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg>
+        <span class="dot" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="icon-btn" data-optional title="Estado del concentrador HIS: señal estable al 98 %" aria-label="Estado de la señal del HIS">
+        <svg class="icon" aria-hidden="true"><use href="#i-signal"></use></svg>
+      </button>
+      <button type="button" class="icon-btn" data-optional title="Centro de ayuda y protocols ED-1" aria-label="Ayuda">
+        <svg class="icon" aria-hidden="true"><use href="#i-help"></use></svg>
+      </button>
+
+      <div class="menu">
+        <button type="button" class="user" id="userBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
+          <span class="avatar" aria-hidden="true">MV</span>
+          <span class="user__text">
+            <span class="user__name">Dr. M. Vance, MD</span>
+            <span class="user__role">Chief Attending ED-1</span>
+          </span>
+        </button>
+        <div class="menu__panel" id="userMenu" role="menu" hidden>
+          <div class="menu__head">
+            <div class="nowrap" style="font-weight:600">Dr. M. Vance, MD</div>
+            <div class="menu__meta">Matrícula 4482-A · Turno noche 19:00–07:00</div>
+          </div>
+          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-user"></use></svg>Mi perfil clínico</button>
+          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-calendar"></use></svg>Mi turno</button>
+          <div class="menu__sep" role="separator"></div>
+          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-logout"></use></svg>Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+    <div class="side__unit">
+      <span class="side__unit-icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-stethoscope"></use></svg></span>
+      <span class="side__unit-text">
+        <span class="side__unit-name">ED-1 Triage</span>
+        <span class="side__unit-sub" title="Sistema de triaje Manchester">Manchester System MTS</span>
+      </span>
+    </div>
+
+    <div class="side__primary">
+      <button type="button" class="btn btn--primary btn--block" data-nav="ingesta" title="Nuevo Ingreso">
+        <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
+        <span class="btn__label">Nuevo Ingreso</span>
+      </button>
+    </div>
+
+    <nav class="side__nav" aria-label="Navegación principal">
+      <a class="nav__item is-active" data-nav="ingesta" href="./index.html" title="Ingesta" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="#i-inbox"></use></svg>
+        <span class="nav__label">Ingesta</span>
+      </a>
+      <a class="nav__item" data-nav="resultado" href="../resultado/index.html" title="Resultado">
+        <svg class="icon" aria-hidden="true"><use href="#i-file-check"></use></svg>
+        <span class="nav__label">Resultado</span>
+      </a>
+      <a class="nav__item" data-nav="colas" href="../colas/index.html" title="Colas">
+        <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>
+        <span class="nav__label">Colas</span>
+        <span class="nav__badge" id="navQueueTotal" title="Pacientes en cola de triaje">0</span>
+      </a>
+      <a class="nav__item" data-nav="auditoria" href="../auditoria/index.html" title="Auditoría">
+        <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
+        <span class="nav__label">Auditoría</span>
+        <span class="nav__badge nav__badge--alerta" id="navAuditTotal" title="Revisiones pendientes">4</span>
+      </a>
+      <a class="nav__item" data-nav="historial" href="../historial/index.html" title="Historial">
+        <svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg>
+        <span class="nav__label">Historial</span>
+      </a>
+    </nav>
+
+    <div class="side__foot">
+      <a class="nav__item" href="#" title="Configuración">
+        <svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg>
+        <span class="nav__label">Configuración</span>
+      </a>
+      <a class="nav__item" href="#" title="Soporte HIS">
+        <svg class="icon" aria-hidden="true"><use href="#i-support"></use></svg>
+        <span class="nav__label">Soporte HIS</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main" id="main">
+    <div class="page-head">
+      <div class="page-head__text">
+        <p class="page-head__eyebrow"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-inbox"></use></svg>Urgencias · ED-1</p>
+        <h1 class="page-head__title">Nuevo ingreso y triaje MTS</h1>
+        <p class="page-head__sub">Registra al paciente, asigna el nivel de triaje de Manchester y confirma el ingreso en la unidad.</p>
+      </div>
+      <div class="page-head__actions">
+        <span class="badge badge--navy"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-calendar"></use></svg>Turno noche · 22:41</span>
+        <button type="button" class="btn" data-toast="Borrador guardado en el HIS. Recuperable durante 24 h.">
+          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-clipboard"></use></svg>Guardar borrador
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid--2">
+
+      <!-- ---------- Columna de formulario ---------- -->
+      <div class="stack">
+
+        <!-- Datos del paciente -->
+        <section class="card" aria-labelledby="h-datos">
+          <div class="card__head">
+            <h2 class="card__title" id="h-datos"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg>Datos del paciente</h2>
+            <span class="badge badge--gris">Campos con <span class="req">*</span> son obligatorios</span>
+          </div>
+          <div class="card__body">
+            <form id="formPaciente" novalidate>
+              <div class="form-grid">
+                <div class="field col-3">
+                  <label class="label" for="doc">Cédula <span class="req">*</span></label>
+                  <input class="input" id="doc" name="doc" inputmode="numeric" placeholder="12.345.678-9" required>
+                  <span class="hint" id="docHint">FormatoUY: 8 dígitos + verificador</span>
+                </div>
+                <div class="field col-3">
+                  <label class="label" for="nac">Fecha de nacimiento <span class="req">*</span></label>
+                  <input class="input" id="nac" name="nac" type="date" required>
+                  <span class="hint" id="edadHint">— años</span>
+                </div>
+                <div class="field col-3">
+                  <span class="label">Sexo <span class="req">*</span></span>
+                  <div class="segmented" role="radiogroup" aria-label="Sexo del paciente">
+                    <input type="radio" name="sexo" id="sxF" value="F" checked><label for="sxF">Femenino</label>
+                    <input type="radio" name="sexo" id="sxM" value="M"><label for="sxM">Masculino</label>
+                    <input type="radio" name="sexo" id="sxO" value="O"><label for="sxO">Otro</label>
+                  </div>
+                </div>
+                <div class="field col-3">
+                  <label class="label" for="tel">Teléfono</label>
+                  <input class="input" id="tel" name="tel" type="tel" placeholder="09 812 345 67" title="Teléfono de contacto">
+                </div>
+
+                <div class="field col-5">
+                  <label class="label" for="nom">Nombres y apellidos <span class="req">*</span></label>
+                  <input class="input" id="nom" name="nom" placeholder="María Fernanda Ruiz González" required
+                         title="Máximo 80 caracteres; se muestra completo en la cabecera de admisión">
+                </div>
+                <div class="field col-3">
+                  <label class="label" for="obra">Obra social</label>
+                  <select class="select" id="obra" name="obra">
+                    <option value="FONASA">FONASA · Grupo B</option>
+                    <option value="ISAPRE">ISAPRE · Contrato vigente</option>
+                    <option value="PART">Particular</option>
+                    <option value="SISP">SISPLA / SIPSAP</option>
+                  </select>
+                </div>
+                <div class="field col-4">
+                  <label class="label" for="acomp">Acompañante</label>
+                  <input class="input" id="acomp" name="acomp" placeholder="Nombre y parentesco" title="Nombre y parentesco del acompañante">
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Motivo de consulta -->
+        <section class="card" aria-labelledby="h-motivo">
+          <div class="card__head">
+            <h2 class="card__title" id="h-motivo"><svg class="icon" aria-hidden="true"><use href="#i-clipboard"></use></svg>Motivo de consulta</h2>
+            <span class="card__sub">Motivos frecuentes ED-1 (últimos 30 días)</span>
+          </div>
+          <div class="card__body">
+            <div class="field" style="margin-bottom:12px">
+              <span class="label">Motivos frecuentes</span>
+              <div class="filters" id="motivos"></div>
+              <span class="hint">Toca un motivo para añadirlo al detalle. Puedes combinar varios.</span>
+            </div>
+            <div class="form-grid">
+              <div class="field col-8">
+                <label class="label" for="detalle">Detalle del motivo <span class="req">*</span></label>
+                <textarea class="textarea" id="detalle" name="detalle" required
+                          placeholder="Descripción clínica breve: inicio, evolución, síntomas asociados y tratamientos previos…"></textarea>
+                <span class="hint"><span id="detalleLen">0</span> caracteres · mínimo recomendado 25</span>
+              </div>
+              <div class="field col-4">
+                <label class="label" for="eva">Dolor (EVA 0–10)</label>
+                <input class="input" id="eva" name="eva" type="range" min="0" max="10" value="4" style="padding:0 8px">
+                <span class="hint">Valor actual: <strong id="evaVal" class="tabnum">4</strong>/10</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Constantes vitales -->
+        <section class="card" aria-labelledby="h-vitales">
+          <div class="card__head">
+            <h2 class="card__title" id="h-vitales"><svg class="icon" aria-hidden="true"><use href="#i-activity"></use></svg>Constantes vitales</h2>
+            <button type="button" class="btn btn--sm btn--ghost" id="btnVitals">
+              <svg class="icon icon--sm" aria-hidden="true"><use href="#i-refresh"></use></svg>Tomar del monitor
+            </button>
+          </div>
+          <div class="card__body">
+            <div class="vitals-grid" id="vitals"></div>
+            <p class="hint" style="margin-top:10px">Los rangos de referencia corresponden a adultos. Cualquier valor fuera de rango se marca y se adjunta al informe de triaje.</p>
+          </div>
+        </section>
+
+        <!-- Triaje MTS -->
+        <section class="card" aria-labelledby="h-mts" id="secMts">
+          <div class="card__head">
+            <h2 class="card__title" id="h-mts"><svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>Nivel de triaje · Manchester MTS</h2>
+            <span class="badge badge--azul" id="mtsHint">Selecciona un nivel</span>
+          </div>
+          <div class="card__body">
+            <fieldset class="mts-grid" id="mtsGrid">
+              <legend class="sr-only">Selecciona el nivel de triaje MTS</legend>
+            </fieldset>
+            <p class="hint" style="margin-top:12px">Tiempo máximo de atención según el nivel. El temporizador de la cola se inicia al confirmar el ingreso.</p>
+          </div>
+        </section>
+
+        <!-- Derivación -->
+        <section class="card" aria-labelledby="h-der">
+          <div class="card__head">
+            <h2 class="card__title" id="h-der"><svg class="icon" aria-hidden="true"><use href="#i-clipboard"></use></svg>Derivación y observaciones</h2>
+          </div>
+          <div class="card__body">
+            <div class="form-grid">
+              <div class="field col-4">
+                <label class="label" for="destino">Destino previsto</label>
+                <select class="select" id="destino" name="destino">
+                  <option>Observación · Sala A</option>
+                  <option>Observación · Sala B</option>
+                  <option>Camilla · Monitor 2</option>
+                  <option>Camilla · Monitor 4</option>
+                  <option>Quirófono · Bloque 1</option>
+                  <option>Alta a domicilio</option>
+                </select>
+              </div>
+              <div class="field col-4">
+                <label class="label" for="medico">Médico responsable</label>
+                <select class="select" id="medico" name="medico">
+                  <option selected>Dr. M. Vance, MD · Chief Attending</option>
+                  <option>Dra. L. Fernández · Residente R3</option>
+                  <option>Dr. A. Sosa · Cirujano general</option>
+                  <option>Dra. P. Iglesias · Pediatra</option>
+                </select>
+              </div>
+              <div class="field col-4">
+                <span class="label">Preaviso</span>
+                <label class="switch" style="height:36px">
+                  <input type="checkbox" id="preaviso" checked>
+                  <span class="switch__track" aria-hidden="true"></span>
+                  <span class="nowrap">Notificar al equipo de destino</span>
+                </label>
+              </div>
+              <div class="field col-12">
+                <label class="label" for="obs">Observaciones de triaje</label>
+                <textarea class="textarea" id="obs" name="obs" placeholder="Alergias, riesgo de aislamiento, necesidad de interprete, controles de seguridad…"></textarea>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ---------- Columna lateral ---------- -->
+      <div class="stack">
+
+        <!-- Resumen del triaje -->
+        <section class="card resumen" aria-labelledby="h-resumen">
+          <div class="card__head">
+            <h2 class="card__title" id="h-resumen"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>Resumen del triaje</h2>
+            <span class="badge badge--gris">En vivo</span>
+          </div>
+          <div class="card__body">
+            <div class="resumen__prio" id="resumenPrio">
+              <span class="resumen__nivel" id="resumenNivel">Sin asignar</span>
+              <span class="resumen__sla" id="resumenSla">Selecciona un nivel MTS</span>
+            </div>
+            <dl class="dl" id="resumenDl"></dl>
+            <div class="resumen__alertas" id="resumenAlertas"></div>
+          </div>
+        </section>
+
+        <!-- Avisos de seguridad -->
+        <section class="card" aria-labelledby="h-seg">
+          <div class="card__head">
+            <h2 class="card__title" id="h-seg"><svg class="icon" aria-hidden="true"><use href="#i-alert"></use></svg>Controles de seguridad</h2>
+          </div>
+          <div class="card__body">
+            <div class="stack" style="gap:8px" id="seguridad"></div>
+          </div>
+        </section>
+
+        <!-- Ingresos recientes -->
+        <section class="card" aria-labelledby="h-recientes">
+          <div class="card__head">
+            <h2 class="card__title" id="h-recientes"><svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg>Ingresos recientes en ED-1</h2>
+            <a class="linkbtn" href="../colas/index.html">Ver cola<svg class="icon icon--sm" aria-hidden="true"><use href="#i-chevron"></use></svg></a>
+          </div>
+          <div class="card__body card__body--tight">
+            <ul class="recientes" id="recientes"></ul>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- Acciones fijas -->
+    <div class="sticky-actions">
+      <span class="chip" id="chipEstado"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-clipboard"></use></svg>Borrador sin confirmar</span>
+      <span class="hint" style="margin-right:auto">El ingreso no se publica en la cola hasta confirmar el nivel MTS.</span>
+      <button type="button" class="btn btn--ghost" id="btnLimpiar">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>Limpiar formulario
+      </button>
+      <button type="button" class="btn btn--soft" data-toast="Borrador guardado en el HIS. Recuperable durante 24 h.">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-clipboard"></use></svg>Guardar borrador
+      </button>
+      <button type="button" class="btn btn--primary" id="btnConfirmar">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg>Confirmar ingreso MTS
+      </button>
+    </div>
+  </main>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal" id="modalConfirmar" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" hidden>
+  <div class="modal__dialog">
+    <div class="modal__head">
+      <span class="side__unit-icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-check"></use></svg></span>
+      <h2 class="modal__title" id="modalTitulo">Confirmar ingreso y publicar en la cola</h2>
+    </div>
+    <div class="modal__body" id="modalBody"></div>
+    <div class="modal__foot">
+      <button type="button" class="btn" data-close-modal>Volver a editar</button>
+      <button type="button" class="btn btn--primary" id="btnConfirmarFinal">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg>Confirmar y publicar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

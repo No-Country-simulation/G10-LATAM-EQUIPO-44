@@ -1,0 +1,193 @@
+/* ==========================================================================
+   Pantalla Resultado — estilos específicos
+   Depende de assets/css/styles.css (tokens + shell + componentes)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Barra de contexto del paciente
+   -------------------------------------------------------------------------- */
+.patientbar .card__body { padding: 14px 16px; }
+
+.patientbar__row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.patientbar__id { min-width: 0; flex: 1 1 260px; }
+.idcell__avatar--lg { width: 40px; height: 40px; font-size: 13px; }
+
+.patientbar__name {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.patientbar__badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.patientbar__picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 0 1 260px;
+}
+.patientbar__picker .select { font-weight: 600; }
+
+.patientbar__alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.patientbar__alerts:empty { display: none; }
+
+/* --------------------------------------------------------------------------
+   2. Franja de signos vitales
+   -------------------------------------------------------------------------- */
+.vitals-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+.vital-chip {
+  --c-bd: var(--border);
+  --c-bg: #F8FAFD;
+  --c-ink: var(--navy);
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 9px 11px;
+  background: var(--c-bg);
+  border: 1px solid var(--c-bd);
+  border-radius: var(--radius);
+}
+.vital-chip__label {
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vital-chip__value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--c-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vital-chip__unit { font-size: 11px; font-weight: 600; color: var(--muted); }
+.vital-chip__ref {
+  font-size: 10.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vital-chip.is-alerta { --c-bd: var(--mts-naranja-border); --c-bg: var(--mts-naranja-bg); --c-ink: var(--mts-naranja-ink); }
+.vital-chip.is-critico { --c-bd: var(--mts-rojo-border); --c-bg: var(--mts-rojo-bg); --c-ink: var(--mts-rojo-ink); }
+.vital-chip.is-ok { --c-bd: var(--mts-verde-border); --c-bg: var(--mts-verde-bg); --c-ink: var(--mts-verde-ink); }
+
+/* --------------------------------------------------------------------------
+   3. Tabla de estudios
+   -------------------------------------------------------------------------- */
+.estudio { display: flex; flex-direction: column; min-width: 0; }
+.estudio__name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.estudio__cat { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+
+td .valor {
+  font-weight: 650;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+}
+td .valor .unit { font-size: 11px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+tr[data-estado="critico"] td.valor { color: var(--mts-rojo-ink); }
+tr[data-estado="alerta"] td.valor { color: var(--mts-naranja-ink); }
+tr[data-estado="pendiente"] td.valor { color: var(--muted); font-weight: 500; }
+
+/* --------------------------------------------------------------------------
+   4. Estudios pendientes
+   -------------------------------------------------------------------------- */
+.pendientes { display: flex; flex-direction: column; }
+.pendientes__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+}
+.pendientes__item + .pendientes__item { border-top: 1px solid var(--border); }
+.pendientes__icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  background: var(--mts-azul-bg);
+  color: var(--mts-azul-ink);
+}
+.pendientes__icon--espera { background: var(--mts-naranja-bg); color: var(--mts-naranja-ink); }
+.pendientes__body { min-width: 0; flex: 1 1 auto; }
+.pendientes__name { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pendientes__meta { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pendientes__eta {
+  flex: none;
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.pendientes__vacio {
+  padding: 18px 8px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+   5. Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .patientbar__picker { flex: 1 1 100%; }
+}
+
+@media (max-width: 560px) {
+  .vitals-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .patientbar__row { gap: 12px; }
+}

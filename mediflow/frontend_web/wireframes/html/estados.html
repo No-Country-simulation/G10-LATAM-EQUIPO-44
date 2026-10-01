@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 02 — Estados del documento</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="wf-docbar">
+  <span class="wf-docbar__tag">Punto 3</span>
+  <span class="wf-docbar__title">Estados: Recibido · Procesado · Auditoria</span>
+  <span class="wf-docbar__sep"></span>
+  <a href="index.html">Indice</a>
+  <a href="../02-estados.md">Especificacion</a>
+</div>
+
+<div class="wf" style="grid-template-columns:1fr;grid-template-areas:'header' 'main'">
+  <div class="wf__main" style="padding:24px 20px;max-width:1000px;width:100%;margin:0 auto">
+
+    <h1 class="wf-h1" style="margin-bottom:6px">Criterios de estado</h1>
+    <p class="wf-sub" style="margin-bottom:20px">
+      Tres estados y ningun mas. El criterio sale del flujo real del proyecto: un documento
+      tiene o no inferencia calculada, y esa inferencia tiene o no confianza suficiente y
+      gravedad baja.
+    </p>
+
+    <div class="wf-note wf-note--nuevo">
+      <div>
+        <strong>Decision central.</strong> Los valores <span class="wf-mono">critico</span>,
+        <span class="wf-mono">discrepancia</span> y <span class="wf-mono">revision</span> que usa hoy
+        el panel de auditoria dejan de ser estados paralelos y pasan a ser <strong>motivos</strong>
+        de entrada en Auditoria. Eso elimina la competencia entre los dos vocabularios sin tocar
+        el comportamiento observable de las cuatro pestañas.
+      </div>
+    </div>
+
+    <!-- LOS TRES ESTADOS -->
+    <h2 class="wf-h2" style="margin:24px 0 12px">Los tres estados</h2>
+
+    <div class="wf-grid3">
+
+      <div class="wf-card" style="border-color:#CBD5E1">
+        <div class="wf-card__head" style="background:#F1F5F9">
+          <span class="wf-chip wf-chip--recibido"><span class="wf-chip__dot"></span>Recibido</span>
+          <span class="wf-spacer"></span>
+          <span class="wf-mono wf-dim" style="font-size:10px">orden 0</span>
+        </div>
+        <div class="wf-card__body">
+          <p class="wf-h3">Criterio</p>
+          <p class="wf-sub" style="margin-top:4px">
+            Documento admitido en el repositorio y <strong>sin inferencia calculada</strong>.
+            Sin nivel MTS asignado, o con el nivel heredado del HIS sin confirmar.
+          </p>
+          <p class="wf-h3" style="margin-top:12px">Nivel MTS</p>
+          <p class="wf-sub" style="margin-top:4px">Ninguno asignado</p>
+          <p class="wf-h3" style="margin-top:12px">Acciones</p>
+          <p class="wf-sub" style="margin-top:4px">Ver detalle, consultar ruta, copiar enlace.<br>
+            <span style="color:var(--mts-rojo-ink)">Aprobar y rechazar no disponibles.</span></p>
+          <div class="wf-swatch">
+            <div style="background:#F1F5F9;border:1px solid #CBD5E1;color:#475569">fondo</div>
+            <div style="background:#CBD5E1;color:#1B2437">borde</div>
+            <div style="background:#475569;color:#fff">tinta</div>
+          </div>
+          <p class="wf-sub wf-dim" style="margin-top:8px;font-size:10.5px">
+            Neutro a proposito: sin severidad no debe tomar un tono MTS.
+          </p>
+        </div>
+      </div>
+
+      <div class="wf-card" style="border-color:var(--mts-verde-border)">
+        <div class="wf-card__head" style="background:var(--mts-verde-bg)">
+          <span class="wf-chip wf-chip--procesado"><span class="wf-chip__dot"></span>Procesado</span>
+          <span class="wf-spacer"></span>
+          <span class="wf-mono wf-dim" style="font-size:10px">orden 1</span>
+        </div>
+        <div class="wf-card__body">
+          <p class="wf-h3">Criterio</p>
+          <p class="wf-sub" style="margin-top:4px">
+            Hay inferencia, la confianza es <strong>&ge; 0.60</strong> y el nivel MTS
+            <strong>no es rojo</strong>. El modelo resolvio el caso sin intervencion.
+          </p>
+          <p class="wf-h3" style="margin-top:12px">Nivel MTS</p>
+          <p class="wf-sub" style="margin-top:4px">Verde, amarillo, azul</p>
+          <p class="wf-h3" style="margin-top:12px">Acciones</p>
+          <p class="wf-sub" style="margin-top:4px">
+            Ver detalle, copiar ruta, consultar inferencia, solicitar escalamiento.
+            <br><span class="wf-dim">Aprobar y rechazar ya no aplican.</span></p>
+          <div class="wf-swatch">
+            <div style="background:#ECF8EF;border:1px solid #B2E0C0;color:#1D7438">fondo</div>
+            <div style="background:#B2E0C0;color:#1B2437">borde</div>
+            <div style="background:#1D7438;color:#fff">tinta</div>
+          </div>
+          <p class="wf-sub wf-dim" style="margin-top:8px;font-size:10.5px">
+            Familia <span class="wf-mono">--mts-verde-*</span>: resuelto.
+          </p>
+        </div>
+      </div>
+
+      <div class="wf-card" style="border-color:var(--mts-naranja-border)">
+        <div class="wf-card__head" style="background:var(--mts-naranja-bg)">
+          <span class="wf-chip wf-chip--auditoria"><span class="wf-chip__dot"></span>Auditoria</span>
+          <span class="wf-spacer"></span>
+          <span class="wf-mono wf-dim" style="font-size:10px">orden 2</span>
+        </div>
+        <div class="wf-card__body">
+          <p class="wf-h3">Criterio</p>
+          <p class="wf-sub" style="margin-top:4px">
+            Requiere decision humana. Se entra si se cumple <strong>cualquiera</strong> de los
+            tres disparadores de abajo.
+          </p>
+          <p class="wf-h3" style="margin-top:12px">Nivel MTS</p>
+          <p class="wf-sub" style="margin-top:4px">Rojo, naranja, amarillo</p>
+          <p class="wf-h3" style="margin-top:12px">Acciones</p>
+          <p class="wf-sub" style="margin-top:4px">
+            Ver detalle, editar datos, <strong>aprobar</strong>, <strong>rechazar con motivo</strong>,
+            aprobar en lote si cumple elegibilidad.</p>
+          <div class="wf-swatch">
+            <div style="background:#FFF4E8;border:1px solid #F8CB98;color:#A94F00">fondo</div>
+            <div style="background:#F8CB98;color:#1B2437">borde</div>
+            <div style="background:#A94F00;color:#fff">tinta</div>
+          </div>
+          <p class="wf-sub wf-dim" style="margin-top:8px;font-size:10.5px">
+            Familia <span class="wf-mono">--mts-naranja-*</span>: el rojo queda reservado
+            al nivel MTS rojo, para que un color no signifique dos cosas.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- DISPARADORES -->
+    <h2 class="wf-h2" style="margin:28px 0 12px">Los tres disparadores de entrada en Auditoria</h2>
+    <p class="wf-sub" style="margin-bottom:12px">
+      Cada uno corresponde a una de las tres pestañas del panel. Son los unicos motivos validos
+      para sacar un documento del circuito automatico.
+    </p>
+
+    <div class="wf-card">
+      <table class="wf-table">
+        <thead><tr><th style="width:60px">#</th><th style="width:210px">Disparador</th><th style="width:250px">Condicion</th><th>Pestana del panel</th><th style="width:150px">Origen</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>D1</strong></td>
+            <td>Gravedad critica</td>
+            <td class="wf-mono">nivelMTS === "rojo"</td>
+            <td><span class="wf-mts wf-mts--rojo"><span class="wf-mts__dot"></span>Criticos</span></td>
+            <td class="wf-mono wf-dim">auditoria/app.js:41-45</td>
+          </tr>
+          <tr>
+            <td><strong>D2</strong></td>
+            <td>Confianza insuficiente</td>
+            <td class="wf-mono">score &lt; 0.60</td>
+            <td><span class="wf-mono">revision</span> · En revision</td>
+            <td class="wf-mono wf-dim">UMBRAL · app.js:38</td>
+          </tr>
+          <tr>
+            <td><strong>D3</strong></td>
+            <td>Discrepancia diagnostica</td>
+            <td class="wf-mono">diagA / diagB / discriminador</td>
+            <td><span class="wf-mono">discrepancia</span></td>
+            <td class="wf-mono wf-dim">auditoria/app.js</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="wf-note wf-note--decidir" style="margin-top:12px">
+      <div>
+        <strong>Franja sin destino: 0.55 &le; score &lt; 0.60.</strong>
+        <span class="wf-mono">UMBRAL_RAPIDA</span> es 0.55 y permite aprobar en lote;
+        <span class="wf-mono">UMBRAL</span> es 0.60 y mete en auditoria. Un score de 0.58 no es
+        aprobable en lote y tampoco esta claramente en auditoria. Es la decision abierta
+        <strong>D3</strong> de <a href="../07-sprint2.md">07-sprint2.md §2</a>.
+      </div>
+    </div>
+
+    <!-- MAQUINA -->
+    <h2 class="wf-h2" style="margin:28px 0 12px">Maquina de transiciones</h2>
+
+    <div class="wf-card" style="padding:20px">
+      <div class="wf-machine" style="justify-items:center">
+
+        <div class="wf-node wf-node--recibido" style="width:260px">
+          <div class="wf-node__t">Recibido</div>
+          <div class="wf-node__c">sin inferencia calculada</div>
+        </div>
+
+        <div class="wf-edge">
+          T2 · inferencia limpia &nbsp;&rarr;&nbsp; <b>score &ge; 0.60 y nivel &ne; rojo</b> &nbsp;(automática)<br>
+          T3 · score &lt; 0.60, nivel rojo o discrepancia &nbsp;<b>&rarr; Auditoria</b> &nbsp;(automática)
+        </div>
+
+        <div class="wf-row" style="gap:60px;align-items:flex-start;width:100%;justify-content:center">
+          <div class="wf-node wf-node--procesado" style="width:230px">
+            <div class="wf-node__t">Procesado</div>
+            <div class="wf-node__c">resuelto sin intervencion</div>
+          </div>
+          <div class="wf-node wf-node--auditoria" style="width:230px">
+            <div class="wf-node__t">Auditoria</div>
+            <div class="wf-node__c">D1, D2 o D3 · requiere firma</div>
+          </div>
+        </div>
+
+        <div class="wf-edge" style="width:100%;max-width:560px">
+          T4 · Procesado &rarr; Auditoria: <b>escalamiento</b> o reevaluacion con <i>Reanalizar Lote</i><br>
+          T5 · Auditoria &rarr; Procesado: <b>aprobacion firmada</b><br>
+          T7 · Auditoria &rarr; Procesado: <b>aprobacion en lote</b> firmada<br>
+          T6 · Auditoria &rarr; Recibido: <b>rechazo firmado con motivo</b> → vuelve a triaje
+        </div>
+
+        <div class="wf-node wf-node--recibido" style="width:260px;border-style:dashed">
+          <div class="wf-node__t">Triaje</div>
+          <div class="wf-node__c">destino de T6, tal como nombra el modal actual</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="wf-note wf-note--hueco" style="margin-top:12px">
+      <div>
+        <strong>La maquina es una especificacion pendiente, no el comportamiento actual.</strong>
+        En el codigo de hoy ninguna accion cambia el estado de un documento: las cinco acciones
+        de auditoria solo hacen <span class="wf-mono">d.resuelto = true</span> y el campo
+        <span class="wf-mono">estado</span> del listado es de solo lectura en las cinco pantallas.
+        Es el hallazgo H3, y se implementa como P1.1 en Sprint 2.
+      </div>
+    </div>
+
+    <!-- VARIANTE AZUL -->
+    <h2 class="wf-h2" style="margin:28px 0 12px">La variante azul de Recibido</h2>
+
+    <div class="wf-card" style="padding:16px">
+      <div class="wf-row wf-row--wrap" style="gap:20px">
+        <div style="display:grid;gap:8px">
+          <span class="wf-chip wf-chip--recibido"><span class="wf-chip__dot"></span>Recibido · gris</span>
+          <span class="wf-chip wf-chip--recibido-alt"><span class="wf-chip__dot"></span>Recibido · azul</span>
+        </div>
+        <div style="flex:1;min-width:280px">
+          <p class="wf-sub">
+            Existe el campo <span class="wf-mono">recibidoAzul</span> y una regla CSS especifica
+            para el, y solo lo tiene <span class="wf-mono">DOC-0004</span>. El codigo nunca explica
+            la intencion.
+          </p>
+          <p class="wf-sub" style="margin-top:6px">
+            <strong>Supuesto a confirmar (D1):</strong> azul = alta validada automaticamente desde
+            el HIS; gris = alta manual pendiente de verificar. Es la unica lectura que explica
+            por que un estado sin gravedad tendria dos variantes.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <p class="wf-sub wf-dim" style="margin-top:20px">
+      Volver al <a href="index.html">indice</a> · Ver el
+      <a href="listado.html">listado</a> y el <a href="panel-auditoria.html">panel de auditoria</a>
+      · Especificacion: <a href="../02-estados.md">02-estados.md</a>
+    </p>
+
+  </div>
+</div>
+
+</body>
+</html>
