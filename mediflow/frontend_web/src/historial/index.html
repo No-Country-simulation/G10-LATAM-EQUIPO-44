@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Historial · MediFlow Clinical Portal</title>
+<meta name="description" content="Repositorio documental clínico de ED-1: informes, analíticas, pruebas de imagen y recetas, con triaje MTS, estado de procesamiento y ruta de almacenamiento en el HIS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body data-screen="historial">
+
+<!-- Sprite de iconos -->
+<svg class="visually-hidden" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <symbol id="i-cross" viewBox="0 0 24 24"><path d="M10 2h4a2 2 0 0 1 2 2v4h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h4V4a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></symbol>
+  <symbol id="i-signal" viewBox="0 0 24 24"><path d="M12 20v-7"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5.5 13.5a9 9 0 0 1 13 0"/><circle cx="12" cy="7" r="2"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2a2.9 2.9 0 1 1 5.6 1c0 1.9-2.8 2.3-2.8 4"/><path d="M12 17.5h.01"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.7 4H7.3a2 2 0 0 0-1.8 1.1z"/></symbol>
+  <symbol id="i-file-check" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 3v6h6"/><path d="M3.5 13a9 9 0 1 0 2.6-6.4L3 9"/><path d="M12 8v4l3 2"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8 2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-support" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="m5.6 5.6 4.2 4.2M18.4 5.6l-4.2 4.2M5.6 18.4l4.2-4.2M18.4 18.4l-4.2-4.2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-stethoscope" viewBox="0 0 24 24"><path d="M5 3v6a4 4 0 0 0 8 0V3"/><path d="M3 3h4M11 3h4"/><path d="M9 13v3a5 5 0 0 0 10 0v-1"/><circle cx="19" cy="12" r="2"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 1 0-7.1 7.1L12 21.5l8.8-8.8a5 5 0 0 0 0-7.1z"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 15h12v6H6z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-.6 4"/><path d="M20 4v7h-7"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6.5L3.7 18a2 2 0 0 0 1.7 3h13.2a2 2 0 0 0 1.7-3L15 8.5V2"/><path d="M8 2h8M7.5 14h9"/></symbol>
+  <symbol id="i-pill" viewBox="0 0 24 24"><path d="M10.5 20.5a6 6 0 0 1-8.5-8.5l8-8a6 6 0 0 1 8.5 8.5z"/><path d="m6 6 8.5 8.5"/></symbol>
+  <symbol id="i-notes" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-user-plus" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 11-5.7"/><path d="M19 8v6M22 11h-6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-funnel" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24"><path d="M8 4v16M8 4 4 9M8 4l4 5M16 20V4M16 20l4-5M16 20l-4-5"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/><path d="M4 11.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
+</defs>
+</svg>
+
+<div class="app">
+
+  <!-- ================= HEADER ================= -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="brand__mark" aria-hidden="true"><svg class="icon"><use href="#i-cross"></use></svg></span>
+      <span class="brand__text">
+        <span class="brand__name">MediFlow Clinical Portal</span>
+        <span class="conn" title="Sincronización activa con el HIS de la unidad ED-1"><span class="conn__dot" aria-hidden="true"></span>HIS Connected</span>
+      </span>
+    </div>
+
+    <div class="topbar__search">
+      <label class="sr-only" for="q">Buscar en el historial por identificador de documento, paciente o ruta de almacenamiento</label>
+      <svg class="icon topbar__search-icon" aria-hidden="true"><use href="#i-search"></use></svg>
+      <input id="q" class="input" type="search" autocomplete="off"
+             placeholder="Buscar por ID, paciente o ruta…">
+      <kbd>Ctrl K</kbd>
+    </div>
+
+    <div class="topbar__actions">
+      <button type="button" class="btn btn--danger" data-toast="Escalación de emergencia enviada a la Jefatura de ED-1 (canal rojo).">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-alert"></use></svg>
+        <span class="nowrap">Emergency Escalation</span>
+      </button>
+      <button type="button" class="icon-btn" title="Notificaciones: 3 nuevas" aria-label="Notificaciones, 3 nuevas">
+        <svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg>
+        <span class="dot" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="icon-btn" data-optional title="Estado del concentrador HIS: señal estable al 98 %" aria-label="Estado de la señal del HIS">
+        <svg class="icon" aria-hidden="true"><use href="#i-signal"></use></svg>
+      </button>
+      <button type="button" class="icon-btn" data-optional title="Centro de ayuda y protocolos ED-1" aria-label="Ayuda">
+        <svg class="icon" aria-hidden="true"><use href="#i-help"></use></svg>
+      </button>
+
+      <div class="menu">
+        <button type="button" class="user" id="userBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
+          <span class="avatar" aria-hidden="true">MV</span>
+          <span class="user__text">
+            <span class="user__name">Dr. M. Vance, MD</span>
+            <span class="user__role">Chief Attending ED-1</span>
+          </span>
+        </button>
+        <div class="menu__panel" id="userMenu" role="menu" hidden>
+          <div class="menu__head">
+            <div class="nowrap" style="font-weight:600">Dr. M. Vance, MD</div>
+            <div class="menu__meta">Matrícula 4482-A · Turno noche 19:00–07:00</div>
+          </div>
+          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-user"></use></svg>Mi perfil clínico</button>
+          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-calendar"></use></svg>Mi turno</button>
+          <div class="menu__sep" role="separator"></div>
+          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-logout"></use></svg>Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+    <div class="side__unit">
+      <span class="side__unit-icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-stethoscope"></use></svg></span>
+      <span class="side__unit-text">
+        <span class="side__unit-name">ED-1 Triage</span>
+        <span class="side__unit-sub" title="Sistema de triaje Manchester">Manchester System MTS</span>
+      </span>
+    </div>
+
+    <div class="side__primary">
+      <button type="button" class="btn btn--primary btn--block" data-nav="ingesta" title="Nuevo Ingreso">
+        <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
+        <span class="btn__label">Nuevo Ingreso</span>
+      </button>
+    </div>
+
+    <nav class="side__nav" aria-label="Navegación principal">
+      <a class="nav__item" data-nav="ingesta" href="../ingesta/index.html" title="Ingesta">
+        <svg class="icon" aria-hidden="true"><use href="#i-inbox"></use></svg>
+        <span class="nav__label">Ingesta</span>
+      </a>
+      <a class="nav__item" data-nav="resultado" href="../resultado/index.html" title="Resultado">
+        <svg class="icon" aria-hidden="true"><use href="#i-file-check"></use></svg>
+        <span class="nav__label">Resultado</span>
+      </a>
+      <a class="nav__item" data-nav="colas" href="../colas/index.html" title="Colas">
+        <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>
+        <span class="nav__label">Colas</span>
+        <span class="nav__badge" id="navQueueTotal" title="Pacientes en cola de triaje">0</span>
+      </a>
+      <a class="nav__item" data-nav="auditoria" href="../auditoria/index.html" title="Auditoría">
+        <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
+        <span class="nav__label">Auditoría</span>
+        <span class="nav__badge nav__badge--alerta" id="navAuditTotal" title="Revisiones pendientes">5</span>
+      </a>
+      <a class="nav__item is-active" data-nav="historial" href="./index.html" title="Historial" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg>
+        <span class="nav__label">Historial</span>
+      </a>
+    </nav>
+
+    <div class="side__foot">
+      <a class="nav__item" href="#" title="Configuración">
+        <svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg>
+        <span class="nav__label">Configuración</span>
+      </a>
+      <a class="nav__item" href="#" title="Soporte HIS">
+        <svg class="icon" aria-hidden="true"><use href="#i-support"></use></svg>
+        <span class="nav__label">Soporte HIS</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main" id="main">
+    <div class="page-head">
+      <div class="page-head__text">
+        <p class="page-head__eyebrow"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-history"></use></svg>Historial · ED-1</p>
+        <h1 class="page-head__title">Repositorio documental clínico</h1>
+        <p class="page-head__sub">Informes, analíticas, pruebas de imagen y recetas archivados en el HIS de la unidad, con su triaje MTS y estado de procesamiento.</p>
+      </div>
+      <div class="page-head__actions">
+        <button type="button" class="btn" data-toast="Índice documental impreso para el expediente de referencia.">
+          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-print"></use></svg>Imprimir índice
+        </button>
+        <button type="button" class="btn btn--soft" data-toast="Repositorio exportado como manifiesto DICOMweb FHIR.">
+          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-download"></use></svg>Exportar manifiesto
+        </button>
+      </div>
+    </div>
+
+    <!-- ---------- 1. BARRA SUPERIOR DE TABLA ---------- -->
+    <section class="toolbar toolbar--panel" aria-label="Filtros del repositorio documental">
+      <div class="toolbar__row">
+        <div class="toolbar__search toolbar__search--wide">
+          <label class="sr-only" for="qHist">Buscar por identificador de documento, paciente o ruta de almacenamiento</label>
+          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-search"></use></svg>
+          <input class="input" id="qHist" type="search" autocomplete="off"
+                 placeholder="Buscar por ID, paciente o ruta…">
+        </div>
+
+        <div class="toolbar__field">
+          <label class="field__label" for="selMts">Nivel MTS</label>
+          <select class="select" id="selMts">
+            <option value="todos">Todos</option>
+            <option value="rojo">Rojo</option>
+            <option value="naranja">Naranja</option>
+            <option value="amarillo">Amarillo</option>
+            <option value="verde">Verde</option>
+            <option value="azul">Azul</option>
+          </select>
+        </div>
+
+        <div class="toolbar__field">
+          <label class="field__label" for="selEstado">Estado</label>
+          <select class="select" id="selEstado">
+            <option value="todos">Todos</option>
+            <option value="recibido">Recibido</option>
+            <option value="procesado">Procesado</option>
+            <option value="auditoria">Auditoría</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn" id="btnLimpiar">
+          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>
+          <span class="btn__label">Limpiar filtros</span>
+        </button>
+      </div>
+
+      <div class="toolbar__row toolbar__row--foot">
+        <span class="hint" id="contador" aria-live="polite">Mostrando 0 de 0 registros</span>
+        <div class="toolbar__divider" aria-hidden="true"></div>
+        <span class="active-filters" id="filtrosActivos"></span>
+        <button type="button" class="linkbtn" id="btnCopiarEnlace" title="Copiar un enlace que reproduce esta vista exacta">
+          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-copy"></use></svg>
+          <span>Copiar enlace de la vista</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ---------- 2. TABLA ---------- -->
+    <section class="card table-card" aria-labelledby="h-tabla">
+      <h2 class="sr-only" id="h-tabla">Repositorio documental</h2>
+      <div class="card__body card__body--tight">
+        <div class="table-wrap table-wrap--sticky">
+          <table class="data tabla-hist">
+            <caption class="sr-only">Documentos clínicos archivados con identificador, paciente, tipo, nivel MTS, estado, fecha y ruta de almacenamiento</caption>
+            <thead>
+              <tr id="theadHist">
+                <th scope="col" data-sort="id" aria-sort="none"><button type="button" class="th-sort">ID de documento<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
+                <th scope="col" data-sort="paciente" aria-sort="none"><button type="button" class="th-sort">Paciente<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
+                <th scope="col" data-sort="tipo" aria-sort="none"><button type="button" class="th-sort">Tipo de documento<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
+                <th scope="col" data-sort="mts" aria-sort="none"><button type="button" class="th-sort">Nivel MTS<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
+                <th scope="col" data-sort="estado" aria-sort="none"><button type="button" class="th-sort">Estado<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
+                <th scope="col" data-sort="fecha" aria-sort="none"><button type="button" class="th-sort">Fecha<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
+                <th scope="col" data-sort="ruta" aria-sort="none"><button type="button" class="th-sort">Ruta de almacenamiento<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
+              </tr>
+            </thead>
+            <tbody id="tbodyHist"></tbody>
+          </table>
+        </div>
+
+        <!-- Estado vacío -->
+        <div class="empty" id="vacio" hidden>
+          <span class="empty__icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-funnel"></use></svg></span>
+          <span class="empty__title">No hay registros que coincidan</span>
+          <span class="empty__text">Ningún documento del repositorio cumple a la vez el texto buscado y los filtros de nivel MTS y estado.</span>
+          <button type="button" class="btn btn--primary" id="btnLimpiarVacio">
+            <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>Limpiar filtros
+          </button>
+        </div>
+      </div>
+
+      <!-- ---------- 3. PAGINACIÓN ---------- -->
+      <div class="card__foot paginacion">
+        <div class="paginacion__size">
+          <label class="field__label" for="selPageSize">Filas por página</label>
+          <select class="select" id="selPageSize">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+
+        <span class="paginacion__info hint" id="rangoInfo">—</span>
+
+        <nav class="paginacion__nav" aria-label="Paginación de registros">
+          <button type="button" class="page-btn page-btn--edge" id="btnPrev" aria-label="Página anterior">
+            <svg class="icon icon--sm" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+            <span class="nowrap">Anterior</span>
+          </button>
+          <span class="paginacion__pages" id="paginas"></span>
+          <button type="button" class="page-btn page-btn--edge" id="btnNext" aria-label="Página siguiente">
+            <span class="nowrap">Siguiente</span>
+            <svg class="icon icon--sm" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+          </button>
+        </nav>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

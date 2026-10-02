@@ -1,0 +1,26 @@
+CENTRO DE DIAGNOSTICO POR IMAGENES
+INFORME RADIOLOGICO
+
+Fecha del estudio: 25/09/2026
+
+Paciente: Javier Eduardo Morales Diaz
+Identificacion: 21.654.872-3
+Edad: 27 años
+Sexo: Masculino
+
+Antecedente clinico: Trauma por inversion de tobillo derecho durante actividad deportiva. Dolor y edema local.
+
+Estudio: Radiografia de tobillo derecho, proyecciones anteroposterior, lateral y mortaja.
+
+Hallazgos:
+Aumento de densidad y volumen de tejidos blandos periarticulares, de predominio lateral.
+Alineacion articular conservada.
+No se identifican trazos de fractura.
+No se observan signos de luxacion.
+
+Conclusion:
+Aumento de volumen de partes blandas periarticulares. Sin evidencia radiografica de lesion osea aguda.
+
+Profesional informante: Dr. Sebastian Riquelme Soto
+Medico Radiologo
+Registro profesional: 376582

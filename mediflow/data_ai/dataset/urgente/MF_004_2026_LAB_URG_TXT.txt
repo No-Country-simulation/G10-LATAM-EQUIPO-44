@@ -1,0 +1,22 @@
+LABORATORIO CLINICO LOS ANDES
+INFORME DE RESULTADOS
+
+N. de orden: LAB-260928-114
+Fecha de toma de muestra: 28/09/2026 - 08:10
+Fecha de emision: 28/09/2026 - 11:35
+
+Paciente: Claudia Andrea Sepulveda Rojas
+Identificacion: 17.562.841-9
+Edad: 48 años
+Sexo: Femenino
+
+Examen: Glicemia en ayunas
+Resultado: 250 mg/dL
+Valor de referencia: 70-99 mg/dL
+Condicion de muestra: ayuno de 10 horas informado.
+
+Profesional responsable: TM. Rodrigo Salinas Vega
+Tecnologo Medico
+Registro profesional: 395421
+
+Observaciones: Resultado fuera del intervalo de referencia.

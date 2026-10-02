@@ -1,0 +1,11 @@
+# MediFlow Backend & Data AI Dependencies
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+oci>=2.120.0
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+python-multipart>=0.0.9
