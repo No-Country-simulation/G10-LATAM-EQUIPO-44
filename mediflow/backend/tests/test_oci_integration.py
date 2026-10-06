@@ -1,5 +1,9 @@
 import os
-from conexion_oci import OCIStorageManager
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from app.core.oci_client import OCIStorageManager
 
 def probar_espacios_drazen():
     print("=== INICIANDO PRUEBAS DE ESPACIOS OCI (DRAZEN) ===")
@@ -72,11 +76,11 @@ def probar_espacios_drazen():
             print(f"   [OK] Contenido verificado exitosamente: '{contenido}'")
             
         print("\n==================================================")
-        print("🎉 ¡TODAS LAS PRUEBAS DE LOS 3 BUCKETS PASARON CON ÉXITO!")
+        print("[EXITO] TODAS LAS PRUEBAS DE LOS 3 BUCKETS PASARON CON EXITO!")
         print("==================================================")
 
     except Exception as e:
-        print(f"\n❌ Error durante la prueba: {e}")
+        print(f"\n[ERROR] Error durante la prueba: {e}")
     finally:
         for temp_file in [archivo_local, "receta_descargada_verificada.txt"]:
             if os.path.exists(temp_file):

@@ -6,10 +6,11 @@ import sys
 from pathlib import Path
 
 try:
-    from ..eliana.conexion_oci import OCIStorageManager
+    from app.core.oci_client import OCIStorageManager
+
 except ImportError:
     sys.path.insert(0, str(Path(__file__).parents[1]))
-    from eliana.conexion_oci import OCIStorageManager  # type: ignore[no-redef]
+    from app.core.oci_client import OCIStorageManager  # type: ignore[no-redef]
 
 try:
     from oci.exceptions import ConfigFileNotFound, InvalidConfig, RequestException, ServiceError
