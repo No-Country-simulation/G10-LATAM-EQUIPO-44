@@ -1,108 +1,168 @@
-"""
-Módulo OCIStorageManager
-------------------------
-Este módulo centraliza la conexión con Oracle Cloud Infrastructure (OCI).
 
-Funciones creadas y parámetros que reciben:
-- subir_archivo_desde_memoria(contenido_bytes, nombre_bucket, nombre_destino): Sube un archivo directamente desde un flujo de bytes (ideal para FastAPI).
-- subir_archivo(ruta_local, nombre_bucket, nombre_destino): Sube un archivo físico leyendo la ruta de tu disco duro.
-- descargar_archivo(nombre_bucket, nombre_archivo, ruta_descarga): Descarga un archivo desde un bucket hacia tu equipo.
-- mover_archivo(nombre_archivo, bucket_origen, bucket_destino): Copia un documento hacia un nuevo bucket y elimina el original.
+from __future__ import annotations
 
-Ejemplo sencillo de uso:
-------------------------
-from oci_client import OCIStorageManager
-
-gestor = OCIStorageManager()
-gestor.subir_archivo_desde_memoria(
-    contenido_bytes=archivo_bytes, 
-    nombre_bucket="recibidos", 
-    nombre_destino="DOC-123.pdf"
-)
-"""
+import os
+import time
 
 import oci
-import os
+from dotenv import load_dotenv
+
+
+# Carga las variables definidas en el archivo .env
+# sin sobrescribir variables de entorno ya existentes.
+load_dotenv()
+
+REQUIRED_ENV_VARS = [
+    "OCI_USER_OCID",
+    "OCI_FINGERPRINT",
+    "OCI_KEY_FILE",
+    "OCI_TENANCY_OCID",
+    "OCI_REGION",
+]
+
 
 class OCIStorageManager:
-    def __init__(self, config_profile="DEFAULT"):
-        # Carga la configuración local por defecto desde ~/.oci/config
-        self.config = oci.config.from_file(profile_name=config_profile)
-        self.object_storage = oci.object_storage.ObjectStorageClient(self.config)
-        
-        # El namespace es un identificador único del Tenancy en OCI
-        self.namespace = self.object_storage.get_namespace().data
+    """Gestiona las operaciones sobre OCI Object Storage."""
 
-    def subir_archivo_desde_memoria(self, contenido_bytes, nombre_bucket: str, nombre_destino: str):
-        """Sube un archivo directamente desde memoria (ideal para recibir desde la API REST)."""
-        print(f"Subiendo archivo desde memoria al bucket '{nombre_bucket}' como '{nombre_destino}'...")
-        self.object_storage.put_object(
-            namespace_name=self.namespace,
-            bucket_name=nombre_bucket,
-            object_name=nombre_destino,
-            put_object_body=contenido_bytes
-        )
+    def __init__(self, config_profile: str | None = None):
+        """
+        Inicializa el cliente de OCI.
+        El parámetro config_profile se mantiene por compatibilidad con código existente.
+        """
+
+        # Se mantiene el parámetro para evitar romper código existente.
+        del config_profile
+
+        # Validar que las variables necesarias estén configuradas.
+        missing_vars = [
+            variable
+            for variable in REQUIRED_ENV_VARS
+            if not os.getenv(variable)
+        ]
+
+        if missing_vars:
+            raise ValueError(
+                "Faltan variables de entorno requeridas para OCI: "
+                + ", ".join(missing_vars)
+            )
+
+
+        # Obtención de la configuración OCI desde el entorno.
+        self.config = {
+            "user": os.getenv("OCI_USER_OCID"),
+            "fingerprint": os.getenv("OCI_FINGERPRINT"),
+            "key_file": os.path.expanduser(os.getenv("OCI_KEY_FILE", "")),
+            "tenancy": os.getenv("OCI_TENANCY_OCID"),
+            "region": os.getenv("OCI_REGION"),
+        }
+
+        # Valida que la configuración mínima requerida por OCI esté correctamente definida.
+        oci.config.validate_config(self.config)
+
+        # Crea el cliente de Object Storage.
+        self.object_storage = oci.object_storage.ObjectStorageClient(self.config)
+
+        # El namespace puede configurarse mediante el entorno. Si no existe, se obtiene directamente desde OCI.
+        self.namespace = (os.getenv("OCI_NAMESPACE") or self.object_storage.get_namespace().data)
+        
+        #Traer el nombre del bucket desde la variable de entorno
+        self.bucket_name = os.getenv("OCI_BUCKET_NAME")
+
+    def subir_archivo_desde_memoria(self, contenido_bytes, nombre_bucket: str, nombre_destino: str,):
+        """
+        Sube un archivo directamente desde memoria.
+        """
+        print(f"Subiendo archivo desde memoria al bucket " f"'{nombre_bucket}' como '{nombre_destino}'...")
+
+        self.object_storage.put_object(namespace_name=self.namespace, bucket_name=nombre_bucket, object_name=nombre_destino, put_object_body=contenido_bytes,)
+
         print("Subida a memoria completada con éxito.")
 
-    def subir_archivo(self, ruta_local: str, nombre_bucket: str, nombre_destino: str):
-        """Sube un archivo local al bucket de OCI (útil para pruebas de escritorio)."""
-        if not os.path.exists(ruta_local):
-            raise FileNotFoundError(f"El archivo local '{ruta_local}' no fue encontrado.")
+    def subir_archivo(self, ruta_local: str, nombre_bucket: str, nombre_destino: str,):
+        """
+        Sube un archivo local al bucket de OCI.
+        """
 
-        with open(ruta_local, "rb") as f:
-            print(f"Subiendo '{ruta_local}' al bucket '{nombre_bucket}' como '{nombre_destino}'...")
-            self.object_storage.put_object(
-                namespace_name=self.namespace,
-                bucket_name=nombre_bucket,
-                object_name=nombre_destino,
-                put_object_body=f
+        if not os.path.exists(ruta_local):
+            raise FileNotFoundError(
+                f"El archivo local '{ruta_local}' no fue encontrado."
             )
+
+        with open(ruta_local, "rb") as archivo:
+            print(f"Subiendo '{ruta_local}' al bucket " f"'{nombre_bucket}' como '{nombre_destino}'...")
+
+            self.object_storage.put_object(namespace_name=self.namespace, bucket_name=nombre_bucket, object_name=nombre_destino, put_object_body=archivo,)
+
         print("Subida local completada con éxito.")
 
-    def descargar_archivo(self, nombre_bucket: str, nombre_archivo: str, ruta_descarga: str):
-        """Descarga un objeto del bucket a una ruta local."""
-        print(f"Descargando '{nombre_archivo}' desde el bucket '{nombre_bucket}'...")
+    def descargar_archivo(self, nombre_bucket: str, nombre_archivo: str, ruta_descarga: str,):
+        """
+        Descarga un objeto desde OCI hacia una ruta local.
+        """
+
+        print(f"Descargando '{nombre_archivo}' " f"desde el bucket '{nombre_bucket}'...")
+
         respuesta = self.object_storage.get_object(
             namespace_name=self.namespace,
             bucket_name=nombre_bucket,
-            object_name=nombre_archivo
+            object_name=nombre_archivo,
         )
 
-        with open(ruta_descarga, "wb") as f:
-            for chunk in respuesta.data.raw.stream(1024 * 1024, decode_content=False):
-                f.write(chunk)
-        print(f"Archivo guardado exitosamente en '{ruta_descarga}'.")
+        with open(ruta_descarga, "wb") as archivo:
+            for chunk in respuesta.data.raw.stream(
+                1024 * 1024, decode_content=False,):
+                archivo.write(chunk)
 
-    def mover_archivo(self, nombre_archivo: str, bucket_origen: str, bucket_destino: str):
-        """Mueve un archivo entre buckets (copia y elimina el original tras confirmar)."""
-        import time
-        print(f"Moviendo '{nombre_archivo}' de '{bucket_origen}' a '{bucket_destino}'...")
-        
+        print(f"Archivo guardado exitosamente en " f"'{ruta_descarga}'.")
+
+    def mover_archivo(self, nombre_archivo: str, bucket_origen: str, bucket_destino: str,):
+        """
+        Mueve un archivo entre buckets.
+
+        El proceso consiste en:
+        1. Solicitar la copia del archivo.
+        2. Esperar hasta confirmar que el archivo existe en el bucket destino.
+        3. Eliminar el archivo del bucket origen.
+        """
+
+        print(f"Moviendo '{nombre_archivo}' " f"de '{bucket_origen}' a '{bucket_destino}'...")
+
         detalle_copia = oci.object_storage.models.CopyObjectDetails(
             source_object_name=nombre_archivo,
             destination_region=self.config["region"],
             destination_namespace=self.namespace,
             destination_bucket=bucket_destino,
-            destination_object_name=nombre_archivo
+            destination_object_name=nombre_archivo,
         )
-        
-        # 1. Iniciar la solicitud de copia en OCI
-        self.object_storage.copy_object(self.namespace, bucket_origen, detalle_copia)
-        
-        # 2. Esperar confirmación de que el objeto llegó al destino
+
+        # 1. Solicitar la copia del objeto.
+        self.object_storage.copy_object(self.namespace, bucket_origen, detalle_copia,)
+
+        # 2. Esperar confirmación de que el objeto
+        # existe en el bucket destino.
         print("   Esperando confirmación del copiado en OCI...")
+
         copiado = False
+
         for _ in range(10):
             time.sleep(1.5)
-            res = self.object_storage.list_objects(self.namespace, bucket_destino)
-            nombres = [obj.name for obj in res.data.objects]
+
+            respuesta = self.object_storage.list_objects(self.namespace, bucket_destino,)
+
+            nombres = [
+                objeto.name
+                for objeto in respuesta.data.objects
+            ]
+
             if nombre_archivo in nombres:
                 copiado = True
                 break
-        
+
+        # Si no se confirmó la copia, no se elimina el archivo original.
         if not copiado:
-            raise Exception(f"No se pudo completar la copia de '{nombre_archivo}' hacia '{bucket_destino}'.")
-            
-        # 3. Borrar del origen únicamente cuando ya existe en el destino
-        self.object_storage.delete_object(self.namespace, bucket_origen, nombre_archivo)
+            raise Exception(f"No se pudo completar la copia de " f"'{nombre_archivo}' hacia " f"'{bucket_destino}'.")
+
+        # 3. Eliminar el archivo original solamente .después de confirmar la copia.
+        self.object_storage.delete_object(self.namespace, bucket_origen, nombre_archivo,)
+
         print("Movimiento completado con éxito.")
