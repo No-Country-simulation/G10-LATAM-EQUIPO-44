@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from app.core.config import settings
 from app.core.oci_client import OCIStorageManager
 
 def probar_espacios_drazen():
@@ -10,9 +11,9 @@ def probar_espacios_drazen():
     
     gestor = OCIStorageManager()
     
-    BUCKET_RECIBIDOS = "recibidos"
-    BUCKET_AUDITORIA = "auditoria_humana"
-    BUCKET_PROCESADOS = "procesados"
+    BUCKET_RECIBIDOS = settings.OCI_BUCKET_RECIBIDOS
+    BUCKET_AUDITORIA = settings.OCI_BUCKET_AUDITORIA
+    BUCKET_PROCESADOS = settings.OCI_BUCKET_PROCESADOS
     
     # -------------------------------------------------------------
     # 0. Prueba en bucket /recibidos (subida en memoria desde API/FastAPI)

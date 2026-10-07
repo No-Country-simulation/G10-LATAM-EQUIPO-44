@@ -16,18 +16,32 @@ pip install -r mediflow/requirements.txt
 
 ---
 
-## ⚙️ Variables de Entorno
+## ⚙️ Variables de Entorno y Conexión OCI
 
-Puedes configurar un archivo `.env` en `mediflow/` o en `mediflow/backend/` tomando como base `mediflow/.env.example`:
+La configuración del sistema se gestiona de forma centralizada con `pydantic-settings` en `app/core/config.py`.
+
+Puedes crear un archivo `.env` en `mediflow/` o en la raíz del repositorio basándote en `mediflow/.env.example`.
+
+### Estrategia de Autenticación con OCI:
+1. **Vía variables de entorno (`.env`):** Ideal para despliegues, CI/CD y entornos en contenedor. Si defines `OCI_USER_OCID`, `OCI_FINGERPRINT`, `OCI_KEY_FILE`, `OCI_TENANCY_OCID` y `OCI_REGION` en el archivo `.env`, el backend se autentica directamente con esas credenciales.
+2. **Vía archivo local `~/.oci/config` (Fallback):** Si no defines las credenciales en el `.env`, el gestor utiliza automáticamente tu perfil local de OCI CLI (`DEFAULT`), garantizando retrocompatibilidad con entornos de desarrollo locales.
 
 | Variable | Descripción | Valor por defecto |
 | :--- | :--- | :--- |
 | `ENVIRONMENT` | Entorno de ejecución (`development` / `production`) | `development` |
 | `PORT` | Puerto del servidor FastAPI | `8000` |
 | `HOST` | Dirección de escucha | `0.0.0.0` |
+| `DEBUG` | Modo depuración | `True` |
+| `OCI_USER_OCID` | OCID del usuario en OCI | `None` (Usa fallback a `~/.oci/config`) |
+| `OCI_FINGERPRINT` | Huella digital (fingerprint) de la clave API | `None` |
+| `OCI_KEY_FILE` | Ruta absoluta o con `~` a la clave privada `.pem` | `None` |
+| `OCI_TENANCY_OCID` | OCID del Tenancy en OCI | `None` |
+| `OCI_REGION` | Región de OCI (ej. `us-ashburn-1`) | `None` |
+| `OCI_NAMESPACE` | Namespace del Tenancy en OCI | Opcional (Se resuelve dinámicamente si no se define) |
 | `OCI_BUCKET_RECIBIDOS` | Bucket de ingesta de documentos | `recibidos` |
 | `OCI_BUCKET_AUDITORIA` | Bucket para documentos en revisión | `auditoria_humana` |
 | `OCI_BUCKET_PROCESADOS` | Bucket para documentos completados | `procesados` |
+| `DATABASE_URL` | Cadena de conexión a base de datos | `sqlite:///./mediflow.db` |
 
 ---
 

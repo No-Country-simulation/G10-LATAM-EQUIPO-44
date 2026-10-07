@@ -21,17 +21,47 @@ gestor.subir_archivo_desde_memoria(
 )
 """
 
-import oci
 import os
+import sys
+from pathlib import Path
+from typing import Optional, Dict, Any
+import oci
+
+try:
+    from app.core.config import settings
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from app.core.config import settings
 
 class OCIStorageManager:
-    def __init__(self, config_profile="DEFAULT"):
-        # Carga la configuración local por defecto desde ~/.oci/config
-        self.config = oci.config.from_file(profile_name=config_profile)
+    def __init__(self, config_profile: str = "DEFAULT", custom_config: Optional[Dict[str, Any]] = None):
+        """
+        Inicializa el gestor de OCI Object Storage.
+
+        Estrategia de resolución de credenciales:
+        1. Diccionario explícito 'custom_config' (si se pasa por parámetro).
+        2. Perfil explícito en ~/.oci/config (si 'config_profile' es distinto a 'DEFAULT').
+        3. Variables de entorno / archivo .env (si están configuradas en settings).
+        4. Perfil DEFAULT en archivo local ~/.oci/config (fallback para desarrollo local).
+        """
+        if custom_config:
+            self.config = custom_config
+        elif config_profile != "DEFAULT":
+            self.config = oci.config.from_file(profile_name=config_profile)
+        elif settings.has_oci_env_credentials():
+            self.config = settings.get_oci_config_dict()
+        else:
+            self.config = oci.config.from_file(profile_name=config_profile)
+
+        oci.config.validate_config(self.config)
         self.object_storage = oci.object_storage.ObjectStorageClient(self.config)
-        
-        # El namespace es un identificador único del Tenancy en OCI
-        self.namespace = self.object_storage.get_namespace().data
+
+        # El namespace identifica unívocamente el Tenancy en OCI
+        dummy_namespaces = ("mediflow_namespace", "")
+        if settings.OCI_NAMESPACE and settings.OCI_NAMESPACE not in dummy_namespaces:
+            self.namespace = settings.OCI_NAMESPACE
+        else:
+            self.namespace = self.object_storage.get_namespace().data
 
     def subir_archivo_desde_memoria(self, contenido_bytes, nombre_bucket: str, nombre_destino: str):
         """Sube un archivo directamente desde memoria (ideal para recibir desde la API REST)."""
