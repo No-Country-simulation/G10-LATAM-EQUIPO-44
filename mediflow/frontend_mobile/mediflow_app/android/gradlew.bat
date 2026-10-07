@@ -16,6 +16,10 @@ if "%DIRNAME%" == "" set DIRNAME=.
 set APP_BASE_NAME=%~n0
 set APP_HOME=%DIRNAME%
 
+@rem Use the current Windows profile for Gradle caches when no override exists.
+@rem This prevents Java processes with an incorrect user.home from using C:\.gradle.
+if not defined GRADLE_USER_HOME set "GRADLE_USER_HOME=%USERPROFILE%\.gradle"
+
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
 

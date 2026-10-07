@@ -2,37 +2,41 @@
 
 from __future__ import annotations
 
-import sys
 import unittest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-try:
-    from .oci_error_handler import (
-        OCIConfigurationError,
-        OCIConnectionError,
-        OCIInputError,
-        upload_document,
-    )
-except ImportError:
-    sys.path.insert(0, str(Path(__file__).parent))
-    from oci_error_handler import (  # type: ignore[no-redef]
-        OCIConfigurationError,
-        OCIConnectionError,
-        OCIInputError,
-        upload_document,
-    )
+from app.core.oci_error_handler import (
+    OCIConfigurationError, OCIConnectionError, OCIInputError, upload_document,
+)
 
 
 class OCIErrorHandlerTest(unittest.TestCase):
-    @patch("oci_error_handler.OCIStorageManager")
+    @patch("app.core.oci_error_handler.OCIStorageManager")
+    def test_controla_configuracion_del_cliente(self, manager_class):
+        from app.core.oci_client import OCIConfigurationError as ClientError
+        manager_class.side_effect = ClientError("configuración incompleta")
+        with self.assertRaises(OCIConfigurationError):
+            upload_document("documento.txt", "mediflow-documents", "recibidos/test.txt")
+
+    @patch("app.core.oci_error_handler.OCIStorageManager")
+    def test_controla_permisos_sdk(self, manager_class):
+        try:
+            from oci.exceptions import ServiceError
+        except ImportError:
+            self.skipTest("SDK OCI no instalado")
+        manager_class.return_value.subir_archivo.side_effect = ServiceError(
+            status=403, code="NotAuthorized", headers={}, message="sin permisos"
+        )
+        with self.assertRaises(OCIConfigurationError):
+            upload_document("documento.txt", "mediflow-documents", "recibidos/test.txt")
+    @patch("app.core.oci_error_handler.OCIStorageManager")
     def test_subida_exitosa(self, manager_class: MagicMock) -> None:
         upload_document("documento.txt", "documentos", "documento.txt")
         manager_class.return_value.subir_archivo.assert_called_once_with(
             "documento.txt", "documentos", "documento.txt"
         )
 
-    @patch("oci_error_handler.OCIStorageManager")
+    @patch("app.core.oci_error_handler.OCIStorageManager")
     def test_controla_error_de_conexion(self, manager_class: MagicMock) -> None:
         manager_class.return_value.subir_archivo.side_effect = ConnectionError(
             "servidor no disponible"
@@ -40,13 +44,13 @@ class OCIErrorHandlerTest(unittest.TestCase):
         with self.assertRaises(OCIConnectionError):
             upload_document("documento.txt", "documentos", "documento.txt")
 
-    @patch("oci_error_handler.OCIStorageManager")
+    @patch("app.core.oci_error_handler.OCIStorageManager")
     def test_controla_error_de_credenciales(self, manager_class: MagicMock) -> None:
         manager_class.side_effect = PermissionError("credenciales inválidas")
         with self.assertRaises(OCIConfigurationError):
             upload_document("documento.txt", "documentos", "documento.txt")
 
-    @patch("oci_error_handler.OCIStorageManager")
+    @patch("app.core.oci_error_handler.OCIStorageManager")
     def test_controla_archivo_invalido(self, manager_class: MagicMock) -> None:
         manager_class.return_value.subir_archivo.side_effect = FileNotFoundError(
             "archivo ausente"
