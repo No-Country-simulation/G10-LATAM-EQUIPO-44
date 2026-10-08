@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
 from app.api.routes import router as triage_router
 
 app = FastAPI(
     title="MediFlow API",
     description="API de triaje clínico inteligente con OCI y LLM",
-    version="1.0.0"
+    version="1.0.0",
+    debug=settings.DEBUG
 )
 
 app.add_middleware(
@@ -20,4 +22,8 @@ app.include_router(triage_router)
 
 @app.get("/")
 def health_check():
-    return {"status": "ok", "app": "MediFlow Backend"}
+    return {
+        "status": "ok",
+        "app": "MediFlow Backend",
+        "environment": settings.ENVIRONMENT
+    }
