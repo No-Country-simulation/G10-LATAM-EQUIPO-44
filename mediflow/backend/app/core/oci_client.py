@@ -24,14 +24,22 @@ gestor.subir_archivo_desde_memoria(
 import oci
 import os
 
+from .oci_transfer import OCIObjectMover
+from .config import settings
+
+
 class OCIStorageManager:
-    def __init__(self, config_profile="DEFAULT"):
+    def __init__(self, config_profile=None):
         # Carga la configuración local por defecto desde ~/.oci/config
-        self.config = oci.config.from_file(profile_name=config_profile)
+        profile = config_profile or settings.OCI_CONFIG_PROFILE
+        self.config = oci.config.from_file(
+            file_location=settings.OCI_CONFIG_FILE,
+            profile_name=profile,
+        )
         self.object_storage = oci.object_storage.ObjectStorageClient(self.config)
-        
+        self.settings = settings
         # El namespace es un identificador único del Tenancy en OCI
-        self.namespace = self.object_storage.get_namespace().data
+        self.namespace = settings.OCI_NAMESPACE or self.object_storage.get_namespace().data
 
     def subir_archivo_desde_memoria(self, contenido_bytes, nombre_bucket: str, nombre_destino: str):
         """Sube un archivo directamente desde memoria (ideal para recibir desde la API REST)."""
@@ -43,6 +51,16 @@ class OCIStorageManager:
             put_object_body=contenido_bytes
         )
         print("Subida a memoria completada con éxito.")
+
+    def subir_a_recibidos(self, contenido_bytes: bytes, nombre_destino: str) -> str:
+        """Sube un objeto al bucket recibido, respetando el prefijo configurado."""
+        object_name = f"{settings.OCI_PREFIX_RECIBIDOS}{nombre_destino}"
+        self.subir_archivo_desde_memoria(
+            contenido_bytes,
+            settings.OCI_BUCKET_RECIBIDOS,
+            object_name,
+        )
+        return object_name
 
     def subir_archivo(self, ruta_local: str, nombre_bucket: str, nombre_destino: str):
         """Sube un archivo local al bucket de OCI (útil para pruebas de escritorio)."""
@@ -74,35 +92,9 @@ class OCIStorageManager:
         print(f"Archivo guardado exitosamente en '{ruta_descarga}'.")
 
     def mover_archivo(self, nombre_archivo: str, bucket_origen: str, bucket_destino: str):
-        """Mueve un archivo entre buckets (copia y elimina el original tras confirmar)."""
-        import time
-        print(f"Moviendo '{nombre_archivo}' de '{bucket_origen}' a '{bucket_destino}'...")
-        
-        detalle_copia = oci.object_storage.models.CopyObjectDetails(
-            source_object_name=nombre_archivo,
-            destination_region=self.config["region"],
-            destination_namespace=self.namespace,
-            destination_bucket=bucket_destino,
-            destination_object_name=nombre_archivo
-        )
-        
-        # 1. Iniciar la solicitud de copia en OCI
-        self.object_storage.copy_object(self.namespace, bucket_origen, detalle_copia)
-        
-        # 2. Esperar confirmación de que el objeto llegó al destino
-        print("   Esperando confirmación del copiado en OCI...")
-        copiado = False
-        for _ in range(10):
-            time.sleep(1.5)
-            res = self.object_storage.list_objects(self.namespace, bucket_destino)
-            nombres = [obj.name for obj in res.data.objects]
-            if nombre_archivo in nombres:
-                copiado = True
-                break
-        
-        if not copiado:
-            raise Exception(f"No se pudo completar la copia de '{nombre_archivo}' hacia '{bucket_destino}'.")
-            
-        # 3. Borrar del origen únicamente cuando ya existe en el destino
-        self.object_storage.delete_object(self.namespace, bucket_origen, nombre_archivo)
-        print("Movimiento completado con éxito.")
+        """Mueve un objeto verificando su contenido antes de eliminar el origen."""
+        return OCIObjectMover(
+            self.object_storage,
+            self.namespace,
+            self.config["region"],
+        ).move(nombre_archivo, bucket_origen, bucket_destino)
