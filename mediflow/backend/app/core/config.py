@@ -55,6 +55,14 @@ class Settings(BaseSettings):
     OCI_GENAI_ENDPOINT: Optional[str] = "https://inference.generativeai.us-ashburn-1.oci.oraclecloud.com"
     OCI_GENAI_MODEL_ID: Optional[str] = "cohere.command-r-plus-08-2024"
 
+    # Proveedor temporal para S2-06; la API key debe existir solo en el entorno.
+    LLM_PROVIDER: str = ""
+    COHERE_API_KEY: Optional[str] = None
+    COHERE_MODEL: str = "command-r-plus"
+    COHERE_VISION_MODEL: str = "command-a-vision-07-2025"
+    COHERE_API_URL: str = "https://api.cohere.com/v2/chat"
+    COHERE_TIMEOUT_SECONDS: float = 30.0
+
     # Base de Datos / Almacenamiento local
     DATABASE_URL: str = "sqlite:///./mediflow.db"
 

@@ -2,7 +2,9 @@ import uuid
 from pathlib import PurePosixPath
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
 from starlette.concurrency import run_in_threadpool
+from app.core.config import settings
 from app.core.oci_client import OCIStorageManager
+from app.core.llm_client import CohereClient, LLMError, LLMInputError
 from app.models.schemas import TriageResponse
 
 router = APIRouter(prefix="/api", tags=["Triage"])
@@ -46,9 +48,24 @@ async def post_triage(file: UploadFile = File(...)):
             detail="No se pudo almacenar el documento en OCI."
         )
 
-    # 5. Respuesta según el contrato JSON oficial (Estado 'recibido' según Matriz de Estados)
-    return {
-        "status": "recibido",
+    extraction = None
+    if extension in ALLOWED_EXTENSIONS and settings.LLM_PROVIDER.lower() == "cohere":
+        try:
+            extraction = await run_in_threadpool(
+                CohereClient.from_settings().extract_document,
+                file_bytes,
+                file.filename,
+            )
+        except LLMInputError:
+            extraction = None
+        except LLMError as error:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="No se pudo obtener una respuesta valida del proveedor LLM.",
+            ) from error
+
+    response = {
+        "status": "procesado" if extraction else "recibido",
         "documento_id": doc_id,
         "clasificacion": {
             "tipo_documento": "Pendiente de procesamiento",
@@ -75,3 +92,23 @@ async def post_triage(file: UploadFile = File(...)):
             "status_backup": backup_status
         }
     }
+    if extraction:
+        unexpected = set(extraction) - {"clasificacion", "datos_extraidos"}
+        if unexpected:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="La respuesta del LLM contiene campos no esperados.",
+            )
+        response["clasificacion"] = extraction.get("clasificacion", {})
+        response["datos_extraidos"] = extraction.get("datos_extraidos", {})
+        response["decision_enrutamiento"]["justificacion_enrutamiento"] = (
+            f"Extraccion Cohere completada; archivo almacenado en '{bucket_name}/{object_name}'"
+        )
+        try:
+            return TriageResponse.model_validate(response).model_dump()
+        except ValueError as error:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="La respuesta del LLM no cumple el contrato JSON.",
+            ) from error
+    return response
