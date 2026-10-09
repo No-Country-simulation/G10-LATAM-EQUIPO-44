@@ -44,11 +44,9 @@
      CATÁLOGOS
      -------------------------------------------------------------------- */
   const MTS = {
-    rojo: { id: "rojo", nombre: "Rojo", orden: 0, min: 0 },
-    naranja: { id: "naranja", nombre: "Naranja", orden: 1, min: 10 },
-    amarillo: { id: "amarillo", nombre: "Amarillo", orden: 2, min: 60 },
-    verde: { id: "verde", nombre: "Verde", orden: 3, min: 120 },
-    azul: { id: "azul", nombre: "Azul", orden: 4, min: 240 }
+    urgente: { nombre: "Urgente", orden: 0 },
+    rutina: { nombre: "Rutina", orden: 1 },
+    pendiente: { nombre: "Pendiente", orden: 2 }
   };
 
   const ESTADOS = {
@@ -74,7 +72,7 @@
     id: { etiqueta: "ID de documento", tipo: "texto" },
     paciente: { etiqueta: "Paciente", tipo: "texto" },
     tipo: { etiqueta: "Tipo de documento", tipo: "texto" },
-    mts: { etiqueta: "Nivel MTS", tipo: "mts" },
+    prioridad: { etiqueta: "Prioridad", tipo: "prioridad" },
     estado: { etiqueta: "Estado", tipo: "estado" },
     fecha: { etiqueta: "Fecha", tipo: "fecha" },
     ruta: { etiqueta: "Ruta de almacenamiento", tipo: "texto" }
@@ -86,19 +84,14 @@
      Este array es el único punto de sustitución: reemplazar por la
      respuesta del endpoint de documentos al conectar el backend.
      -------------------------------------------------------------------- */
-  const records = [
-    { id: "DOC-0001", paciente: "Nombre del paciente", dni: "00.000.000-0", ingreso: "Ingreso reservado", tipo: "Tipo de documento", mts: "rojo", estado: "recibido", fecha: "2026-01-01T09:00", ruta: "his://ruta/reservada" },
-    { id: "DOC-0002", paciente: "Nombre del paciente", dni: "00.000.000-0", ingreso: "Ingreso reservado", tipo: "Tipo de documento", mts: "naranja", estado: "procesado", fecha: "2026-01-01T10:00", ruta: "his://ruta/reservada" },
-    { id: "DOC-0003", paciente: "Nombre del paciente", dni: "00.000.000-0", ingreso: "Ingreso reservado", tipo: "Tipo de documento", mts: "amarillo", estado: "auditoria", fecha: "2026-01-01T11:00", ruta: "his://ruta/reservada" },
-    { id: "DOC-0004", paciente: "Nombre del paciente", dni: "00.000.000-0", ingreso: "Ingreso reservado", tipo: "Tipo de documento", mts: "verde", estado: "recibido", recibidoAzul: true, fecha: "2026-01-01T12:00", ruta: "his://ruta/reservada" }
-  ];
+  const records = window.MediFlowDocuments.documents.map(window.MediFlowDocuments.toRow);
 
   /* --------------------------------------------------------------------
      ESTADO CENTRAL
      -------------------------------------------------------------------- */
   const state = {
     query: "",
-    mts: "todos",
+    prioridad: "todos",
     estado: "todos",
     sortBy: "fecha",
     sortDir: "desc",
@@ -106,7 +99,7 @@
     pageSize: 10
   };
 
-  const PARAMETROS = { query: "q", mts: "mts", estado: "estado", sortBy: "orden", sortDir: "dir", page: "pagina", pageSize: "por" };
+  const PARAMETROS = { query: "q", prioridad: "prioridad", estado: "estado", sortBy: "orden", sortDir: "dir", page: "pagina", pageSize: "por" };
 
   /* --------------------------------------------------------------------
      PIPELINE: filtrar -> ordenar -> paginar -> renderizar
@@ -114,7 +107,7 @@
   function filtrar() {
     const q = norm(state.query.trim());
     return records.filter((r) => {
-      if (state.mts !== "todos" && r.mts !== state.mts) return false;
+      if (state.prioridad !== "todos" && r.prioridad !== state.prioridad) return false;
       if (state.estado !== "todos" && r.estado !== state.estado) return false;
       if (!q) return true;
       return (
@@ -134,8 +127,8 @@
       let cmp = 0;
       if (state.sortBy === "fecha") {
         cmp = new Date(a.fecha).getTime() - new Date(b.fecha).getTime();
-      } else if (col.tipo === "mts") {
-        cmp = MTS[a.mts].orden - MTS[b.mts].orden;
+      } else if (col.tipo === "prioridad") {
+        cmp = MTS[a.prioridad].orden - MTS[b.prioridad].orden;
       } else if (col.tipo === "estado") {
         cmp = ESTADOS[a.estado].orden - ESTADOS[b.estado].orden;
       } else {
@@ -174,6 +167,7 @@
   }
 
   function fechaTexto(iso) {
+    if (!iso) return { dia: "No informada", hora: "" };
     const d = new Date(iso);
     const p = (n) => String(n).padStart(2, "0");
     return {
@@ -185,19 +179,15 @@
   function renderFilas(lista) {
     $("#tbodyHist").innerHTML = lista
       .map((r) => {
-        const mts = MTS[r.mts];
+        const prioridad = MTS[r.prioridad];
         const est = ESTADOS[r.estado];
         const f = fechaTexto(r.fecha);
         const alternativa = r.estado === "recibido" && r.recibidoAzul === true;
         /* El identificador puede traer un segmento de año intercalado; si no
            lo trae, se conserva tal cual. */
-        const idPartes = r.id.split("-");
-        const anio = idPartes.length > 2 ? idPartes[1] : null;
-
         return (
           "<tr>" +
-          '<td><span class="doc-id nowrap">' + (anio ? idPartes[0] + "-" + idPartes[1] : idPartes[0]) +
-          '<span class="doc-id__year">' + (anio ? "-" + idPartes[2] : "-" + idPartes[1]) + "</span></span></td>" +
+          '<td><button type="button" class="linkbtn" data-document="' + esc(r.id) + '">' + esc(r.id) + '</button></td>' +
 
           '<td><div class="idcell"><span class="idcell__avatar" aria-hidden="true">' + esc(iniciales(r.paciente)) + "</span>" +
           '<span class="idcell__text"><span class="idcell__name" title="' + esc(r.paciente) + '">' + esc(r.paciente) + "</span>" +
@@ -206,8 +196,8 @@
           '<td><div class="tipo-doc" title="' + esc(r.tipo) + '">' + icon(TIPOS[r.tipo] || "i-notes", "icon--sm") +
           '<span class="tipo-doc__txt">' + esc(r.tipo) + "</span></div></td>" +
 
-          '<td><span class="mts-tag mts-tag--' + r.mts + '" title="' + esc(mts.nombre + " · objetivo " + mts.min + " min") + '">' +
-          '<span class="mts-tag__dot" aria-hidden="true"></span>' + esc(mts.nombre) + "</span></td>" +
+          '<td><span class="prioridad-tag prioridad-tag--' + r.prioridad + '" title="' + esc(prioridad.nombre) + '">' +
+          '<span class="prioridad-tag__dot" aria-hidden="true"></span>' + esc(prioridad.nombre) + "</span></td>" +
 
           '<td><span class="estado-chip estado-chip--' + r.estado + (alternativa ? " estado-chip--alt" : "") + '">' +
           '<span class="estado-chip__dot" aria-hidden="true"></span>' + esc(est.nombre) + "</span></td>" +
@@ -244,10 +234,10 @@
     if (state.query.trim()) {
       partes.push('<span class="filtro-tag">Búsqueda: <b>' + esc(state.query.trim()) + "</b></span>");
     }
-    if (state.mts !== "todos") {
+    if (state.prioridad !== "todos") {
       partes.push(
-        '<span class="filtro-tag filtro-tag--mts" style="--ac:var(--mts-' + state.mts + ');--ac-bg:var(--mts-' + state.mts + '-bg);--ac-bd:var(--mts-' + state.mts + '-border);--ac-ink:var(--mts-' + state.mts + '-ink)">' +
-          '<span class="filtro-tag--dot" aria-hidden="true"></span>' + esc(MTS[state.mts].nombre) + "</span>"
+        '<span class="filtro-tag filtro-tag--prioridad" style="--ac:var(--prioridad-' + state.prioridad + ');--ac-bg:var(--prioridad-' + state.prioridad + '-bg);--ac-bd:var(--prioridad-' + state.prioridad + '-border);--ac-ink:var(--prioridad-' + state.prioridad + '-ink)">' +
+          '<span class="filtro-tag--dot" aria-hidden="true"></span>' + esc(MTS[state.prioridad].nombre) + "</span>"
       );
     }
     if (state.estado !== "todos") {
@@ -290,8 +280,8 @@
     const p = new URLSearchParams(window.location.search);
     const q = p.get(PARAMETROS.query);
     if (q !== null) state.query = q;
-    const mts = p.get(PARAMETROS.mts);
-    if (mts && MTS[mts]) state.mts = mts;
+    const prioridad = p.get(PARAMETROS.prioridad);
+    if (prioridad && MTS[prioridad]) state.prioridad = prioridad;
     const est = p.get(PARAMETROS.estado);
     if (est && ESTADOS[est]) state.estado = est;
     const orden = p.get(PARAMETROS.sortBy);
@@ -307,7 +297,7 @@
   function sincronizarURL() {
     const p = new URLSearchParams();
     if (state.query.trim()) p.set(PARAMETROS.query, state.query.trim());
-    if (state.mts !== "todos") p.set(PARAMETROS.mts, state.mts);
+    if (state.prioridad !== "todos") p.set(PARAMETROS.prioridad, state.prioridad);
     if (state.estado !== "todos") p.set(PARAMETROS.estado, state.estado);
     if (state.sortBy !== "fecha" || state.sortDir !== "desc") {
       p.set(PARAMETROS.sortBy, state.sortBy);
@@ -364,7 +354,7 @@
      -------------------------------------------------------------------- */
   function limpiarFiltros(silencioso) {
     state.query = "";
-    state.mts = "todos";
+    state.prioridad = "todos";
     state.estado = "todos";
     state.page = 1;
     $("#qHist").value = "";
@@ -452,7 +442,7 @@
     });
 
     $("#selMts").addEventListener("change", (ev) => {
-      state.mts = ev.target.value;
+      state.prioridad = ev.target.value;
       state.page = 1;
       apply();
     });
@@ -475,6 +465,13 @@
     });
 
     $("#tbodyHist").addEventListener("click", (ev) => {
+      const detail = ev.target.closest("[data-document]");
+      if (detail) {
+        const row = records.find((record) => record.id === detail.dataset.document);
+        $("#documentDetailJson").textContent = JSON.stringify(row.documento, null, 2);
+        $("#documentDetail").showModal();
+        return;
+      }
       const btn = ev.target.closest("[data-ruta]");
       if (btn) copiarRuta(btn);
     });
@@ -500,7 +497,7 @@
     window.addEventListener("popstate", () => {
       leerURL();
       $("#qHist").value = state.query;
-      $("#selMts").value = state.mts;
+      $("#selMts").value = state.prioridad;
       $("#selEstado").value = state.estado;
       $("#selPageSize").value = String(state.pageSize);
       apply({ silenciosoURL: true });
@@ -514,7 +511,7 @@
     sincronizarNav();
     leerURL();
     $("#qHist").value = state.query;
-    $("#selMts").value = state.mts;
+    $("#selMts").value = state.prioridad;
     $("#selEstado").value = state.estado;
     $("#selPageSize").value = String(state.pageSize);
     apply({ silenciosoURL: true });

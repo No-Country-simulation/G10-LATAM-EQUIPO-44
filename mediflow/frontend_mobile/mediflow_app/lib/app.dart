@@ -3,11 +3,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'screens/home_screen.dart';
 import 'services/file_picker_service.dart';
+import 'services/triage_api_service.dart';
 
 class MediFlowApp extends StatelessWidget {
-  const MediFlowApp({super.key, this.filePickerService});
+  const MediFlowApp({super.key, this.filePickerService, this.triageApiService});
 
   final FilePickerService? filePickerService;
+  final TriageApiService? triageApiService;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,10 @@ class MediFlowApp extends StatelessWidget {
           behavior: SnackBarBehavior.floating,
         ),
       ),
-      home: HomeScreen(filePickerService: filePickerService),
+      home: HomeScreen(
+        filePickerService: filePickerService,
+        triageApiService: triageApiService,
+      ),
     );
   }
 }

@@ -4,9 +4,9 @@ Prototipo navegable del front de una clinica de urgencias. Cinco pantallas HTML
 independientes que comparten design tokens, hoja de estilos comun y la misma
 navegacion lateral.
 
-Es un prototipo **sin datos precargados**: los arrays de datos de cada pantalla
-estan vacios a proposito y son el punto de sustitucion cuando se conecte el
-backend.
+Es un prototipo con estados vacíos y datos de demostración según la pantalla.
+El listado de `historial/` usa mocks sintéticos del contrato JSON de MediFlow.
+No realiza peticiones al backend durante Sprint 2.
 
 ## Como ejecutarlo
 
@@ -88,7 +88,7 @@ pacientes en el repositorio.
 | Resultado | `alertas`, `traza`, `signos`         | `{}`              |
 | Ingesta   | `data`, `motivos`, `constantes`…     | Tablas de referencia del sistema (MTS, motivos, prioridades). No son pacientes. |
 | Auditoria | Registros `AUD-0001`…`AUD-0005`     | Marcadores de posicion, con campos de relleno. |
-| Historial | Registros `DOC-0001`…`DOC-0004`     | Marcadores de posicion, con campos de relleno. |
+| Historial | `assets/js/documents-mock.js` | Documentos sintéticos con el contrato oficial. |
 
 Al conectar el backend hay que respetar los contratos de cada bloque, que estan
 documentados como comentario en el `app.js` de la pantalla correspondiente.
@@ -113,4 +113,26 @@ detalle todavia no esta implementada como pantalla real.
   datos vacios.
 - Auditoria e Historial son prototipos de interfaz: los registros son
   marcadores de posicion, no datos reales.
-- No hay pruebas automatizadas ni validacion visual en este repositorio.
+- El adaptador del listado Sprint 2 tiene pruebas automatizadas con Node.
+
+## Listado Sprint 2
+
+Abre `http://localhost:8080/historial/` al servir `src/`. Se indica explícitamente
+que son datos de demostración. La tabla muestra `documento_id`, tipo documental,
+prioridad y estado. El identificador abre el JSON del documento en un diálogo
+de lectura; no aprueba ni modifica documentos. Los filtros, búsqueda, orden y
+paginación operan sobre el mismo conjunto de mocks.
+
+`assets/js/documents-mock.js` contiene los documentos y el adaptador `toRow`.
+No convierte prioridades documentales en niveles MTS. Para `recibido`, la prioridad
+se muestra pendiente; el análisis todavía no se ha realizado. El contrato no
+incluye fecha, DNI ni ingreso: la interfaz no inventa esos datos.
+
+Pruebas desde `mediflow/frontend_web`:
+
+```powershell
+node --test tests/documents-mock.test.js
+```
+
+Las otras pantallas conservan sus prototipos anteriores. Conexión GET,
+persistencia y aprobación humana quedan fuera de este cambio de Sprint 2.
