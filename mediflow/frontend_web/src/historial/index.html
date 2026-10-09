@@ -68,7 +68,7 @@
       <span class="brand__mark" aria-hidden="true"><svg class="icon"><use href="#i-cross"></use></svg></span>
       <span class="brand__text">
         <span class="brand__name">MediFlow Clinical Portal</span>
-        <span class="conn" title="Sincronización activa con el HIS de la unidad ED-1"><span class="conn__dot" aria-hidden="true"></span>HIS Connected</span>
+        <span class="conn" title="Datos de demostración; sin conexión a un HIS"><span class="conn__dot" aria-hidden="true"></span>Demo Sprint 2</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
         <svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg>
         <span class="dot" aria-hidden="true"></span>
       </button>
-      <button type="button" class="icon-btn" data-optional title="Estado del concentrador HIS: señal estable al 98 %" aria-label="Estado de la señal del HIS">
+      <button type="button" class="icon-btn" data-optional title="Modo demostración, sin conexión HIS" aria-label="Modo demostración">
         <svg class="icon" aria-hidden="true"><use href="#i-signal"></use></svg>
       </button>
       <button type="button" class="icon-btn" data-optional title="Centro de ayuda y protocolos ED-1" aria-label="Ayuda">
@@ -178,7 +178,7 @@
       <div class="page-head__text">
         <p class="page-head__eyebrow"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-history"></use></svg>Historial · ED-1</p>
         <h1 class="page-head__title">Repositorio documental clínico</h1>
-        <p class="page-head__sub">Informes, analíticas, pruebas de imagen y recetas archivados en el HIS de la unidad, con su triaje MTS y estado de procesamiento.</p>
+        <p class="page-head__sub">Sprint 2 · Datos de demostración. Listado de documentos con tipo, prioridad y estado. No conectado al backend.</p>
       </div>
       <div class="page-head__actions">
         <button type="button" class="btn" data-toast="Índice documental impreso para el expediente de referencia.">
@@ -201,14 +201,12 @@
         </div>
 
         <div class="toolbar__field">
-          <label class="field__label" for="selMts">Nivel MTS</label>
+          <label class="field__label" for="selMts">Prioridad</label>
           <select class="select" id="selMts">
             <option value="todos">Todos</option>
-            <option value="rojo">Rojo</option>
-            <option value="naranja">Naranja</option>
-            <option value="amarillo">Amarillo</option>
-            <option value="verde">Verde</option>
-            <option value="azul">Azul</option>
+            <option value="urgente">Urgente</option>
+            <option value="rutina">Rutina</option>
+            <option value="pendiente">Pendiente</option>
           </select>
         </div>
 
@@ -245,13 +243,13 @@
       <div class="card__body card__body--tight">
         <div class="table-wrap table-wrap--sticky">
           <table class="data tabla-hist">
-            <caption class="sr-only">Documentos clínicos archivados con identificador, paciente, tipo, nivel MTS, estado, fecha y ruta de almacenamiento</caption>
+            <caption class="sr-only">Documentos de demostración con identificador, paciente, tipo, prioridad, estado, fecha y ubicación</caption>
             <thead>
               <tr id="theadHist">
                 <th scope="col" data-sort="id" aria-sort="none"><button type="button" class="th-sort">ID de documento<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
                 <th scope="col" data-sort="paciente" aria-sort="none"><button type="button" class="th-sort">Paciente<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
                 <th scope="col" data-sort="tipo" aria-sort="none"><button type="button" class="th-sort">Tipo de documento<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
-                <th scope="col" data-sort="mts" aria-sort="none"><button type="button" class="th-sort">Nivel MTS<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
+                <th scope="col" data-sort="prioridad" aria-sort="none"><button type="button" class="th-sort">Prioridad<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
                 <th scope="col" data-sort="estado" aria-sort="none"><button type="button" class="th-sort">Estado<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
                 <th scope="col" data-sort="fecha" aria-sort="none"><button type="button" class="th-sort">Fecha<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
                 <th scope="col" data-sort="ruta" aria-sort="none"><button type="button" class="th-sort">Ruta de almacenamiento<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
@@ -265,7 +263,7 @@
         <div class="empty" id="vacio" hidden>
           <span class="empty__icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-funnel"></use></svg></span>
           <span class="empty__title">No hay registros que coincidan</span>
-          <span class="empty__text">Ningún documento del repositorio cumple a la vez el texto buscado y los filtros de nivel MTS y estado.</span>
+          <span class="empty__text">Ningún documento de demostración cumple el texto buscado y los filtros de prioridad y estado.</span>
           <button type="button" class="btn btn--primary" id="btnLimpiarVacio">
             <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>Limpiar filtros
           </button>
@@ -303,6 +301,13 @@
 
 <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
+<dialog id="documentDetail" aria-labelledby="documentDetailTitle" style="max-width:720px;width:90%;padding:24px;border-radius:16px">
+  <h2 id="documentDetailTitle">Detalle del documento · Demostración</h2>
+  <p>Vista de lectura. La revisión y aprobación conectadas se implementarán en un sprint posterior.</p>
+  <pre id="documentDetailJson" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+  <form method="dialog"><button class="btn" type="submit">Cerrar</button></form>
+</dialog>
+<script src="../assets/js/documents-mock.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

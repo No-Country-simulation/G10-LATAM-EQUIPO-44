@@ -1,0 +1,1 @@
+Este archivo es una prueba de conexión entre Python y Oracle Cloud Object Storage.

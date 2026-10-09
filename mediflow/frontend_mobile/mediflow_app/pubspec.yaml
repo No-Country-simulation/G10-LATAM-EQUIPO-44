@@ -1,5 +1,5 @@
 name: mediflow_app
-description: "MediFlow Sprint 1: navegación y selección local de documentos clínicos."
+description: "MediFlow: selección local y envío de documentos a la API de triaje."
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  http: ^1.6.0
+  http_parser: ^4.1.2
 
 dev_dependencies:
   flutter_test:

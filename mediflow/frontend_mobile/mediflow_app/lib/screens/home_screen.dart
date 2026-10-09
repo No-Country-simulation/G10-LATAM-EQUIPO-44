@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../services/file_picker_service.dart';
+import '../services/triage_api_service.dart';
 import 'document_selection_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, this.filePickerService});
+  const HomeScreen({super.key, this.filePickerService, this.triageApiService});
 
   final FilePickerService? filePickerService;
+  final TriageApiService? triageApiService;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +91,7 @@ class HomeScreen extends StatelessWidget {
                     MaterialPageRoute<void>(
                       builder: (_) => DocumentSelectionScreen(
                         filePickerService: filePickerService,
+                        triageApiService: triageApiService,
                       ),
                     ),
                   ),
@@ -107,7 +110,8 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(width: 10),
                     const Expanded(
                       child: Text(
-                        'Selección local y sin conexión..',
+                        'Selecciona un archivo local. Solo se enviará al servidor '
+                        'cuando pulses Procesar documento.',
                       ),
                     ),
                   ],

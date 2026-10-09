@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 enum DocumentType {
   pdf('PDF'),
   image('Imagen'),
@@ -16,11 +18,15 @@ class SelectedDocument {
     required this.size,
     required this.type,
     this.path,
+    this.bytes,
   });
 
   final String name;
   final String extension;
   final String? path;
+
+  /// Respaldo en memoria cuando el selector no proporciona una ruta local.
+  final Uint8List? bytes;
   final int size;
   final DocumentType type;
 

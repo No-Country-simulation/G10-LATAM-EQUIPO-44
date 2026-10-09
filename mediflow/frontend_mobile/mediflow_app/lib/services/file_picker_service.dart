@@ -24,7 +24,7 @@ class FilePickerService {
     dialogTitle: 'Seleccionar documento',
   );
 
-  /// No lee el contenido, no procesa y no envía el documento.
+  /// Conserva bytes solo si no hay ruta local. No procesa ni envía el documento.
   /// Android limita el selector a archivos locales en MainActivity.
   Future<SelectedDocument?> pickDocument() async {
     final file = await _pickFile();
@@ -42,6 +42,9 @@ class FilePickerService {
       name: file.name,
       extension: extension,
       path: file.path,
+      bytes: file.path == null || file.path!.isEmpty
+          ? await file.readAsBytes()
+          : null,
       size: size,
       type: switch (extension) {
         'pdf' => DocumentType.pdf,

@@ -4,12 +4,22 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:mediflow_app/app.dart';
 import 'package:mediflow_app/models/selected_document.dart';
 import 'package:mediflow_app/services/file_picker_service.dart';
+import 'package:mediflow_app/services/triage_api_service.dart';
 import 'package:mediflow_app/widgets/selected_file_card.dart';
 
 import 'helpers/stub_platform_file.dart';
+
+TriageApiService successfulApi() => TriageApiService(
+  clientFactory: () => MockClient(
+    (_) async =>
+        http.Response('{"status":"recibido","documento_id":"DOC-TEST"}', 200),
+  ),
+);
 
 Future<void> tapText(WidgetTester tester, String text) async {
   final finder = find.text(text);
@@ -35,7 +45,9 @@ Future<void> openSelection(
   WidgetTester tester,
   FilePickerService service,
 ) async {
-  await tester.pumpWidget(MediFlowApp(filePickerService: service));
+  await tester.pumpWidget(
+    MediFlowApp(filePickerService: service, triageApiService: successfulApi()),
+  );
   await tapText(tester, 'Seleccionar documento');
 }
 
@@ -52,12 +64,17 @@ void main() {
     final service = FilePickerService(
       pickFile: () async => responses.removeAt(0),
     );
-    await tester.pumpWidget(MediFlowApp(filePickerService: service));
+    await tester.pumpWidget(
+      MediFlowApp(
+        filePickerService: service,
+        triageApiService: successfulApi(),
+      ),
+    );
     expect(find.text('MediFlow'), findsOneWidget);
     expect(find.text('Triaje de documentos clínicos'), findsOneWidget);
     await tapText(tester, 'Seleccionar documento');
     expect(find.text('Ningún archivo seleccionado'), findsOneWidget);
-    expect(find.text('Continuar'), findsNothing);
+    expect(find.text('Procesar documento'), findsNothing);
 
     await tapText(tester, 'Buscar archivo');
     expect(find.text('informe.pdf'), findsOneWidget);
@@ -81,18 +98,13 @@ void main() {
     expect(find.text('Tipo: Imagen'), findsOneWidget);
     expect(find.text('Ruta disponible'), findsNothing);
 
-    await tapText(tester, 'Continuar');
-    expect(
-      find.text(
-        'Documento listo para procesar. La integración estará disponible en el Sprint 2.',
-      ),
-      findsOneWidget,
-    );
+    await tapText(tester, 'Procesar documento');
+    expect(find.text('Documento recibido correctamente.'), findsOneWidget);
     await tester.pumpAndSettle(const Duration(seconds: 5));
     await tapText(tester, 'Quitar archivo');
     expect(find.text('Ningún archivo seleccionado'), findsOneWidget);
     expect(find.byType(SelectedFileCard), findsNothing);
-    expect(find.text('Continuar'), findsNothing);
+    expect(find.text('Procesar documento'), findsNothing);
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     expect(find.text('Triaje de documentos clínicos'), findsOneWidget);
@@ -174,11 +186,12 @@ void main() {
         FilePickerService(
           pickFile: () async => StubPlatformFile(
             name: 'informe_clinico_con_un_nombre_muy_largo_de_prueba.pdf',
+            localPath: null,
           ),
         ),
       );
       await tapText(tester, 'Buscar archivo');
-      await tapText(tester, 'Continuar');
+      await tapText(tester, 'Procesar documento');
       expect(tester.takeException(), isNull);
     });
   }
