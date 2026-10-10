@@ -1,1 +1,85 @@
+{
+  "version": "1.2-dataset-sintetico",
+  "disclaimer": "Reglas experimentales del dataset; NO son criterios clínicos validados ni instrucciones asistenciales.",
+  "priority_values": [
+    "Rutina",
+    "Urgente"
+  ],
+  "ambiguous_handling": {
+    "status": "auditoria_humana",
+    "priority_when_not_urgent": "Rutina",
+    "destination": "Cola_Revision_Humana",
+    "requires_human_review": true
+  },
+  "rules": [
+    {
+      "id": "dosis_prescrita_ilegible",
+      "scenario": "AMB",
+      "condition": "Dosis de medicamento manuscrita presente pero ilegible",
+      "destination": "Cola_Revision_Humana"
+    },
+    {
+      "id": "antiguedad_documento",
+      "scenario": "AMB",
+      "condition": "En el flujo de evaluacion actual se exige resultado reciente y el documento de laboratorio es de 2025 mientras processing_date es 2026-10-01; requiere contexto externo",
+      "destination": "Cola_Revision_Humana"
+    },
+    {
+      "id": "inconsistencia_dispositivo_flujo_oxigeno",
+      "scenario": "AMB",
+      "condition": "Orden con naricera nasal y flujo de 7 L/min, combinacion marcada como inconsistente por la prueba",
+      "destination": "Cola_Revision_Humana"
+    },
+    {
+      "id": "hiperglicemia_marcada",
+      "scenario": "URG",
+      "condition": "Glicemia en ayunas de 250 mg/dL en el caso de prueba",
+      "destination": "Cola_Emergencia_Medica"
+    },
+    {
+      "id": "hallazgo_radiologico_sospechoso",
+      "scenario": "URG",
+      "condition": "Lesion pulmonar espiculada sospechosa de neoplasia segun informe del caso",
+      "destination": "Cola_Emergencia_Medica"
+    },
+    {
+      "id": "lesion_por_presion_estadio_4",
+      "scenario": "URG",
+      "condition": "Orden domiciliaria para lesion por presion estadio 4",
+      "destination": "Cola_Emergencia_Medica"
+    },
+    {
+      "id": "pie_diabetico_wagner_3",
+      "scenario": "URG",
+      "condition": "Epicrisis con ulcera de pie diabetico Wagner grado 3",
+      "destination": "Cola_Emergencia_Medica"
+    }
+  ],
+  "default": {
+    "status": "procesado",
+    "priority": "Rutina",
+    "destination": "Cola_Historia_Clinica",
+    "requires_human_review": false
+  },
+  "special_routing": {
+    "Receta Médica": "Cola_Farmacia"
+  },
+  "interpretation_notes": [
+    "Reglas de demostración, no validadas para decisiones asistenciales.",
+    "El escenario URG/AMB/NOR en el nombre del archivo nunca debe transmitirse a Gemini.",
+    "La prioridad Rutina en un caso ambiguo es solo un valor técnico provisional; la revisión humana prevalece.",
+    "La antigüedad documental exige contexto de vigencia explícito, no se deduce solo del año.",
+    "Una lesión pulmonar sospechosa no equivale automáticamente a una urgencia de servicio de emergencias; la regla del dataset requiere validación clínica.",
+    "La clasificación de prioridad y el destino deben ser verificados por el backend antes de ejecutarse.",
+    "Los estados son recibidos desde el backend; Gemini solo devuelve procesado o auditoria_humana después del análisis.",
+    "La matriz de estados no define umbral de confianza; no se aplica un valor numérico arbitrario.",
+    "Prioridad y destino generados por IA son propuestas para validación del backend, no decisiones clínicas autónomas."
+  ],
+  "source_of_states": "data_ai/docs/matriz_estados.md (Laura Paiva v1.0)",
+  "states": {
+    "initial": "recibido",
+    "automatic": "procesado",
+    "manual_review": "auditoria_humana"
+  }
+}
 
