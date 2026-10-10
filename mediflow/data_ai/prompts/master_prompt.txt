@@ -14,7 +14,7 @@ CLASIFICACIÓN Y REGLAS
 - Tipo de documento: Receta Médica, Informe de Laboratorio, Informe de Estudio por Imágenes, Orden / Solicitud de Procedimiento, Epicrisis / Informe de Alta o Certificado Médico.
 - Solo puedes usar nivel_prioridad Rutina o Urgente. No inventes otros valores.
 - Aplica las reglas experimentales adjuntas solo a documentos de prueba sintéticos. No son criterios asistenciales validados.
-- Si hay información crítica ilegible, inconsistente o insuficiente, status = ambiguo, destino_principal = Cola_Revision_Humana y requiere_auditoria_humana = true. Si no hay una regla explícita de urgencia, nivel_prioridad = Rutina como valor técnico provisional, NO como decisión clínica.
+- Si hay información crítica ilegible, inconsistente o insuficiente, status = auditoria_humana, destino_principal = Cola_Revision_Humana y requiere_auditoria_humana = true. Si no hay una regla explícita de urgencia, nivel_prioridad = Rutina como valor técnico provisional, NO como decisión clínica.
 - Si una regla de urgencia del dataset se activa sin ambigüedad, nivel_prioridad = Urgente y destino_principal = Cola_Emergencia_Medica.
 - Para casos rutinarios: receta a Cola_Farmacia; otros a Cola_Historia_Clinica.
 - Justifica brevemente la decisión con evidencia del documento y la regla aplicable. No derives prioridad del nombre del archivo.
@@ -23,3 +23,12 @@ LÍMITES
 - No incluyas documento_id, notificacion_generada ni almacenamiento_oci. Son responsabilidad del backend.
 - No afirmes que se ejecutó una derivación, se envió una alerta o se guardó algo en OCI.
 - Si no hay información suficiente para una conclusión clínica, prioriza revisión humana.
+
+ESTADOS DE LA MATRIZ DE ESTADOS
+- recibido es un estado de ingreso asignado por el backend y NO es una salida del análisis Gemini.
+- procesado indica análisis documental completo y coherente, sin condiciones de auditoría humana.
+- auditoria_humana indica necesidad de revisión por ilegibilidad, contradicción, datos críticos faltantes o enrutamiento inseguro.
+- Un documento urgente puede ser procesado si es legible y consistente.
+- No inventes un umbral numérico para score_confianza_clasificacion; la política de umbral está pendiente de aprobación.
+- Si no hay evidencia suficiente para determinar la prioridad, usa Rutina solo como valor técnico provisional y exige auditoria_humana; no equivale a baja gravedad clínica.
+- No confundas medicamento prescrito con medicamento mencionado como antecedente o administrado; extrae solo prescripciones explícitas.
