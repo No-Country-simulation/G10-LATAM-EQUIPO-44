@@ -8,17 +8,23 @@
         "score_confianza_clasificacion": 0.99
     },
     "datos_extraidos": {
-    "paciente": {
-        "nombre": "Carlos Eduardo Mendes",
-        "edad": 52
-    },
-    "medico_solicitante": {
-        "nombre": "Dra. Renata Silveira",
-        "matricula": "145892"
-    },
-    "estudio_realizado": "Tomografia de Torax con contraste",
-    "diagnostico_principal": "Tromboembolismo Pulmonar Agudo (TEP)",
-    "cie10_sugerido": "I26.9"
+        "paciente": {
+            "nombre": "Carlos Eduardo Mendes",
+            "edad": 52
+        },
+        "medico_solicitante": {
+            "nombre": "Dra. Renata Silveira",
+            "matricula": "145892"
+        },
+        "estudio_realizado": "Tomografia de Torax con contraste",
+        "diagnostico_principal": "Tromboembolismo Pulmonar Agudo (TEP)",
+        "cie10_sugerido": "I26.9",
+        "medicamentos_recetados": [
+            {
+                "medicamento": "Heparina no fraccionada",
+                "dosis": "5000 UI en bolo intravenoso"
+            }
+        ]
     },
     "decision_enrutamiento": {
         "destino_principal": "Cola_Emergencia_Medica",
@@ -26,8 +32,8 @@
         "justificacion_enrutamiento": "Hallazgo critico de alta gravedad (TEP agudo) detectado en paciente sintomatico."
     },
     "notificacion_generada": {
-    "canal": "Alerta_Guardia_Medica",
-    "mensaje": "ALERTA URGENTE: Informe critico de TEP Aguda para el paciente Carlos Eduardo Mendes en Guardia de Emergencias."
+        "canal": "Alerta_Guardia_Medica",
+        "mensaje": "ALERTA URGENTE: Informe critico de TEP Aguda para el paciente Carlos Eduardo Mendes en Guardia de Emergencias."
     },
     "almacenamiento_oci": {
         "bucket": "mediflow-documentos-clinicos",
