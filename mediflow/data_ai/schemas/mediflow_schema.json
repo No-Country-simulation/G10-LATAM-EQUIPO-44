@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MediFlow GeminiAnalysis v1.2",
+  "description": "Salida parcial de IA para documentos sintéticos; backend completa documento_id, notificaciones y OCI. Estados alineados con matriz_estados.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "clasificacion",
+    "datos_extraidos",
+    "decision_enrutamiento"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "procesado",
+        "auditoria_humana"
+      ]
+    },
+    "clasificacion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tipo_documento",
+        "especialidad",
+        "nivel_prioridad",
+        "score_confianza_clasificacion"
+      ],
+      "properties": {
+        "tipo_documento": {
+          "type": "string"
+        },
+        "especialidad": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "nivel_prioridad": {
+          "type": "string",
+          "enum": [
+            "Rutina",
+            "Urgente"
+          ]
+        },
+        "score_confianza_clasificacion": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "datos_extraidos": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paciente",
+        "medico_solicitante",
+        "estudio_realizado",
+        "diagnostico_principal",
+        "cie10_sugerido",
+        "medicamentos_recetados"
+      ],
+      "properties": {
+        "paciente": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "nombre",
+            "edad"
+          ],
+          "properties": {
+            "nombre": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "edad": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            }
+          }
+        },
+        "medico_solicitante": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "nombre",
+            "matricula"
+          ],
+          "properties": {
+            "nombre": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "matricula": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "estudio_realizado": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "diagnostico_principal": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cie10_sugerido": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "medicamentos_recetados": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "medicamento",
+              "dosis"
+            ],
+            "properties": {
+              "medicamento": {
+                "type": "string"
+              },
+              "dosis": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "decision_enrutamiento": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "destino_principal",
+        "requiere_auditoria_humana",
+        "justificacion_enrutamiento"
+      ],
+      "properties": {
+        "destino_principal": {
+          "type": "string",
+          "enum": [
+            "Cola_Revision_Humana",
+            "Cola_Emergencia_Medica",
+            "Cola_Farmacia",
+            "Cola_Historia_Clinica"
+          ]
+        },
+        "requiere_auditoria_humana": {
+          "type": "boolean"
+        },
+        "justificacion_enrutamiento": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
