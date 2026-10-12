@@ -81,3 +81,11 @@ La prueba sintética real está autorizada previamente, pero sigue sin ejecutars
 Se necesitan resultados reales para evaluar calidad de extracción y cumplimiento de reglas, además de validar políticas clínicas con Laura.
 No se certifica OCR ni calibración de confianza. El flujo de Brando está probado con proveedores simulados; eso no demuestra integración real en la cuenta OCI/Gemini.
 No se hizo commit ni push. Este estado está preparado para un commit local de integración técnica, sin afirmar validación real de punta a punta.
+
+
+## Publicación autorizada en main
+Agregado por Edil: el usuario autorizó posteriormente commit y push a main para que el equipo pueda hacer pull.
+Al incorporar origin/main (4becdbc) hubo un conflicto únicamente en master_prompt.txt.
+Conservamos el prompt integrado basado en la entrega posterior de Nicolás (Sprint-2-Nico hasta 21634c9), con sus precauciones y nuestras aclaraciones de salida; no recuperamos el estado antiguo ambiguo, incompatible con el catálogo oficial.
+Las versiones anteriores siguen disponibles en el historial y las entregas conservadas. No se hizo push forzado.
+La afirmación anterior de main intacta describe la revisión previa a esta autorización; esta publicación sí actualiza main.
