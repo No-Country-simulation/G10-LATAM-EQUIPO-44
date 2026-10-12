@@ -60,6 +60,40 @@ Future<void> ready(
 }
 
 void main() {
+  // Agregado por Edil: análisis solo tras autorización explícita para el archivo seleccionado.
+  for (final status in ['procesado', 'auditoria_humana']) {
+    testWidgets('representa resultado autorizado $status del pipeline', (tester) async {
+      await ready(tester, TriageApiService(
+        clientFactory: () => MockClient((request) async {
+          expect(request.body, contains('name="analyze"'));
+          expect(request.body, contains('true'));
+          return http.Response(
+            '{"status":"$status","documento_id":"DOC-PIPELINE",'
+            '"clasificacion":{"tipo_documento":"Receta médica","nivel_prioridad":"Urgente"}}',
+            201,
+            // Agregado por Edil: FastAPI devuelve JSON UTF-8, también en los mocks.
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }),
+      ));
+      await press(tester, 'Autorizo enviar este archivo a Google Gemini');
+      await press(tester, 'Procesar documento');
+      expect(find.text(status == 'procesado'
+          ? 'Extracción completada.' : 'Requiere revisión humana.'), findsOneWidget);
+      expect(find.text('Prioridad: Urgente'), findsOneWidget);
+      expect(find.text('Tipo: Receta médica'), findsOneWidget);
+    });
+  }
+  testWidgets('cambiar documento revoca consentimiento Gemini', (tester) async {
+    await ready(tester, TriageApiService(
+      clientFactory: () => MockClient((_) async => http.Response('{}', 200)),
+    ));
+    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value, isFalse);
+    await press(tester, 'Autorizo enviar este archivo a Google Gemini');
+    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value, isTrue);
+    await press(tester, 'Cambiar archivo');
+    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value, isFalse);
+  });
   testWidgets('acepta 201 con contrato anidado de recepción del backend', (tester) async {
     await ready(tester, TriageApiService(
       clientFactory: () => MockClient((request) async {
@@ -96,6 +130,16 @@ void main() {
           }),
         ),
       );
+      // Agregado por Edil: el consentimiento hace más larga la lista; el botón
+      // puede no haberse construido todavía. Se conservan todas las aserciones.
+      if (find.text('Procesar documento').evaluate().isEmpty) {
+        await tester.scrollUntilVisible(
+          find.text('Procesar documento'), 160,
+          scrollable: find.descendant(
+            of: find.byType(ListView), matching: find.byType(Scrollable),
+          ).first,
+        );
+      }
       await tester.ensureVisible(find.text('Procesar documento'));
       await tester.pump();
       final send = tester

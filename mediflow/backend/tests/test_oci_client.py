@@ -87,3 +87,23 @@ class OCIStorageManagerTest(unittest.TestCase):
                 }
             ],
         )
+
+    # Agregado por Edil: prueba faltante de subida local del módulo de Eliana,
+    # sin acceder a OCI y sin atribuir esta corrección a su entrega original.
+    def test_uploads_local_file_preserving_bytes(self):
+        storage = MagicMock()
+        uploaded = []
+        storage.put_object.side_effect = lambda **kwargs: uploaded.append(
+            (kwargs["bucket_name"], kwargs["object_name"], kwargs["put_object_body"].read())
+        )
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "demo.txt"
+            source.write_bytes(b"documento sintetico")
+            result = manager.subir_archivo(source, "recibidos", "demo.txt")
+            self.assertEqual(source.read_bytes(), b"documento sintetico")
+        self.assertEqual(result, "demo.txt")
+        self.assertEqual(uploaded, [("recibidos", "demo.txt", b"documento sintetico")])

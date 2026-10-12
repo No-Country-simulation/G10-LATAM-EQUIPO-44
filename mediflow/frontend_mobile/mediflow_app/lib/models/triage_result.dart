@@ -11,6 +11,14 @@ class TriageResult {
   final String? message;
   final Map<String, dynamic> rawData;
 
+  // Agregado por Edil: lectura básica del contrato; conserva rawData y el modelo original.
+  Map<String, dynamic> get _classification =>
+      rawData['clasificacion'] is Map<String, dynamic>
+          ? rawData['clasificacion'] as Map<String, dynamic>
+          : {};
+  String? get tipoDocumento => _asText(_classification['tipo_documento']);
+  String? get prioridad => _asText(_classification['nivel_prioridad']);
+
   static String? _asText(Object? value) {
     if (value is! String && value is! num) return null;
     final text = value.toString().trim();

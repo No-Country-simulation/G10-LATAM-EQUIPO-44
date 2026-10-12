@@ -28,6 +28,8 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
       widget.filePickerService ?? FilePickerService();
   SelectedDocument? _document;
   bool _pickerOpen = false;
+  // Agregado por Edil: consentimiento por archivo, nunca activado automáticamente.
+  bool _analyze = false;
   late final TriageApiService _api =
       widget.triageApiService ?? TriageApiService();
   _TriageState _state = _TriageState.idle;
@@ -39,6 +41,7 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
   void _setDocument(SelectedDocument? document) {
     setState(() {
       _document = document;
+      _analyze = false; // Agregado por Edil: cambiar/quitar archivo revoca el consentimiento.
       _state = _TriageState.idle;
       _result = null;
       _error = null;
@@ -59,7 +62,7 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
       _error = null;
     });
     try {
-      final result = await _api.sendDocument(document);
+      final result = await _api.sendDocument(document, analyze: _analyze);
       if (!mounted) return;
       setState(() {
         _result = result;
@@ -208,7 +211,12 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'Documento recibido correctamente.',
+                                // Agregado por Edil: distingue recepción, extracción y revisión.
+                                _result!.status == 'procesado'
+                                    ? 'Extracción completada.'
+                                    : _result!.status == 'auditoria_humana'
+                                        ? 'Requiere revisión humana.'
+                                        : 'Documento recibido correctamente.',
                                 style: theme.textTheme.titleMedium,
                               ),
                               if (_result!.status case final status?) ...[
@@ -225,6 +233,17 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
                               if (_result!.documentoId case final id?) ...[
                                 const SizedBox(height: 8),
                                 Text('Documento: $id'),
+                              ],
+                              // Agregado por Edil: resultado básico de Sprint 2; no diagnóstico final.
+                              if (_result!.status != 'recibido' &&
+                                  _result!.tipoDocumento != null) ...[
+                                const SizedBox(height: 8),
+                                Text('Tipo: ${_result!.tipoDocumento}'),
+                              ],
+                              if (_result!.status != 'recibido' &&
+                                  _result!.prioridad != null) ...[
+                                const SizedBox(height: 8),
+                                Text('Prioridad: ${_result!.prioridad}'),
                               ],
                               if (_result!.message case final message?) ...[
                                 const SizedBox(height: 8),
@@ -245,6 +264,21 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
                           style: TextStyle(color: theme.colorScheme.error),
                         ),
                       ),
+                    ),
+                  // Agregado por Edil: identifica payload/destino y exige autorización humana.
+                  if (_state != _TriageState.success)
+                    CheckboxListTile(
+                      value: _analyze,
+                      onChanged: _processing || _pickerOpen
+                          ? null
+                          : (value) => setState(() => _analyze = value ?? false),
+                      title: const Text('Autorizo enviar este archivo a Google Gemini'),
+                      subtitle: const Text(
+                        'Su contenido se enviará a un proveedor externo y puede generar costes. '
+                        'Confirma que tienes autorización para compartir este documento. '
+                        'Sin marcar, solo se guardará en OCI.',
+                      ),
+                      controlAffinity: ListTileControlAffinity.leading,
                     ),
                   if (_state != _TriageState.success)
                     OutlinedButton.icon(

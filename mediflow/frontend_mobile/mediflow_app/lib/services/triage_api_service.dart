@@ -33,7 +33,8 @@ class TriageApiService {
   final Duration _timeout;
   final Set<http.Client> _activeClients = {};
 
-  Future<TriageResult> sendDocument(SelectedDocument document) async {
+  // Agregado por Edil: IA opt-in; el valor por defecto conserva recepción sin Gemini.
+  Future<TriageResult> sendDocument(SelectedDocument document, {bool analyze = false}) async {
     http.Client? client;
     try {
       final Uri endpoint;
@@ -47,7 +48,7 @@ class TriageApiService {
       client = _clientFactory();
       _activeClients.add(client);
       // Incluye preparación, envío, cabeceras y lectura del cuerpo completo.
-      return await _send(client, endpoint, document).timeout(_timeout);
+      return await _send(client, endpoint, document, analyze).timeout(_timeout);
     } on TriageApiException {
       rethrow;
     } on TimeoutException {
@@ -87,6 +88,7 @@ class TriageApiService {
     http.Client client,
     Uri endpoint,
     SelectedDocument document,
+    bool analyze,
   ) async {
     final part = await _filePart(document);
     if (!_activeClients.contains(client)) {
@@ -95,6 +97,8 @@ class TriageApiService {
     final request = http.MultipartRequest('POST', endpoint)
       ..followRedirects = false
       ..headers['Accept'] = 'application/json'
+      // Agregado por Edil: solo true tras consentimiento del usuario para este archivo.
+      ..fields['analyze'] = analyze.toString()
       ..files.add(part);
     // MultipartRequest genera Content-Type y boundary; no se fijan manualmente.
     final response = await http.Response.fromStream(await client.send(request));
