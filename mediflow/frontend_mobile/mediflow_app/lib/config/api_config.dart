@@ -11,7 +11,8 @@ class ApiConfig {
         : 'http://127.0.0.1:8000';
   }
   static const fileFieldName = 'file';
-  static const requestTimeout = Duration(seconds: 30);
+  // Agregado por Edil: contempla almacenamiento OCI más análisis autorizado.
+  static const requestTimeout = Duration(seconds: 90);
 
   static Uri triageUri({String? url, bool allowHttp = kDebugMode}) {
     final base = Uri.tryParse((url ?? baseUrl).trim());

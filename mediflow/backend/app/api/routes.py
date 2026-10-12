@@ -1,9 +1,16 @@
 import uuid
 from pathlib import PurePosixPath
-from fastapi import APIRouter, UploadFile, File, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status
 from starlette.concurrency import run_in_threadpool
 from app.core.oci_client import OCIStorageManager
 from app.models.schemas import TriageResponse
+# Agregado por Edil: la nueva integración se mantiene en un servicio separado.
+from app.services.triage_pipeline import analyze_received_document
+from app.services.llm_errors import (
+    LLMConfigurationError, LLMAuthenticationError, LLMInputError,
+    LLMQuotaError, LLMTimeoutError, LLMNetworkError, LLMUnavailableError,
+    LLMRequestError, LLMResponseError,
+)
 
 router = APIRouter(prefix="/api", tags=["Triage"])
 
@@ -11,7 +18,8 @@ ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".txt"}
 MAX_FILE_BYTES = 10 * 1024 * 1024
 
 @router.post("/triage", response_model=TriageResponse, status_code=status.HTTP_201_CREATED)
-async def post_triage(file: UploadFile = File(...)):
+# Agregado por Edil: analyze permite integrar IA sin retirar la recepción original.
+async def post_triage(file: UploadFile = File(...), analyze: bool = Form(False)):
     # 1. Validar que llegó un archivo
     if not file or not file.filename:
         raise HTTPException(
@@ -46,6 +54,35 @@ async def post_triage(file: UploadFile = File(...)):
             detail="No se pudo almacenar el documento en OCI."
         )
 
+    # Agregado por Edil: OCI se completa antes de la IA. Ante fallos se conserva
+    # el original en recibidos; no se borra ni se finge una respuesta procesada.
+    if analyze:
+        storage = {
+            "bucket": bucket_name, "ruta_objeto": object_name, "status_backup": backup_status,
+        }
+        try:
+            return await run_in_threadpool(
+                analyze_received_document, file_bytes, file.filename, doc_id, storage
+            )
+        except LLMConfigurationError:
+            code, message = 503, "El análisis IA no está configurado."
+        except LLMAuthenticationError:
+            code, message = 502, "No se pudo autenticar el servicio de análisis."
+        except LLMQuotaError:
+            code, message = 429, "El servicio de análisis alcanzó su límite de solicitudes."
+        except LLMTimeoutError:
+            code, message = 504, "El servicio de análisis agotó el tiempo de espera."
+        except (LLMNetworkError, LLMUnavailableError):
+            code, message = 503, "El servicio de análisis no está disponible."
+        except (LLMRequestError, LLMResponseError):
+            code, message = 502, "El servicio de análisis devolvió una respuesta inválida."
+        except LLMInputError:
+            code, message = 422, "El documento no puede analizarse en su formato actual."
+        except Exception:
+            code, message = 500, "No se pudo completar el análisis."
+        raise HTTPException(status_code=code, detail=message, headers={"X-Document-ID": doc_id})
+
+    # Agregado por Edil: se conserva a continuación la respuesta original de recepción.
     # 5. Respuesta según el contrato JSON oficial (Estado 'recibido' según Matriz de Estados)
     return {
         "status": "recibido",

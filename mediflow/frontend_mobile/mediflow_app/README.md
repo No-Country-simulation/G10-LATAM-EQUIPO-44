@@ -49,3 +49,16 @@ Para compilar distribución:
 ```powershell
 flutter build windows --release --dart-define=API_BASE_URL=https://TU_SERVIDOR
 ```
+
+## Integración IA de Sprint 2 — Agregado por Edil
+
+Motivo: completar el envío a la IA sin transmitir automáticamente documentos
+a un proveedor externo. La casilla de autorización Gemini está apagada por
+defecto y se reinicia al cambiar o quitar el archivo.
+Sin autorización, analyze=false mantiene recepción y almacenamiento OCI.
+Con autorización expresa para el documento seleccionado, analyze=true solicita
+al backend análisis con Google Gemini. Puede generar costes y exige permiso
+para compartir ese contenido. Las pruebas usan exclusivamente datos sintéticos.
+La UI distingue recibido, procesado y auditoria_humana y muestra tipo/prioridad.
+Timeout cliente: 90 segundos para permitir OCI más Gemini; reintento siempre manual.
+El formulario multipart y el selector originales se conservan.

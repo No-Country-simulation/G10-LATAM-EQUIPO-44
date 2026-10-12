@@ -13,7 +13,8 @@
       datos_extraidos: {
         paciente: { nombre: "Paciente de prueba", edad: null },
         medico_solicitante: { nombre: null, matricula: null },
-        estudio_realizado: null, diagnostico_principal: null, cie10_sugerido: null
+        // Agregado por Edil: usamos medicamentos_recetados, como lo definió Eliana.
+        estudio_realizado: null, diagnostico_principal: null, cie10_sugerido: null, medicamentos_recetados: []
       },
       decision_enrutamiento: {
         destino_principal: review ? "Cola_Revision_Humana" : "Cola_Procesamiento_Inicial",
@@ -28,7 +29,7 @@
     document("DOC-DEMO-001", "recibido", "Pendiente de procesamiento", "Rutina", false),
     document("DOC-DEMO-002", "procesado", "Receta médica", "Rutina", false),
     document("DOC-DEMO-003", "procesado", "Informe de laboratorio", "Urgente", false),
-    document("DOC-DEMO-004", "auditoria_humana", "Documento ambiguo", "Pendiente", true)
+    document("DOC-DEMO-004", "auditoria_humana", "Documento ambiguo", "Rutina", true)
   ];
   function toRow(doc) {
     if (!doc || typeof doc.documento_id !== "string" || !doc.clasificacion || !doc.almacenamiento_oci) {

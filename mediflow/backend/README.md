@@ -62,7 +62,7 @@ vacíos o mayores de 10 MiB y genera un identificador UUID completo.
 La validación inicial revisa extensión y tamaño; todavía no analiza el contenido
 para comprobar que corresponde al formato declarado.
 Guarda el archivo en el bucket independiente `recibidos` y retorna JSON con estado
-`recibido`. No llama al LLM: los campos clínicos son pendientes, no inferencias.
+`recibido`. Agregado por Edil: sin analyze conserva la recepción original; con analyze=true invoca Gemini y valida el contrato.
 
 ### Ejemplo con cURL
 
@@ -165,3 +165,22 @@ indica --host y --port al iniciar el servidor.
 Compatibilidad Windows: si otra herramienta exporta DEBUG=release, se interpreta
 como depuración desactivada. Valores distintos que no sean booleanos válidos
 producen un error de configuración al iniciar.
+
+## Módulo LLM separado (Sprint 2)
+
+El cliente Gemini, prompt, extracción TXT/PDF y pruebas están documentados en
+[Data e IA](../data_ai/README.md). Agregado por Edil: ahora se invocan solo cuando POST /api/triage recibe analyze=true.
+
+## Cierre técnico de Sprint 2 — Agregado por Edil
+
+Se conserva la recepción original. Para solicitar IA de manera explícita,
+agrega el campo multipart analyze=true junto con file. No se debe habilitar
+automáticamente para documentos sensibles sin permiso para enviarlos a Google.
+Flutter obtiene esa autorización por archivo; las pruebas automáticas usan mocks.
+Configura GEMINI_API_KEY y GEMINI_MODEL en mediflow/.env local. Nunca publiques
+la clave. El modelo no se fija automáticamente; verifica capacidades, cuota y coste.
+Los errores IA producen HTTP controlados: 422 entrada, 429 cuota, 502 proveedor/
+salida inválida, 503 configuración/red y 504 timeout. El original queda en recibidos.
+No se ejecutan movimientos automáticos a procesados ni aprobación humana:
+son alcance posterior. El estado procesado indica extracción JSON validada.
+La respuesta incluye medicamentos opcionales y mantiene el contrato previo.
