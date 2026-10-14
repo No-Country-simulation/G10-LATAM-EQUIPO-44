@@ -34,7 +34,7 @@
 * **`decision_enrutamiento`** (Objeto, Obligatorio):
 * `destino_principal` (String, Obligatorio): Cola, departamento o sistema de destino.
 * `requiere_auditoria_humana` (Boolean, Obligatorio): Bandera de control (`true` / `false`) para derivar a revisión manual por riesgos clínicos, ambigüedades o datos faltantes.
-* `justificacion_enrutamiento` (String, Opcional): Motivo lógico de la decisión. *(Opcional en el esquema para evitar caídas del servidor en documentos simples, pero altamente recomendado como directriz en el Prompt de IA).*
+* `justificacion_enrutamiento` (String, Obligatorio).
 
 
 * **`notificacion_generada`** (Objeto, Opcional): Se incluye solo si el sistema debe generar una alerta (ej. casos urgentes).
