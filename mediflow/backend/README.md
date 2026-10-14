@@ -124,6 +124,32 @@ curl -X POST "http://localhost:8000/api/triage" \
 
 ---
 
+## 📂 Endpoints de Consulta de Documentos (Sprint 3)
+
+### 1. Listar Documentos: `GET /api/documents`
+Lista los documentos almacenados en los buckets de OCI (`recibidos`, `procesados`, `auditoria_humana`).
+- **Query Params:**
+  - `status`: Filtrar por estado (`recibido`, `procesado`, `auditoria_humana`).
+  - `prioridad`: Filtrar por prioridad (`Rutina`, `Urgente`).
+  - `limit`: Máximo de documentos a retornar (default: 100).
+- **Respuesta:** Array de objetos `TriageResponse` (`HTTP 200 OK`).
+
+```bash
+curl -X GET "http://localhost:8000/api/documents?status=procesado&prioridad=Urgente"
+```
+
+### 2. Consultar Documento por ID: `GET /api/documents/{document_id}`
+Recupera el resultado de triaje de un documento específico persistido en OCI.
+- **Códigos de respuesta:** `200 OK` si existe, `404 Not Found` si no existe en ningún bucket, `400 Bad Request` si el ID es inválido.
+
+```bash
+curl -X GET "http://localhost:8000/api/documents/DOC-CLIN-ABCD1234"
+```
+
+Documentación detallada para el Frontend Web disponible en [`docs/sprint-3/api_documentos_flor.md`](../../docs/sprint-3/api_documentos_flor.md).
+
+---
+
 ## 🧪 Ejecución de Pruebas
 
 ### 1. Pruebas Unitarias de Manejo de Errores OCI (Sin conexión OCI requerida, con Mocks):

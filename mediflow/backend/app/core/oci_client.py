@@ -6,6 +6,7 @@ claves privadas nunca se almacenan en el repositorio.
 
 from __future__ import annotations
 
+import json
 import os
 import time
 from dataclasses import dataclass
@@ -201,6 +202,162 @@ class OCIStorageManager:
                 return
             time.sleep(wait_seconds)
         raise TimeoutError(f"OCI no confirmó la copia de '{object_name}'.")
+
+    # Métodos agregados por Drazen para Sprint 3 (S3-04A): persistencia, recuperación y verificación
+    def obtener_objeto_bytes(self, nombre_bucket: str, nombre_objeto: str) -> bytes:
+        """Obtiene el contenido binario de un objeto en memoria sin guardar en disco."""
+        response = self.object_storage.get_object(
+            namespace_name=self.namespace,
+            bucket_name=_required_name(nombre_bucket, "bucket"),
+            object_name=_required_name(nombre_objeto, "objeto"),
+        )
+        data = getattr(response, "data", None)
+        if data is None:
+            return b""
+        if hasattr(data, "content") and isinstance(data.content, (bytes, bytearray)):
+            return bytes(data.content)
+        if hasattr(data, "raw") and hasattr(data.raw, "read"):
+            return data.raw.read()
+        if hasattr(data, "text"):
+            return data.text.encode("utf-8")
+        if isinstance(data, (bytes, bytearray)):
+            return bytes(data)
+        return bytes(data)
+
+    def guardar_json(
+        self, datos: dict | str, nombre_bucket: str, nombre_objeto: str
+    ) -> str:
+        """Serializa y sube un diccionario o texto JSON a un bucket de OCI."""
+        if isinstance(datos, dict):
+            contenido_bytes = json.dumps(datos, ensure_ascii=False, indent=2).encode("utf-8")
+        elif isinstance(datos, str):
+            contenido_bytes = datos.encode("utf-8")
+        else:
+            raise ValueError("Los datos deben ser un diccionario o una cadena JSON.")
+        return self.subir_archivo_desde_memoria(contenido_bytes, nombre_bucket, nombre_objeto)
+
+    def recuperar_json(self, nombre_bucket: str, nombre_objeto: str) -> dict:
+        """Descarga y deserializa un objeto JSON almacenado en OCI."""
+        contenido = self.obtener_objeto_bytes(nombre_bucket, nombre_objeto)
+        return json.loads(contenido.decode("utf-8"))
+
+    def listar_objetos(
+        self, nombre_bucket: str, prefix: str | None = None, limit: int | None = None
+    ) -> list[str]:
+        """Lista los nombres de los objetos presentes en un bucket."""
+        kwargs: dict[str, Any] = {
+            "namespace_name": self.namespace,
+            "bucket_name": _required_name(nombre_bucket, "bucket"),
+        }
+        if prefix:
+            kwargs["prefix"] = prefix
+        if limit:
+            kwargs["limit"] = limit
+        response = self.object_storage.list_objects(**kwargs)
+        objects = getattr(getattr(response, "data", None), "objects", []) or []
+        return [item.name for item in objects]
+
+    def verificar_conexion_buckets(self) -> dict[str, bool]:
+        """Verifica la conectividad y acceso a los buckets de recibidos, procesados y auditoría."""
+        resultados: dict[str, bool] = {}
+        for nombre_bucket in [
+            self.settings.bucket_recibidos,
+            self.settings.bucket_procesados,
+            self.settings.bucket_auditoria,
+        ]:
+            try:
+                self.object_storage.get_bucket(
+                    namespace_name=self.namespace,
+                    bucket_name=nombre_bucket,
+                )
+                resultados[nombre_bucket] = True
+            except Exception:
+                resultados[nombre_bucket] = False
+        return resultados
+
+    def determinar_bucket_por_estado(self, status: str) -> str:
+        """Determina el bucket correspondiente según el estado del documento."""
+        if status == "auditoria_humana":
+            return self.settings.bucket_auditoria
+        elif status == "procesado":
+            return self.settings.bucket_procesados
+        return self.settings.bucket_recibidos
+
+    def guardar_resultado_triage(self, triage_data: dict | Any) -> str:
+        """Guarda el JSON del resultado de triaje en el bucket correspondiente a su estado."""
+        if hasattr(triage_data, "model_dump"):
+            payload = triage_data.model_dump()
+        elif isinstance(triage_data, dict):
+            payload = dict(triage_data)
+        else:
+            raise ValueError("triage_data debe ser un dict o modelo Pydantic.")
+
+        doc_id = payload.get("documento_id")
+        if not doc_id:
+            raise ValueError("El JSON debe contener un 'documento_id'.")
+
+        estado = payload.get("status", "recibido")
+        bucket = self.determinar_bucket_por_estado(estado)
+        objeto_json = f"{doc_id}.json"
+
+        return self.guardar_json(payload, bucket, objeto_json)
+
+    def recuperar_resultado_triage(self, documento_id: str) -> dict | None:
+        """Busca y recupera el JSON de un documento por su ID en los tres buckets."""
+        objeto_json = f"{documento_id}.json"
+        # Priorizamos procesados y auditoria_humana sobre recibidos
+        buckets_a_buscar = [
+            self.settings.bucket_procesados,
+            self.settings.bucket_auditoria,
+            self.settings.bucket_recibidos,
+        ]
+        for bucket in buckets_a_buscar:
+            try:
+                return self.recuperar_json(bucket, objeto_json)
+            except Exception:
+                continue
+        return None
+
+    def listar_resultados_triage(
+        self, status: str | None = None, limit: int | None = None
+    ) -> list[dict]:
+        """Lista y recupera los documentos JSON almacenados en los buckets."""
+        if status:
+            buckets = [self.determinar_bucket_por_estado(status)]
+        else:
+            buckets = [
+                self.settings.bucket_procesados,
+                self.settings.bucket_auditoria,
+                self.settings.bucket_recibidos,
+            ]
+
+        vistos: set[str] = set()
+        documentos: list[dict] = []
+        for bucket in buckets:
+            try:
+                nombres = self.listar_objetos(bucket)
+            except Exception:
+                continue
+            for nombre in nombres:
+                if nombre.endswith(".json"):
+                    doc_id_candidato = nombre[:-5]
+                    if doc_id_candidato in vistos:
+                        continue
+                    try:
+                        doc = self.recuperar_json(bucket, nombre)
+                        if isinstance(doc, dict) and "documento_id" in doc:
+                            if status and doc.get("status") != status:
+                                continue
+                            doc_id = doc["documento_id"]
+                            if doc_id in vistos:
+                                continue
+                            vistos.add(doc_id)
+                            documentos.append(doc)
+                            if limit and len(documentos) >= limit:
+                                return documentos
+                    except Exception:
+                        continue
+        return documentos
 
 
 def _required_name(value: str, label: str) -> str:

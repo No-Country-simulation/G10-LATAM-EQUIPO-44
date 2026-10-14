@@ -1,6 +1,7 @@
+from typing import Optional, Literal
 import uuid
 from pathlib import PurePosixPath
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Query, status
 from starlette.concurrency import run_in_threadpool
 from app.core.oci_client import OCIStorageManager
 from app.models.schemas import TriageResponse
@@ -61,9 +62,15 @@ async def post_triage(file: UploadFile = File(...), analyze: bool = Form(False))
             "bucket": bucket_name, "ruta_objeto": object_name, "status_backup": backup_status,
         }
         try:
-            return await run_in_threadpool(
+            result = await run_in_threadpool(
                 analyze_received_document, file_bytes, file.filename, doc_id, storage
             )
+            # Agregado por Drazen (S3-04A): persistir JSON final generado por IA en OCI
+            try:
+                await run_in_threadpool(gestor.guardar_resultado_triage, result)
+            except Exception:
+                pass
+            return result
         except LLMConfigurationError:
             code, message = 503, "El análisis IA no está configurado."
         except LLMAuthenticationError:
@@ -84,7 +91,7 @@ async def post_triage(file: UploadFile = File(...), analyze: bool = Form(False))
 
     # Agregado por Edil: se conserva a continuación la respuesta original de recepción.
     # 5. Respuesta según el contrato JSON oficial (Estado 'recibido' según Matriz de Estados)
-    return {
+    initial_response = {
         "status": "recibido",
         "documento_id": doc_id,
         "clasificacion": {
@@ -112,3 +119,106 @@ async def post_triage(file: UploadFile = File(...), analyze: bool = Form(False))
             "status_backup": backup_status
         }
     }
+    # Agregado por Drazen (S3-04A): persistir JSON en bucket recibidos
+    try:
+        await run_in_threadpool(gestor.guardar_resultado_triage, initial_response)
+    except Exception:
+        pass
+    return initial_response
+
+
+# ==============================================================================
+# ENDPOINTS GET - CONSULTA DE DOCUMENTOS (Agregado por Drazen - S3-03)
+# ==============================================================================
+
+@router.get(
+    "/documents",
+    response_model=list[TriageResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Listar documentos clínicos",
+    description="Retorna la lista de documentos clínicos y resultados de triaje persistidos en OCI Object Storage."
+)
+async def get_documents(
+    status_filter: Optional[Literal["recibido", "procesado", "auditoria_humana"]] = Query(
+        default=None, alias="status", description="Filtrar por estado del documento ('recibido', 'procesado', 'auditoria_humana')"
+    ),
+    prioridad: Optional[Literal["Rutina", "Urgente"]] = Query(
+        default=None, description="Filtrar por nivel de prioridad clínica ('Rutina', 'Urgente')"
+    ),
+    limit: int = Query(
+        default=100, ge=1, le=500, description="Límite máximo de documentos a retornar (1-500)"
+    ),
+):
+    """
+    S3-03.1 / S3-03.3: Lista los documentos clínicos almacenados en OCI.
+    Permite filtrar por estado (recibido/procesado/auditoria_humana) y prioridad.
+    """
+    try:
+        gestor = await run_in_threadpool(OCIStorageManager)
+        raw_docs = await run_in_threadpool(
+            gestor.listar_resultados_triage, status=status_filter, limit=limit
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No se pudieron recuperar los documentos de OCI."
+        )
+
+    documentos: list[TriageResponse] = []
+    for doc in raw_docs:
+        try:
+            validated = TriageResponse.model_validate(doc)
+            if prioridad and validated.clasificacion.nivel_prioridad != prioridad:
+                continue
+            documentos.append(validated)
+        except Exception:
+            continue
+    return documentos
+
+
+@router.get(
+    "/documents/{document_id}",
+    response_model=TriageResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Consultar documento clínico por ID",
+    description="Recupera el detalle y resultado de triaje de un documento clínico persistido en OCI Object Storage."
+)
+async def get_document_by_id(document_id: str):
+    """
+    S3-03.2 / S3-03.4: Consulta un documento específico por su ID.
+    Busca el JSON correspondiente en los buckets de OCI y devuelve el contrato validado.
+    """
+    if not document_id or not document_id.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Debe proporcionar un identificador de documento válido."
+        )
+    document_id = document_id.strip()
+    if "/" in document_id or "\\" in document_id or ".." in document_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Identificador de documento inválido."
+        )
+
+    try:
+        gestor = await run_in_threadpool(OCIStorageManager)
+        doc_data = await run_in_threadpool(gestor.recuperar_resultado_triage, document_id)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al consultar el almacenamiento en OCI."
+        )
+
+    if doc_data is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Documento '{document_id}' no encontrado."
+        )
+
+    try:
+        return TriageResponse.model_validate(doc_data)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="El documento almacenado en OCI no cumple el contrato oficial de datos."
+        )
