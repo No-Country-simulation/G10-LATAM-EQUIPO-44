@@ -1,0 +1,342 @@
+{
+  "version": "1.1.0-candidate",
+  "status": "pending_clinical_validation",
+  "purpose": "Candidate clinical-alert and document-priority signals for synthetic document processing; not autonomous triage.",
+  "dimensions": {
+    "clinical_alert": [
+      "possible_emergency",
+      "possible_urgent_assessment",
+      "none_detected",
+      "indeterminate"
+    ],
+    "document_priority": [
+      "priority_review",
+      "routine",
+      "indeterminate"
+    ]
+  },
+  "clinical_rules": [
+    {
+      "id": "CL_CARD_01",
+      "group": "cardiovascular",
+      "terms": [
+        "infarto agudo de miocardio",
+        "sindrome coronario agudo",
+        "dolor toracico opresivo actual"
+      ],
+      "icd10_prefixes": [
+        "I21",
+        "I22"
+      ],
+      "candidate_alert": "possible_emergency"
+    },
+    {
+      "id": "CL_NEURO_01",
+      "group": "neurologico",
+      "terms": [
+        "sospecha de acv agudo",
+        "debilidad unilateral subita",
+        "afasia de inicio subito",
+        "hemorragia subaracnoidea aguda"
+      ],
+      "icd10_prefixes": [
+        "I60",
+        "I61",
+        "I63",
+        "I64"
+      ],
+      "candidate_alert": "possible_emergency"
+    },
+    {
+      "id": "CL_RESP_01",
+      "group": "respiratorio",
+      "terms": [
+        "insuficiencia respiratoria aguda",
+        "dificultad respiratoria severa",
+        "tromboembolismo pulmonar agudo"
+      ],
+      "icd10_prefixes": [
+        "J96.0",
+        "I26"
+      ],
+      "candidate_alert": "possible_emergency"
+    },
+    {
+      "id": "CL_SHOCK_01",
+      "group": "shock_anafilaxia",
+      "terms": [
+        "shock anafilactico",
+        "anafilaxia actual",
+        "shock septico"
+      ],
+      "icd10_prefixes": [
+        "T78.2",
+        "R57.2"
+      ],
+      "candidate_alert": "possible_emergency"
+    },
+    {
+      "id": "CL_METAB_01",
+      "group": "metabolico",
+      "terms": [
+        "cetoacidosis diabetica",
+        "estado hiperosmolar hiperglucemico"
+      ],
+      "icd10_prefixes": [
+        "E10.1",
+        "E11.1"
+      ],
+      "candidate_alert": "possible_emergency"
+    },
+    {
+      "id": "CL_TRAUMA_01",
+      "group": "trauma",
+      "terms": [
+        "traumatismo craneoencefalico grave",
+        "hemorragia intracraneal traumatica aguda"
+      ],
+      "icd10_prefixes": [
+        "S06"
+      ],
+      "candidate_alert": "possible_emergency"
+    },
+    {
+      "id": "CL_INFECTION_01",
+      "group": "infeccion",
+      "terms": [
+        "sepsis con disfuncion organica",
+        "sospecha de meningitis bacteriana aguda"
+      ],
+      "icd10_prefixes": [
+        "A41",
+        "G00"
+      ],
+      "candidate_alert": "possible_emergency"
+    },
+    {
+      "id": "CL_PSY_SUICIDE_01",
+      "group": "psicosocial_critico",
+      "terms": [
+        "ideacion suicida activa",
+        "plan suicida",
+        "intento de suicidio reciente",
+        "intencion suicida actual",
+        "riesgo suicida inminente"
+      ],
+      "icd10_prefixes": [
+        "R45.8"
+      ],
+      "candidate_alert": "possible_emergency",
+      "notes": "R45.8 es inespecifico; X60-X84 describen lesiones autoinfligidas intencionalmente y requieren contexto del evento. No inferir riesgo inminente por codigo aislado."
+    },
+    {
+      "id": "CL_PSY_VIOLENCE_01",
+      "group": "psicosocial_critico",
+      "terms": [
+        "agresion sexual reciente",
+        "abuso sexual actual",
+        "violencia intrafamiliar con peligro actual",
+        "amenaza de muerte por pareja",
+        "abandono con riesgo vital",
+        "maltrato infantil en curso"
+      ],
+      "icd10_prefixes": [
+        "T74.2",
+        "T76.2",
+        "T74.1",
+        "T74.3",
+        "T76.1",
+        "T74.0",
+        "T76.0"
+      ],
+      "candidate_alert": "possible_urgent_assessment",
+      "notes": "Escalar a posible emergencia cuando exista peligro inmediato, lesiones agudas o riesgo de repeticion inminente; los codigos T74/T76 no establecen temporalidad por si solos."
+    }
+  ],
+  "document_rules": [
+    {
+      "id": "DOC_CRITICAL_01",
+      "terms": [
+        "resultado critico",
+        "valor critico",
+        "notificar inmediatamente",
+        "comunicar de inmediato"
+      ],
+      "candidate_priority": "priority_review"
+    },
+    {
+      "id": "DOC_ONCO_01",
+      "terms": [
+        "biopsia positiva para malignidad",
+        "hallazgo sospechoso de neoplasia",
+        "lesion pulmonar espiculada sospechosa"
+      ],
+      "candidate_priority": "priority_review"
+    },
+    {
+      "id": "DOC_WOUND_01",
+      "terms": [
+        "lesion por presion estadio 4",
+        "pie diabetico wagner 3"
+      ],
+      "candidate_priority": "priority_review"
+    },
+    {
+      "id": "DOC_FOLLOWUP_01",
+      "terms": [
+        "control preferente",
+        "derivacion urgente",
+        "seguimiento prioritario"
+      ],
+      "candidate_priority": "priority_review"
+    },
+    {
+      "id": "DOC_PSY_SEXUAL_01",
+      "group": "psicosocial_critico",
+      "terms": [
+        "abuso sexual",
+        "agresion sexual",
+        "sospecha de abuso sexual",
+        "explotacion sexual"
+      ],
+      "icd10_prefixes": [
+        "T74.2",
+        "T76.2"
+      ],
+      "candidate_priority": "priority_review"
+    },
+    {
+      "id": "DOC_PSY_VIF_01",
+      "group": "psicosocial_critico",
+      "terms": [
+        "violencia intrafamiliar",
+        "violencia de pareja",
+        "maltrato fisico",
+        "maltrato psicologico",
+        "violencia domestica"
+      ],
+      "icd10_prefixes": [
+        "T74.1",
+        "T74.3",
+        "T76.1"
+      ],
+      "candidate_priority": "priority_review"
+    },
+    {
+      "id": "DOC_PSY_NEGLECT_01",
+      "group": "psicosocial_critico",
+      "terms": [
+        "abandono de persona dependiente",
+        "negligencia de cuidados",
+        "desproteccion infantil",
+        "maltrato por negligencia"
+      ],
+      "icd10_prefixes": [
+        "T74.0",
+        "T76.0",
+        "Z62.0"
+      ],
+      "candidate_priority": "priority_review"
+    },
+    {
+      "id": "DOC_PSY_PARENTING_01",
+      "group": "psicosocial_critico",
+      "terms": [
+        "dinamica familiar hostil con riesgo",
+        "crianza negligente",
+        "otros problemas especificados relacionados con la crianza del niño"
+      ],
+      "icd10_prefixes": [
+        "Z62.8"
+      ],
+      "candidate_priority": "priority_review",
+      "notes": "Z62.8 no demuestra por si solo vulneracion; revisar descripcion y gravedad."
+    },
+    {
+      "id": "DOC_PSY_SUICIDE_01",
+      "group": "psicosocial_critico",
+      "terms": [
+        "ideacion suicida",
+        "conducta suicida",
+        "intento suicida",
+        "autolesion intencional"
+      ],
+      "icd10_prefixes": [
+        "R45.8"
+      ],
+      "candidate_priority": "priority_review",
+      "notes": "X60-X84 se evaluan solo si aparecen explicitamente y se confirma su significado en el documento."
+    },
+    {
+      "id": "DOC_PSY_SUBSTANCE_01",
+      "group": "psicosocial_critico",
+      "terms": [
+        "consumo perjudicial de alcohol",
+        "uso nocivo de sustancias",
+        "abuso de sustancias",
+        "consumo problematico de drogas"
+      ],
+      "icd10_prefixes": [
+        "F10.1",
+        "F19.1"
+      ],
+      "candidate_priority": "priority_review",
+      "notes": "F10.1 alcohol; F19.1 uso de multiples drogas y otras sustancias psicoactivas. No equivalen a intoxicacion aguda ni indican por si solos riesgo inmediato."
+    },
+    {
+      "id": "DOC_PSY_ADOLESCENT_PREG_01",
+      "group": "psicosocial_critico",
+      "terms": [
+        "embarazo adolescente",
+        "embarazo en menor de edad",
+        "gestante adolescente"
+      ],
+      "icd10_prefixes": [],
+      "candidate_priority": "priority_review",
+      "notes": "Requiere dato explicito de edad y embarazo; Z33/Z34/Z35 no codifican adolescencia ni abuso por si solos. Priorizar evaluacion contextual sin presumir delito."
+    }
+  ],
+  "context_rules": {
+    "negation_cues": [
+      "niega",
+      "sin evidencia de",
+      "se descarta",
+      "negativo para"
+    ],
+    "historical_cues": [
+      "antecedente de",
+      "historia de",
+      "infarto antiguo",
+      "resuelto"
+    ],
+    "uncertainty_cues": [
+      "sospecha de",
+      "probable",
+      "descartar",
+      "no se puede excluir"
+    ],
+    "handling": "Context cues require scoped interpretation; no global suppression based on a word anywhere in the document. Suspected acute serious conditions may still trigger review.",
+    "additional_psychosocial_cues": [
+      "victima actual",
+      "sospecha fundada",
+      "riesgo inminente",
+      "persona dependiente",
+      "menor de edad",
+      "evento reciente",
+      "sin riesgo actual documentado"
+    ]
+  },
+  "safety_constraints": [
+    "An ICD-10 code alone does not prove an active emergency.",
+    "Do not infer an ICD-10 code that is not explicitly in the source document.",
+    "No match means no alert detected, not proof of safety.",
+    "Uncertain or contradictory high-risk findings require human review.",
+    "Do not map candidate clinical alerts directly to Manchester categories.",
+    "Document priority and clinical urgency must remain separate until validated mapping to backend schema.",
+    "Psychosocial risk flags trigger confidential human review and locally approved safeguarding pathways; they do not establish criminal facts.",
+    "Do not suppress suspected abuse, suicidal ideation or violence merely because confirmation is pending.",
+    "Adolescent pregnancy, parenting difficulties and harmful substance use do not alone prove immediate clinical emergency.",
+    "Limit sensitive evidence exposure and follow applicable confidentiality and reporting obligations."
+  ],
+  "validation": "All terms, code groupings, priorities and thresholds require clinician review and synthetic test-set evaluation before operational use."
+}
