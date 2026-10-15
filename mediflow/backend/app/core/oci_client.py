@@ -6,6 +6,8 @@ claves privadas nunca se almacenan en el repositorio.
 
 from __future__ import annotations
 
+import json
+import re
 import os
 import time
 from dataclasses import dataclass
@@ -202,8 +204,219 @@ class OCIStorageManager:
             time.sleep(wait_seconds)
         raise TimeoutError(f"OCI no confirmó la copia de '{object_name}'.")
 
+    # Métodos agregados por Drazen para Sprint 3 (S3-04A): persistencia, recuperación y verificación
+    def obtener_objeto_bytes(self, nombre_bucket: str, nombre_objeto: str) -> bytes:
+        """Obtiene el contenido binario de un objeto en memoria sin guardar en disco."""
+        response = self.object_storage.get_object(
+            namespace_name=self.namespace,
+            bucket_name=_required_name(nombre_bucket, "bucket"),
+            object_name=_required_name(nombre_objeto, "objeto"),
+        )
+        data = getattr(response, "data", None)
+        if data is None:
+            return b""
+        if hasattr(data, "content") and isinstance(data.content, (bytes, bytearray)):
+            return bytes(data.content)
+        if hasattr(data, "raw") and hasattr(data.raw, "read"):
+            return data.raw.read()
+        if hasattr(data, "text"):
+            return data.text.encode("utf-8")
+        if isinstance(data, (bytes, bytearray)):
+            return bytes(data)
+        return bytes(data)
+
+    def guardar_json(
+        self, datos: dict | str, nombre_bucket: str, nombre_objeto: str
+    ) -> str:
+        """Serializa y sube un diccionario o texto JSON a un bucket de OCI."""
+        if isinstance(datos, dict):
+            contenido_bytes = json.dumps(datos, ensure_ascii=False, indent=2, allow_nan=False).encode("utf-8")
+        elif isinstance(datos, str):
+            if not isinstance(json.loads(datos), dict):
+                raise ValueError("El resultado JSON debe ser un objeto.")
+            contenido_bytes = datos.encode("utf-8")
+        else:
+            raise ValueError("Los datos deben ser un diccionario o una cadena JSON.")
+        return self.subir_archivo_desde_memoria(contenido_bytes, nombre_bucket, nombre_objeto)
+
+    def recuperar_json(self, nombre_bucket: str, nombre_objeto: str) -> dict:
+        """Descarga y deserializa un objeto JSON almacenado en OCI."""
+        contenido = self.obtener_objeto_bytes(nombre_bucket, nombre_objeto)
+        payload = json.loads(contenido.decode("utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("El JSON almacenado no es un objeto.")
+        return payload
+
+    def listar_objetos(
+        self, nombre_bucket: str, prefix: str | None = None, limit: int | None = None
+    ) -> list[str]:
+        """Lista los nombres de los objetos presentes en un bucket."""
+        if limit is not None and (type(limit) is not int or limit < 1):
+            raise ValueError("El límite debe ser un entero positivo.")
+        kwargs: dict[str, Any] = {
+            "namespace_name": self.namespace,
+            "bucket_name": _required_name(nombre_bucket, "bucket"),
+        }
+        if prefix:
+            kwargs["prefix"] = prefix
+        if limit:
+            kwargs["limit"] = limit
+        # Agregado por Edil: list_objects devuelve una página; continuar con next_start_with.
+        nombres: list[str] = []
+        tokens: set[str] = set()
+        while True:
+            if limit is not None:
+                kwargs["limit"] = min(limit - len(nombres), 1000)
+            response = self.object_storage.list_objects(**kwargs)
+            data = getattr(response, "data", None)
+            nombres.extend(item.name for item in (getattr(data, "objects", []) or []))
+            if limit is not None and len(nombres) >= limit:
+                return nombres[:limit]
+            next_start = getattr(data, "next_start_with", None)
+            if not isinstance(next_start, str) or not next_start:
+                return nombres
+            if next_start in tokens:
+                raise RuntimeError("OCI repitió un marcador de paginación.")
+            tokens.add(next_start)
+            kwargs["start"] = next_start
+
+
+    def verificar_conexion_buckets(self) -> dict[str, bool]:
+        """Verifica la conectividad y acceso a los buckets de recibidos, procesados y auditoría."""
+        resultados: dict[str, bool] = {}
+        for nombre_bucket in [
+            self.settings.bucket_recibidos,
+            self.settings.bucket_procesados,
+            self.settings.bucket_auditoria,
+        ]:
+            try:
+                self.object_storage.get_bucket(
+                    namespace_name=self.namespace,
+                    bucket_name=nombre_bucket,
+                )
+                resultados[nombre_bucket] = True
+            except Exception:
+                resultados[nombre_bucket] = False
+        return resultados
+
+    def determinar_bucket_por_estado(self, status: str) -> str:
+        """Determina el bucket correspondiente según el estado del documento."""
+        # Agregado por Edil: no guardar estados desconocidos silenciosamente en recibidos.
+        if status not in {"recibido", "procesado", "auditoria_humana"}:
+            raise ValueError("Estado de documento no permitido.")
+        if status == "auditoria_humana":
+            return self.settings.bucket_auditoria
+        elif status == "procesado":
+            return self.settings.bucket_procesados
+        return self.settings.bucket_recibidos
+
+    def guardar_resultado_triage(self, triage_data: dict | Any) -> str:
+        """Guarda el JSON del resultado de triaje en el bucket correspondiente a su estado."""
+        if hasattr(triage_data, "model_dump"):
+            payload = triage_data.model_dump()
+        elif isinstance(triage_data, dict):
+            payload = dict(triage_data)
+        else:
+            raise ValueError("triage_data debe ser un dict o modelo Pydantic.")
+
+        doc_id = _validate_document_id(payload.get("documento_id"))
+
+        estado = payload.get("status", "recibido")
+        bucket = self.determinar_bucket_por_estado(estado)
+        objeto_json = f"{doc_id}.json"
+
+        return self.guardar_json(payload, bucket, objeto_json)
+
+    def recuperar_resultado_triage(self, documento_id: str) -> dict | None:
+        """Busca y recupera el JSON de un documento por su ID en los tres buckets."""
+        objeto_json = f"{_validate_document_id(documento_id)}.json"
+        # Priorizamos procesados y auditoria_humana sobre recibidos
+        buckets_a_buscar = [
+            self.settings.bucket_procesados,
+            self.settings.bucket_auditoria,
+            self.settings.bucket_recibidos,
+        ]
+        for bucket in buckets_a_buscar:
+            try:
+                return self.recuperar_json(bucket, objeto_json)
+            except Exception as error:
+                # Agregado por Edil: únicamente un 404 del SDK permite buscar en otro bucket.
+                # Permisos, red y JSON inválido deben llegar al endpoint como error.
+                if not _oci_not_found(error):
+                    raise
+        return None
+
+    def listar_resultados_triage(
+        self, status: str | None = None, limit: int | None = None,
+        prioridad: str | None = None,
+    ) -> list[dict]:
+        """Lista y recupera los documentos JSON almacenados en los buckets."""
+        # Agregado por Edil: selección anterior conservada. Consultar solo recibidos
+        # incluía versiones antiguas de documentos que ya habían terminado.
+        # if status:
+        # buckets = [self.determinar_bucket_por_estado(status)]
+        # else:
+        # buckets = [
+        # self.settings.bucket_procesados,
+        # self.settings.bucket_auditoria,
+        # self.settings.bucket_recibidos,
+        # ]
+        if status is not None and status not in {"recibido", "procesado", "auditoria_humana"}:
+            raise ValueError("Estado no permitido.")
+        buckets = [self.settings.bucket_procesados, self.settings.bucket_auditoria, self.settings.bucket_recibidos]
+
+        if prioridad is not None and prioridad not in {"Rutina", "Urgente"}:
+            raise ValueError("Prioridad no permitida.")
+        if limit is not None and (type(limit) is not int or limit < 1):
+            raise ValueError("El límite debe ser positivo.")
+        vistos: set[str] = set()
+        documentos: list[dict] = []
+        for bucket in buckets:
+            # Agregado por Edil: un fallo de lectura no equivale a una lista vacía.
+            nombres = self.listar_objetos(bucket)
+            for nombre in nombres:
+                if nombre.endswith(".json"):
+                    doc_id_candidato = nombre[:-5]
+                    if doc_id_candidato in vistos:
+                        continue
+                    try:
+                        doc = self.recuperar_json(bucket, nombre)
+                        if isinstance(doc, dict) and "documento_id" in doc:
+                            # Código anterior: filtrar estado antes de deduplicar.
+                            # if status and doc.get("status") != status: continue
+                            doc_id = doc["documento_id"]
+                            if doc_id in vistos:
+                                continue
+                            vistos.add(doc_id)
+                            # Agregado por Edil: filtrar la versión actual, no una recepción antigua.
+                            if status and doc.get("status") != status:
+                                continue
+                            # Agregado por Edil: deduplicar primero y filtrar antes del límite.
+                            # No usar una versión antigua de recibidos si la actual no coincide.
+                            if prioridad and doc.get("clasificacion", {}).get("nivel_prioridad") != prioridad:
+                                continue
+                            documentos.append(doc)
+                            if limit and len(documentos) >= limit:
+                                return documentos
+                    except Exception:
+                        # No ocultar permisos, errores de red ni documentos corruptos.
+                        raise
+        return documentos
+
 
 def _required_name(value: str, label: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"El nombre de {label} es obligatorio.")
     return value.strip()
+
+
+# Agregado por Edil: nombres seguros para JSON derivados de IDs, sin rutas arbitrarias.
+def _validate_document_id(value: Any) -> str:
+    if not isinstance(value, str) or re.fullmatch(r"[A-Za-z0-9_-]{1,128}", value) is None:
+        raise ValueError("Identificador de documento inválido.")
+    return value
+
+
+def _oci_not_found(error: Exception) -> bool:
+    # OCI puede devolver NotAuthorizedOrNotFound; 404 por sí solo no prueba permiso.
+    return oci is not None and isinstance(error, oci.exceptions.ServiceError) and error.status == 404

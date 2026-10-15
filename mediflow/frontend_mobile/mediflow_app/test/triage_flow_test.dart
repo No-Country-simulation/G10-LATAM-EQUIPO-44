@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:mediflow_app/services/file_picker_service.dart';
 import 'package:mediflow_app/services/triage_api_service.dart';
 
 import 'helpers/stub_platform_file.dart';
+import 'helpers/triage_fixture.dart';
 
 Future<void> press(
   WidgetTester tester,
@@ -62,58 +64,111 @@ Future<void> ready(
 void main() {
   // Agregado por Edil: análisis solo tras autorización explícita para el archivo seleccionado.
   for (final status in ['procesado', 'auditoria_humana']) {
-    testWidgets('representa resultado autorizado $status del pipeline', (tester) async {
-      await ready(tester, TriageApiService(
-        clientFactory: () => MockClient((request) async {
-          expect(request.body, contains('name="analyze"'));
-          expect(request.body, contains('true'));
-          return http.Response(
-            '{"status":"$status","documento_id":"DOC-PIPELINE",'
-            '"clasificacion":{"tipo_documento":"Receta médica","nivel_prioridad":"Urgente"}}',
-            201,
-            // Agregado por Edil: FastAPI devuelve JSON UTF-8, también en los mocks.
-            headers: {'content-type': 'application/json; charset=utf-8'},
-          );
-        }),
-      ));
+    testWidgets('representa resultado autorizado $status del pipeline', (
+      tester,
+    ) async {
+      await ready(
+        tester,
+        TriageApiService(
+          clientFactory: () => MockClient((request) async {
+            expect(request.body, contains('name="analyze"'));
+            expect(request.body, contains('true'));
+            return http.Response(
+              jsonEncode(triageFixture(status: status, priority: 'Urgente')),
+              201,
+              // Agregado por Edil: FastAPI devuelve JSON UTF-8, también en los mocks.
+              headers: {'content-type': 'application/json; charset=utf-8'},
+            );
+          }),
+        ),
+      );
       await press(tester, 'Autorizo enviar este archivo a Google Gemini');
       await press(tester, 'Procesar documento');
-      expect(find.text(status == 'procesado'
-          ? 'Extracción completada.' : 'Requiere revisión humana.'), findsOneWidget);
+      expect(
+        find.text(
+          status == 'procesado'
+              ? 'Extracción completada.'
+              : 'Requiere revisión humana.',
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Prioridad: Urgente'), findsOneWidget);
       expect(find.text('Tipo: Receta médica'), findsOneWidget);
     });
   }
   testWidgets('cambiar documento revoca consentimiento Gemini', (tester) async {
-    await ready(tester, TriageApiService(
-      clientFactory: () => MockClient((_) async => http.Response('{}', 200)),
-    ));
-    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value, isFalse);
+    await ready(
+      tester,
+      TriageApiService(
+        clientFactory: () => MockClient(
+          (_) async => http.Response(
+            '{"status":"recibido","documento_id":"DOC-TEST"}',
+            200,
+          ),
+        ),
+      ),
+    );
+    // Agregado por Edil: el consentimiento puede estar fuera de pantalla en el diseño responsive.
+    await tester.scrollUntilVisible(
+      find.byType(CheckboxListTile),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value,
+      isFalse,
+    );
     await press(tester, 'Autorizo enviar este archivo a Google Gemini');
-    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value, isTrue);
+    // Agregado por Edil: el consentimiento puede estar fuera de pantalla en el diseño responsive.
+    await tester.scrollUntilVisible(
+      find.byType(CheckboxListTile),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value,
+      isTrue,
+    );
     await press(tester, 'Cambiar archivo');
-    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value, isFalse);
+    // Agregado por Edil: el consentimiento puede estar fuera de pantalla en el diseño responsive.
+    await tester.scrollUntilVisible(
+      find.byType(CheckboxListTile),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value,
+      isFalse,
+    );
   });
-  testWidgets('acepta 201 con contrato anidado de recepción del backend', (tester) async {
-    await ready(tester, TriageApiService(
-      clientFactory: () => MockClient((request) async {
-        expect(request.url.path, '/api/triage');
-        expect(request.method, 'POST');
-        return http.Response(
-          '{"status":"recibido","documento_id":"DOC-API-201",'
-          '"clasificacion":{"tipo_documento":"Pendiente de procesamiento"},'
-          '"datos_extraidos":{"paciente":{"nombre":null,"edad":null}},'
-          '"decision_enrutamiento":{"requiere_auditoria_humana":false},'
-          '"notificacion_generada":null,'
-          '"almacenamiento_oci":{"bucket":"recibidos","ruta_objeto":"DOC-API-201.txt","status_backup":"exito"}}',
-          201,
-        );
-      }),
-    ));
+  testWidgets('acepta 201 con contrato anidado de recepción del backend', (
+    tester,
+  ) async {
+    await ready(
+      tester,
+      TriageApiService(
+        clientFactory: () => MockClient((request) async {
+          expect(request.url.path, '/api/triage');
+          expect(request.method, 'POST');
+          return http.Response(
+            '{"status":"recibido","documento_id":"DOC-API-201",'
+            '"clasificacion":{"tipo_documento":"Pendiente de procesamiento"},'
+            '"datos_extraidos":{"paciente":{"nombre":null,"edad":null}},'
+            '"decision_enrutamiento":{"requiere_auditoria_humana":false},'
+            '"notificacion_generada":null,'
+            '"almacenamiento_oci":{"bucket":"recibidos","ruta_objeto":"DOC-API-201.txt","status_backup":"exito"}}',
+            201,
+          );
+        }),
+      ),
+    );
     await press(tester, 'Procesar documento');
     expect(find.text('Documento: DOC-API-201'), findsOneWidget);
     expect(find.text('Estado: recibido'), findsOneWidget);
-    expect(find.textContaining('El análisis clínico sigue pendiente.'), findsOneWidget);
+    expect(
+      find.textContaining('El análisis clínico sigue pendiente.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets(
@@ -134,10 +189,14 @@ void main() {
       // puede no haberse construido todavía. Se conservan todas las aserciones.
       if (find.text('Procesar documento').evaluate().isEmpty) {
         await tester.scrollUntilVisible(
-          find.text('Procesar documento'), 160,
-          scrollable: find.descendant(
-            of: find.byType(ListView), matching: find.byType(Scrollable),
-          ).first,
+          find.text('Procesar documento'),
+          160,
+          scrollable: find
+              .descendant(
+                of: find.byType(ListView),
+                matching: find.byType(Scrollable),
+              )
+              .first,
         );
       }
       await tester.ensureVisible(find.text('Procesar documento'));
@@ -193,7 +252,13 @@ void main() {
     },
   );
 
-  for (final scenario in ['400', '500', 'sin conexión', 'timeout']) {
+  for (final scenario in [
+    '400',
+    '500',
+    'sin conexión',
+    'timeout',
+    'JSON inválido',
+  ]) {
     testWidgets(
       '$scenario muestra error y permite reintentar sin perder archivo',
       (tester) async {
@@ -202,7 +267,16 @@ void main() {
         final api = TriageApiService(
           clientFactory: () => MockClient((_) async {
             calls++;
-            if (calls > 1) return http.Response('{}', 200);
+            if (calls > 1) {
+              return http.Response(
+                '{"status":"recibido","documento_id":"DOC-RETRY"}',
+                200,
+              );
+            }
+            // Agregado por Edil: HTTP 200 sin contrato también debe mostrar error.
+            if (scenario == 'JSON inválido') {
+              return http.Response('{}', 200);
+            }
             if (scenario == 'sin conexión') {
               throw const SocketException('no network');
             }
@@ -224,19 +298,25 @@ void main() {
           await tester.pumpAndSettle();
         }
         final message = switch (scenario) {
+          'JSON inválido' => 'El servidor devolvió una respuesta inválida.',
           '400' => 'El servidor rechazó el documento.',
           '500' => 'El servidor no está disponible. Inténtalo más tarde.',
           'sin conexión' => 'No se pudo conectar con el servidor.',
           _ => 'El servidor tardó demasiado en responder.',
         };
         expect(find.text(message), findsOneWidget);
+        if (scenario == '500') {
+          expect(find.text('Código HTTP: 500'), findsOneWidget);
+        }
         expect(find.text('detalle técnico privado'), findsNothing);
         expect(find.text('nota.txt'), findsOneWidget);
         await press(tester, 'Reintentar');
         expect(calls, 2);
         expect(find.text('Documento recibido correctamente.'), findsOneWidget);
         expect(find.text(message), findsNothing);
-        lateResponse.complete(http.Response('{}', 200));
+        lateResponse.complete(
+          http.Response('{"status":"recibido","documento_id":"DOC-TEST"}', 200),
+        );
       },
     );
   }
@@ -248,8 +328,12 @@ void main() {
       await ready(
         tester,
         TriageApiService(
-          clientFactory: () =>
-              MockClient((_) async => http.Response('{}', 200)),
+          clientFactory: () => MockClient(
+            (_) async => http.Response(
+              '{"status":"recibido","documento_id":"DOC-TEST"}',
+              200,
+            ),
+          ),
         ),
         picker: FilePickerService(
           pickFile: () async {
@@ -283,7 +367,9 @@ void main() {
     await press(tester, 'Procesar documento', settle: false);
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
-    response.complete(http.Response('{}', 200));
+    response.complete(
+      http.Response('{"status":"recibido","documento_id":"DOC-TEST"}', 200),
+    );
     await tester.pumpAndSettle();
     expect(find.text('MediFlow'), findsOneWidget);
     expect(tester.takeException(), isNull);

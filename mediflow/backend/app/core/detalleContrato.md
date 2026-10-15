@@ -34,7 +34,7 @@
 * **`decision_enrutamiento`** (Objeto, Obligatorio):
 * `destino_principal` (String, Obligatorio): Cola, departamento o sistema de destino.
 * `requiere_auditoria_humana` (Boolean, Obligatorio): Bandera de control (`true` / `false`) para derivar a revisión manual por riesgos clínicos, ambigüedades o datos faltantes.
-* `justificacion_enrutamiento` (String, Opcional): Motivo lógico de la decisión. *(Opcional en el esquema para evitar caídas del servidor en documentos simples, pero altamente recomendado como directriz en el Prompt de IA).*
+* `justificacion_enrutamiento` (String, Obligatorio).
 
 
 * **`notificacion_generada`** (Objeto, Opcional): Se incluye solo si el sistema debe generar una alerta (ej. casos urgentes).
@@ -56,3 +56,5 @@ El esquema de Nicolás permite dosis null cuando no está escrita; no inventamos
 La especialidad también puede ser null cuando no aparece en el documento.
 El ejemplo conserva el contenido de Eliana; el bucket se ajustó a `recibidos` porque usamos tres buckets independientes: recibidos, procesados y auditoria_humana.
 Un estado procesado no confirma un traslado de bucket ni una notificación. Esas acciones requieren implementación y comprobación aparte.
+
+Agregado por Edil: aplicada la corrección de Eliana bcefff1; la justificación es obligatoria y coincide con Pydantic y las pruebas de Laura.

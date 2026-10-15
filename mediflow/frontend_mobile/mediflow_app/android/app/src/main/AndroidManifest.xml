@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Agregado por Edil: la camara es opcional; el selector sigue disponible. -->
+    <uses-feature android:name="android.hardware.camera.any" android:required="false"/>
     <application
         android:label="MediFlow"
         android:allowBackup="false"

@@ -49,6 +49,72 @@ void main() {
     utf8.encode('Documento sintetico de prueba'),
   );
 
+  // Agregado por Edil: distinguir causas controladas sin mostrar detalles privados.
+  for (final entry in <int, String>{
+    500: 'No se pudo almacenar el documento en OCI.',
+    502: 'No se pudo autenticar el servicio de análisis.',
+    503: 'El análisis IA no está configurado.',
+    429: 'El servicio de análisis alcanzó su límite de solicitudes.',
+    504: 'El servicio de análisis agotó el tiempo de espera.',
+    422: 'El documento no puede analizarse en su formato actual.',
+  }.entries) {
+    test('conserva causa segura y código HTTP ${entry.key}', () async {
+      final service = TriageApiService(
+        clientFactory: () => MockClient(
+          (_) async => http.Response.bytes(
+            utf8.encode(jsonEncode({'detail': entry.value})),
+            entry.key,
+          ),
+        ),
+      );
+      await expectLater(
+        service.sendDocument(document(bytes: payload)),
+        throwsA(
+          isA<TriageApiException>()
+              .having((e) => e.message, 'causa', entry.value)
+              .having((e) => e.statusCode, 'HTTP', entry.key),
+        ),
+      );
+    });
+  }
+  test('informa fallo JSON sin confundirlo con subida del original', () async {
+    const detail =
+        'No se pudo guardar el resultado JSON en OCI. El documento original sigue recibido.';
+    final service = TriageApiService(
+      clientFactory: () => MockClient(
+        (_) async => http.Response.bytes(
+          utf8.encode(jsonEncode({'detail': detail})),
+          503,
+        ),
+      ),
+    );
+    await expectLater(
+      service.sendDocument(document(bytes: payload)),
+      throwsA(
+        isA<TriageApiException>().having((e) => e.message, 'causa', detail),
+      ),
+    );
+  });
+
+  test('no muestra un detail arbitrario o clínico del servidor', () async {
+    final service = TriageApiService(
+      clientFactory: () => MockClient(
+        (_) async =>
+            http.Response(jsonEncode({'detail': 'informacion privada'}), 502),
+      ),
+    );
+    await expectLater(
+      service.sendDocument(document(bytes: payload)),
+      throwsA(
+        isA<TriageApiException>().having(
+          (e) => e.message,
+          'mensaje',
+          isNot(contains('privada')),
+        ),
+      ),
+    );
+  });
+
   test(
     'envía POST multipart con nombre, MIME y contenido desde bytes',
     () async {
@@ -104,7 +170,10 @@ void main() {
     final service = TriageApiService(
       clientFactory: () => MockClient((request) async {
         expect(request.body, contains(utf8.decode(payload)));
-        return http.Response('{}', 200);
+        return http.Response(
+          '{"status":"recibido","documento_id":"DOC-TEST"}',
+          200,
+        );
       }),
     );
     await service.sendDocument(document(path: file.absolute.path));
@@ -121,7 +190,10 @@ void main() {
       final service = TriageApiService(
         clientFactory: () => MockClient((request) async {
           expect(request.body, contains('content-type: ${entry.value}'));
-          return http.Response('{}', 202);
+          return http.Response(
+            '{"status":"recibido","documento_id":"DOC-TEST"}',
+            202,
+          );
         }),
       );
       await service.sendDocument(
@@ -131,15 +203,17 @@ void main() {
   }
 
   for (final code in [200, 201, 202, 204]) {
-    test('acepta HTTP $code sin exigir campos clínicos', () async {
+    test('rechaza HTTP $code sin identidad ni estado válidos', () async {
       final service = TriageApiService(
         clientFactory: () => MockClient(
           (_) async => http.Response(code == 204 ? '' : '{}', code),
         ),
       );
-      final result = await service.sendDocument(document(bytes: payload));
-      expect(result.status, isNull);
-      expect(result.rawData, isEmpty);
+      // Agregado por Edil: Sprint 3 ya no presenta JSON vacío como resultado exitoso.
+      await expectLater(
+        service.sendDocument(document(bytes: payload)),
+        throwsA(failure('El servidor devolvió una respuesta inválida.')),
+      );
     });
   }
 
@@ -201,7 +275,10 @@ void main() {
       final service = TriageApiService(
         clientFactory: () => MockClient((_) async {
           calls++;
-          return http.Response('{}', 200);
+          return http.Response(
+            '{"status":"recibido","documento_id":"DOC-TEST"}',
+            200,
+          );
         }),
       );
       await expectLater(
@@ -247,7 +324,12 @@ void main() {
         timeout: const Duration(milliseconds: 30),
         clientFactory: () => count++ == 0
             ? client
-            : MockClient((_) async => http.Response('{}', 200)),
+            : MockClient(
+                (_) async => http.Response(
+                  '{"status":"recibido","documento_id":"DOC-TEST"}',
+                  200,
+                ),
+              ),
       );
       await expectLater(
         service.sendDocument(document(bytes: payload)),

@@ -68,7 +68,7 @@
       <span class="brand__mark" aria-hidden="true"><svg class="icon"><use href="#i-cross"></use></svg></span>
       <span class="brand__text">
         <span class="brand__name">MediFlow Clinical Portal</span>
-        <span class="conn" title="Datos de demostración; sin conexión a un HIS"><span class="conn__dot" aria-hidden="true"></span>Demo Sprint 2</span>
+        <span id="historyConnection" class="conn" title="Estado de la consulta al backend"><span class="conn__dot" aria-hidden="true"></span>Conectando</span>
       </span>
     </div>
 
@@ -178,9 +178,11 @@
       <div class="page-head__text">
         <p class="page-head__eyebrow"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-history"></use></svg>Historial · ED-1</p>
         <h1 class="page-head__title">Repositorio documental clínico</h1>
-        <p class="page-head__sub">Sprint 2 · Datos de demostración. Listado de documentos con tipo, prioridad y estado. No conectado al backend.</p>
+        <p class="page-head__sub">Documentos consultados al backend. La prioridad es una propuesta pendiente de validación clínica.</p>
       </div>
       <div class="page-head__actions">
+        <!-- Agregado por Edil: GET real; no procesa documentos ni llama a Gemini. -->
+        <button type="button" class="btn" id="refreshDocuments">Actualizar documentos</button>
         <button type="button" class="btn" data-toast="Índice documental impreso para el expediente de referencia.">
           <svg class="icon icon--sm" aria-hidden="true"><use href="#i-print"></use></svg>Imprimir índice
         </button>
@@ -190,6 +192,7 @@
       </div>
     </div>
 
+    <p id="documentLoadStatus" role="status" aria-live="polite">Consultando documentos...</p>
     <!-- ---------- 1. BARRA SUPERIOR DE TABLA ---------- -->
     <section class="toolbar toolbar--panel" aria-label="Filtros del repositorio documental">
       <div class="toolbar__row">
@@ -243,7 +246,7 @@
       <div class="card__body card__body--tight">
         <div class="table-wrap table-wrap--sticky">
           <table class="data tabla-hist">
-            <caption class="sr-only">Documentos de demostración con identificador, paciente, tipo, prioridad, estado, fecha y ubicación</caption>
+            <caption class="sr-only">Documentos con identificador, paciente, tipo, prioridad, estado, fecha y ubicación</caption>
             <thead>
               <tr id="theadHist">
                 <th scope="col" data-sort="id" aria-sort="none"><button type="button" class="th-sort">ID de documento<span class="th-sort__ind" aria-hidden="true">▲▼</span></button></th>
@@ -263,7 +266,7 @@
         <div class="empty" id="vacio" hidden>
           <span class="empty__icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-funnel"></use></svg></span>
           <span class="empty__title">No hay registros que coincidan</span>
-          <span class="empty__text">Ningún documento de demostración cumple el texto buscado y los filtros de prioridad y estado.</span>
+          <span class="empty__text">Ningún documento cargado cumple el texto buscado y los filtros de prioridad y estado.</span>
           <button type="button" class="btn btn--primary" id="btnLimpiarVacio">
             <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>Limpiar filtros
           </button>
@@ -302,12 +305,13 @@
 <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
 <dialog id="documentDetail" aria-labelledby="documentDetailTitle" style="max-width:720px;width:90%;padding:24px;border-radius:16px">
-  <h2 id="documentDetailTitle">Detalle del documento · Demostración</h2>
+  <h2 id="documentDetailTitle">Detalle del documento</h2>
   <p>Vista de lectura. La revisión y aprobación conectadas se implementarán en un sprint posterior.</p>
   <pre id="documentDetailJson" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
   <form method="dialog"><button class="btn" type="submit">Cerrar</button></form>
 </dialog>
 <script src="../assets/js/documents-mock.js"></script>
+<script src="../assets/js/documents-api.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

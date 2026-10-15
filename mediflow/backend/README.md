@@ -184,3 +184,38 @@ salida inválida, 503 configuración/red y 504 timeout. El original queda en rec
 No se ejecutan movimientos automáticos a procesados ni aprobación humana:
 son alcance posterior. El estado procesado indica extracción JSON validada.
 La respuesta incluye medicamentos opcionales y mantiene el contrato previo.
+
+## 📂 Endpoints de Consulta de Documentos (Sprint 3)
+
+### 1. Listar Documentos: `GET /api/documents`
+Lista los documentos almacenados en los buckets de OCI (`recibidos`, `procesados`, `auditoria_humana`).
+- **Query Params:**
+  - `status`: Filtrar por estado (`recibido`, `procesado`, `auditoria_humana`).
+  - `prioridad`: Filtrar por prioridad (`Rutina`, `Urgente`).
+  - `limit`: Máximo de documentos a retornar (default: 100).
+- **Respuesta:** Array de objetos `TriageResponse` (`HTTP 200 OK`).
+
+```bash
+curl -X GET "http://localhost:8000/api/documents?status=procesado&prioridad=Urgente"
+```
+
+### 2. Consultar Documento por ID: `GET /api/documents/{document_id}`
+Recupera el resultado de triaje de un documento específico persistido en OCI.
+- **Códigos de respuesta:** `200 OK` si existe, `404 Not Found` si no existe en ningún bucket, `400 Bad Request` si el ID es inválido.
+
+```bash
+curl -X GET "http://localhost:8000/api/documents/DOC-CLIN-ABCD1234"
+```
+
+Documentación detallada para el Frontend Web disponible en [`docs/sprint-3/api_documentos_flor.md`](../../docs/sprint-3/api_documentos_flor.md).
+
+---
+
+
+Agregado por Edil: si falla el guardado JSON, POST devuelve 503 y conserva el original. GET propaga fallos OCI; no equivale a lista vacía ni 404. Las pruebas reales de S3-04B siguen pendientes.
+
+
+## Agregado por Edil: recepción consultable si falla Gemini
+El JSON recibido se guarda antes del análisis. Si Gemini falla, el archivo y su JSON recibido quedan consultables por ID.
+El código anterior se conserva comentado en routes.py. El listado deduplica primero las versiones procesadas/auditoría antes de filtrar estado, para no mostrar una recepción antigua como pendiente.
+No hay aún reprocesamiento idempotente ni cambios de estado clínicos aprobados; reenvíos generan otro ID.
