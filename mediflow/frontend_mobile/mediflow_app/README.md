@@ -62,3 +62,28 @@ para compartir ese contenido. Las pruebas usan exclusivamente datos sintéticos.
 La UI distingue recibido, procesado y auditoria_humana y muestra tipo/prioridad.
 Timeout cliente: 90 segundos para permitir OCI más Gemini; reintento siempre manual.
 El formulario multipart y el selector originales se conservan.
+
+
+## Sprint 3 — Agregado por Edil
+La respuesta se valida antes de mostrarla como éxito. Un JSON vacío o un estado contradictorio se trata como error.
+Los resultados muestran tipo, prioridad, destino y motivo devueltos por el backend.
+La alerta visual aparece solo si el análisis devuelve Urgente; puede coexistir con revisión humana. La app no decide la urgencia ni envía una notificación por su cuenta.
+Para análisis sigue siendo necesario el consentimiento por archivo para Gemini.
+Ver docs/sprint-3/edil-s3-08-y-s3-04b.md y guia-verificacion-json-oci.md para dependencias y validación real pendiente.
+
+
+## Cámara Android — Agregado por Edil
+Tomar foto abre la cámara del dispositivo. Revisar foto permite ampliar, cancelar o repetir; Usar esta foto vuelve al documento sin enviarlo.
+Al confirmar una captura nueva, Gemini vuelve a quedar desautorizado hasta marcar el consentimiento por archivo.
+Se comprueba JPG/PNG y un máximo de 10 MiB; una imagen que no se visualiza no se puede confirmar.
+Android puede recuperar una captura pendiente después de reiniciar la actividad y vuelve a pedir revisión. Windows mantiene selección de archivos, sin webcam.
+Después de agregar este plugin, detén Flutter y vuelve a ejecutar flutter run; hot reload no instala plugins nativos nuevos.
+Ver docs/sprint-3/camara-documentos.md para uso y limitaciones. La cámara física, orientación y extracción clínica requieren prueba real sintética.
+
+
+## Design System — Agregado por Edil
+Tema Medical Clean centralizado en lib/design_system con AppColors, AppTypography, AppSpacing y AppTheme.
+AppButton, AppCard, AppHeader y AppStatusPanel comparten estilo y controles Material 3; no hay navegación inferior.
+Roboto está empaquetada localmente con licencia. Inicio, selección, archivo, revisión de foto, progreso y resultado comparten el lenguaje visual.
+Éxito se distingue de auditoría y error mediante texto, iconos y colores. La prioridad propuesta por el servidor no se presenta como decisión clínica definitiva.
+Ver docs/sprint-3/design-system.md para tokens, verificación y alcance.

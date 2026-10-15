@@ -1,3 +1,5 @@
+> Actualización de integración: historial/ consulta GET /api/documents por defecto. La documentación anterior de mocks se conserva como referencia del Sprint 2. Las demás pantallas siguen siendo prototipos.
+
 # clinicaFRONT
 
 Prototipo navegable del front de una clinica de urgencias. Cinco pantallas HTML
@@ -136,3 +138,13 @@ node --test tests/documents-mock.test.js
 
 Las otras pantallas conservan sus prototipos anteriores. Conexión GET,
 persistencia y aprobación humana quedan fuera de este cambio de Sprint 2.
+
+
+## Agregado por Edil: historial conectado
+
+Iniciar backend en http://127.0.0.1:8000 y servir src en el puerto 8080.
+Abrir http://127.0.0.1:8080/historial/ y pulsar Actualizar documentos después de un envío desde Flutter.
+La URL pública de API puede configurarse con window.MEDIFLOW_API_BASE_URL antes de cargar documents-api.js; nunca contiene claves OCI o Gemini.
+El listado consulta hasta 500 documentos y conserva filtros, paginación de interfaz y detalle JSON en lectura.
+?demo=1 habilita expresamente los mocks originales. Un error real no se sustituye silenciosamente por mocks.
+Otras pantallas, exportación, revisión clínica y aprobación no quedan conectadas por este cambio.

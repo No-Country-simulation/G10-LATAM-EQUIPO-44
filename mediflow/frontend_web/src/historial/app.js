@@ -84,7 +84,33 @@
      Este array es el único punto de sustitución: reemplazar por la
      respuesta del endpoint de documentos al conectar el backend.
      -------------------------------------------------------------------- */
-  const records = window.MediFlowDocuments.documents.map(window.MediFlowDocuments.toRow);
+  // Codigo anterior conservado: datos de demostracion sin conexion.
+  // const records = window.MediFlowDocuments.documents.map(window.MediFlowDocuments.toRow);
+  // Agregado por Edil: fuente real por defecto; demo solo si se solicita ?demo=1.
+  let records = [];
+  async function loadRecords() {
+    const indicator = $("#documentLoadStatus");
+    const refresh = $("#refreshDocuments");
+    const demo = new URLSearchParams(window.location.search).get("demo") === "1";
+    refresh.disabled = true;
+    indicator.textContent = demo ? "Demostracion explicita: datos simulados." : "Consultando documentos del backend...";
+    try {
+      const source = demo ? window.MediFlowDocuments.documents : await window.MediFlowDocumentsApi.getDocuments();
+      records = source.map(window.MediFlowDocuments.toRow);
+      indicator.textContent = demo ? "Demostracion: no son datos del backend." : "Conectado al backend. Hasta 500 documentos; pulsa Actualizar para ver nuevos envios.";
+      $("#historyConnection").textContent = demo ? "Demostracion" : "Backend conectado";
+      $("#historyConnection").title = indicator.textContent;
+    } catch (error) {
+      records = [];
+      indicator.textContent = error instanceof window.MediFlowDocumentsApi.DocumentsApiError
+        ? error.message : "El historial no cumple el contrato de MediFlow.";
+      $("#historyConnection").textContent = "Sin conexion";
+      $("#historyConnection").title = indicator.textContent;
+    } finally {
+      refresh.disabled = false;
+      apply({ silenciosoURL: true });
+    }
+  }
 
   /* --------------------------------------------------------------------
      ESTADO CENTRAL
@@ -468,6 +494,8 @@
       const detail = ev.target.closest("[data-document]");
       if (detail) {
         const row = records.find((record) => record.id === detail.dataset.document);
+        // Agregado por Edil: una recarga puede retirar la fila anterior.
+        if (!row) { toast("El documento ya no esta en el listado.", "rojo"); return; }
         $("#documentDetailJson").textContent = JSON.stringify(row.documento, null, 2);
         $("#documentDetail").showModal();
         return;
@@ -519,6 +547,8 @@
     initMenu();
     initAvisos();
     initInteraccion();
+    $("#refreshDocuments").addEventListener("click", loadRecords);
+    loadRecords();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

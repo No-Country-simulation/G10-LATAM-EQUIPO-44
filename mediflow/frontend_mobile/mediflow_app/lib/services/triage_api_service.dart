@@ -34,7 +34,10 @@ class TriageApiService {
   final Set<http.Client> _activeClients = {};
 
   // Agregado por Edil: IA opt-in; el valor por defecto conserva recepción sin Gemini.
-  Future<TriageResult> sendDocument(SelectedDocument document, {bool analyze = false}) async {
+  Future<TriageResult> sendDocument(
+    SelectedDocument document, {
+    bool analyze = false,
+  }) async {
     http.Client? client;
     try {
       final Uri endpoint;
@@ -104,16 +107,20 @@ class TriageApiService {
     final response = await http.Response.fromStream(await client.send(request));
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw TriageApiException(
-        _httpError(response.statusCode),
+        _serverError(response),
         statusCode: response.statusCode,
       );
     }
     if (response.statusCode == 204 && response.bodyBytes.isEmpty) {
-      return TriageResult.fromJson({});
+      // Agregado por Edil: sin JSON no se puede confirmar el resultado.
+      throw const FormatException();
     }
     final json = jsonDecode(utf8.decode(response.bodyBytes));
     if (json is! Map<String, dynamic>) throw const FormatException();
-    return TriageResult.fromJson(json);
+    final result = TriageResult.fromJson(json);
+    result.validateForDisplay();
+    // Agregado por Edil: recibido solo confirma recepción; la pantalla lo distingue.
+    return result;
   }
 
   Future<http.MultipartFile> _filePart(SelectedDocument document) async {
@@ -154,6 +161,37 @@ class TriageApiService {
         'El archivo seleccionado ya no está disponible.',
       );
     }
+  }
+
+  // Agregado por Edil: solo mensajes controlados del backend; nunca texto arbitrario,
+  // trazas del proveedor o contenido clínico devuelto en un error.
+  String _serverError(http.Response response) {
+    const allowed = <(int, String)>{
+      (500, 'No se pudo almacenar el documento en OCI.'),
+      // Agregado por Edil: distinguir fallo JSON de la subida original ya completada.
+      (
+        503,
+        'No se pudo guardar el resultado JSON en OCI. El documento original sigue recibido.',
+      ),
+      (503, 'El análisis IA no está configurado.'),
+      (502, 'No se pudo autenticar el servicio de análisis.'),
+      (429, 'El servicio de análisis alcanzó su límite de solicitudes.'),
+      (504, 'El servicio de análisis agotó el tiempo de espera.'),
+      (503, 'El servicio de análisis no está disponible.'),
+      (502, 'El servicio de análisis devolvió una respuesta inválida.'),
+      (422, 'El documento no puede analizarse en su formato actual.'),
+      (500, 'No se pudo completar el análisis.'),
+    };
+    try {
+      final payload = jsonDecode(utf8.decode(response.bodyBytes));
+      if (payload is Map<String, dynamic> && payload['detail'] is String) {
+        final detail = payload['detail'] as String;
+        if (allowed.contains((response.statusCode, detail))) return detail;
+      }
+    } catch (_) {
+      // Mantener el mensaje seguro anterior si el error no cumple nuestro contrato.
+    }
+    return _httpError(response.statusCode);
   }
 
   String _httpError(int code) => switch (code) {

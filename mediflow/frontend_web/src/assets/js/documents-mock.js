@@ -41,7 +41,9 @@
     return {
       id: doc.documento_id,
       paciente: doc.datos_extraidos?.paciente?.nombre || "Sin información",
-      dni: "No informado", ingreso: "Ejemplo de demostración",
+      // Codigo anterior: ingreso: "Ejemplo de demostracion".
+      // Agregado por Edil: el adaptador tambien recibe documentos reales; no inventar origen.
+      dni: "No informado", ingreso: "Documento registrado",
       tipo: doc.clasificacion.tipo_documento,
       prioridad: priority,
       estado: doc.status === "auditoria_humana" ? "auditoria" : doc.status,

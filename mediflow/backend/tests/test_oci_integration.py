@@ -41,3 +41,43 @@ def test_upload_download_recibidos(tmp_path):
                 object_name=object_name,
             )
             print("OK: objeto de prueba eliminado")
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(os.environ.get("RUN_OCI_INTEGRATION") != "1", reason="OCI real desactivado")
+@pytest.mark.parametrize("state", ["recibido", "procesado", "auditoria_humana"])
+def test_json_roundtrip_three_buckets(state):
+    """Agregado por Edil: JSON sintético, no resultado clínico ni llamada a Gemini."""
+    from app.core.environment import load_environment
+    from app.models.schemas import TriageResponse
+
+    load_environment()
+    manager = OCIStorageManager()
+    doc_id = f"DOC-INTEGRATION-{uuid4().hex.upper()}"
+    bucket = manager.determinar_bucket_por_estado(state)
+    object_name = f"{doc_id}.json"
+    payload = TriageResponse.model_validate({
+        "status": state,
+        "documento_id": doc_id,
+        "clasificacion": {"tipo_documento": "Registro sintetico de prueba OCI", "nivel_prioridad": "Rutina"},
+        "datos_extraidos": {},
+        "decision_enrutamiento": {
+            "requiere_auditoria_humana": state == "auditoria_humana",
+            "destino_principal": "Cola_Revision_Humana" if state == "auditoria_humana" else "Cola_Historia_Clinica",
+            "justificacion_enrutamiento": "Datos artificiales para comprobar escritura y lectura JSON, sin analisis clinico.",
+        },
+        "almacenamiento_oci": {"bucket": bucket, "ruta_objeto": object_name, "status_backup": "exito"},
+    }).model_dump()
+    uploaded = False
+    try:
+        manager.guardar_resultado_triage(payload)
+        uploaded = True
+        assert manager.recuperar_json(bucket, object_name) == payload
+        assert manager.recuperar_resultado_triage(doc_id) == payload
+        print(f"OK JSON escritura/lectura: {bucket}/{object_name}")
+    finally:
+        if uploaded:
+            # Agregado por Edil: limpiar exclusivamente el JSON único creado aquí.
+            # No eliminar documentos originales ni otros objetos del bucket.
+            manager.object_storage.delete_object(namespace_name=manager.namespace,
+                bucket_name=bucket, object_name=object_name)

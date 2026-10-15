@@ -73,7 +73,7 @@ def test_full_http_oci_gemini_validation_flow(monkeypatch, review, status):
     (LLMNetworkError("private"),503), (LLMResponseError("private"),502),
     (LLMInputError("private"),422),
 ])
-def test_analysis_failures_keep_received_object_and_hide_details(failure, code):
+def test_analysis_failures_keep_received_object_and_hide_details(failure, code, caplog):
     with patch("app.api.routes.OCIStorageManager") as factory, \
          patch("app.api.routes.analyze_received_document", side_effect=failure):
         factory.return_value.settings.bucket_recibidos = "recibidos"
@@ -83,6 +83,9 @@ def test_analysis_failures_keep_received_object_and_hide_details(failure, code):
                                  files={"file":("demo.txt",b"Nota sintetica")})
         assert response.status_code == code
         assert "private" not in response.text
+        assert type(failure).__name__ in caplog.text
+        assert "private" not in caplog.text
+        assert "Nota sintetica" not in caplog.text
         assert response.headers["X-Document-ID"].startswith("DOC-CLIN-")
         factory.return_value.object_storage.delete_object.assert_not_called()
 
