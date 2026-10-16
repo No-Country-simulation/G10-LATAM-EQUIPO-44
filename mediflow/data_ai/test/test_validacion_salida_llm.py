@@ -4,7 +4,9 @@ import sys
 import pytest
 
 # Permite reutilizar el validador oficial del backend
-backend_dir = Path(__file__).resolve().parents[1] / "backend"
+# Agregado por Edil: al mover esta prueba a test/, backend queda un nivel más arriba.
+# backend_dir = Path(__file__).resolve().parents[1] / "backend"
+backend_dir = Path(__file__).resolve().parents[2] / "backend"
 sys.path.insert(0, str(backend_dir))
 
 from app.services.llm_errors import LLMResponseError

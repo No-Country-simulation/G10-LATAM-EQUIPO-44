@@ -2,7 +2,12 @@
 from __future__ import annotations
 from copy import deepcopy
 from typing import Any
-from urgency_detector import detect_urgency
+# Agregado por Edil: permitir import desde el paquete y desde scripts existentes.
+# from urgency_detector import detect_urgency
+if __package__:
+    from .urgency_detector import detect_urgency
+else:
+    from urgency_detector import detect_urgency
 
 
 def evaluate_analysis(analysis: dict[str, Any], *, source_text: str | None = None) -> dict[str, Any]:

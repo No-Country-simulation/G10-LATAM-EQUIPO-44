@@ -3,7 +3,9 @@ import sys
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+# Agregado por Edil: el módulo está en data_ai, no junto a las pruebas trasladadas.
+# ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from urgency_detector import detect_urgency
 

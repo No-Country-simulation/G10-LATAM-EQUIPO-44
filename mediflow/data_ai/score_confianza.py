@@ -1,3 +1,10 @@
+# Agregado por Edil: un booleano no representa una confianza numérica.
+# Python acepta True como 1; rechazarlo evita aceptar entradas mal tipadas.
+def _validar_numero(valor, nombre):
+    if isinstance(valor, bool) or not isinstance(valor, (int, float)):
+        raise TypeError(f"{nombre} debe ser un número, no un booleano")
+
+
 def calcular_completitud(
     criterios_cumplidos: list[bool],
 ) -> float:
@@ -43,6 +50,8 @@ def calcular_score_operativo(
       score_clasificacion y completitud.
     """
 
+    _validar_numero(score_clasificacion, "score_clasificacion")
+    _validar_numero(completitud, "completitud")
     if not 0.0 <= score_clasificacion <= 1.0:
         raise ValueError(
             "score_clasificacion debe estar entre 0.0 y 1.0"
@@ -75,6 +84,8 @@ def es_ambiguo(
     queda por debajo del umbral configurado.
     """
 
+    _validar_numero(score_operativo, "score_operativo")
+    _validar_numero(umbral, "umbral")
     if not 0.0 <= score_operativo <= 1.0:
         raise ValueError(
             "score_operativo debe estar entre 0.0 y 1.0"
@@ -112,10 +123,14 @@ def evaluar_confianza(
         alerta_critica=alerta_critica,
     )
 
+    # Agregado por Edil: conservar el cálculo original y validar siempre el umbral.
+    # Una alerta crítica obliga a revisión incluso cuando el umbral sea cero.
+    # Antes solo se devolvía el resultado de es_ambiguo(score_operativo, umbral).
     resultado_ambiguo = es_ambiguo(
         score_operativo=score_operativo,
         umbral=umbral,
     )
+    resultado_ambiguo = alerta_critica or resultado_ambiguo
 
     return {
         "completitud": completitud,

@@ -6,7 +6,9 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
-DEFAULT_CATALOG = Path(__file__).resolve().parent / 'urgency_catalog_v1_1.json'
+# Agregado por Edil: el catálogo original está en rules; conservar la ruta previa como referencia.
+# DEFAULT_CATALOG = Path(__file__).resolve().parent / 'urgency_catalog_v1_1.json'
+DEFAULT_CATALOG = Path(__file__).resolve().parent / 'rules' / 'urgency_catalog_v1_1.json'
 CLINICAL_RANK = {'none_detected': 0, 'possible_urgent_assessment': 1, 'possible_emergency': 2}
 
 
