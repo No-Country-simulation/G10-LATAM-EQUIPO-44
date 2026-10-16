@@ -1,3 +1,9 @@
+# Umbral operativo acordado para el MVP / Demo de MediFlow.
+# Un valor mayor representa mayor confianza.
+# Si el score operativo queda por debajo de este valor,
+# el resultado se considera ambiguo por confianza.
+UMBRAL_CONFIANZA_MVP = 0.70
+
 # Agregado por Edil: un booleano no representa una confianza numérica.
 # Python acepta True como 1; rechazarlo evita aceptar entradas mal tipadas.
 def _validar_numero(valor, nombre):
@@ -75,7 +81,7 @@ def calcular_score_operativo(
 
 def es_ambiguo(
     score_operativo: float,
-    umbral: float,
+    umbral: float = UMBRAL_CONFIANZA_MVP,
 ) -> bool:
     """
     Determina si un resultado debe considerarse ambiguo.
@@ -102,7 +108,7 @@ def evaluar_confianza(
     score_clasificacion: float,
     criterios_cumplidos: list[bool],
     alerta_critica: bool,
-    umbral: float,
+    umbral: float = UMBRAL_CONFIANZA_MVP,
 ) -> dict:
     """
     Ejecuta el flujo completo del modelo de confianza.
@@ -157,7 +163,7 @@ def evaluar_confianza_con_dosis(
     score_clasificacion: float,
     criterios_cumplidos: list[bool],
     dosis_medicamentos: list[str | None],
-    umbral: float,
+    umbral: float = UMBRAL_CONFIANZA_MVP,
 ) -> dict:
     """
     Evalua la confianza incorporando como alerta critica
