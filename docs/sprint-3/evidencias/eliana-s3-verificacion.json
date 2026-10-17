@@ -1,0 +1,82 @@
+{
+  "task": "Eliana S3-05",
+  "local_tests_passed": 267,
+  "subtests_passed": 21,
+  "new_integration_tests": 18,
+  "final_failures": 0,
+  "dependency_warnings": 2,
+  "real_scenarios_passed": 3,
+  "trace_checks": {
+    "NORMAL": {
+      "stages": [
+        "persist_received",
+        "classification_validated",
+        "confidence",
+        "urgency",
+        "routing",
+        "copy_verified",
+        "persist_final"
+      ],
+      "order_correct_and_once_per_stage": true,
+      "final_decision_preserved": true
+    },
+    "URGENTE": {
+      "stages": [
+        "persist_received",
+        "classification_validated",
+        "confidence",
+        "urgency",
+        "routing",
+        "copy_verified",
+        "persist_final"
+      ],
+      "order_correct_and_once_per_stage": true,
+      "final_decision_preserved": true
+    },
+    "AMBIGUO/AUDITORÍA": {
+      "stages": [
+        "persist_received",
+        "classification_validated",
+        "confidence",
+        "urgency",
+        "routing",
+        "copy_verified",
+        "persist_final"
+      ],
+      "order_correct_and_once_per_stage": true,
+      "final_decision_preserved": true
+    }
+  },
+  "branch": "cierre/edil-sprint-3-2026-10-16",
+  "head_unchanged": true,
+  "main_ref_unchanged": true,
+  "index_unchanged": true,
+  "existing_runtime_sources_unchanged": {
+    "mediflow/backend/app/core/orquestador.py": true,
+    "mediflow/backend/app/services/servicio_orquestador.py": true,
+    "mediflow/backend/app/services/triage_pipeline.py": true,
+    "mediflow/backend/app/services/gemini_client.py": true,
+    "mediflow/backend/app/core/environment.py": true,
+    "mediflow/backend/app/api/routes.py": true,
+    "mediflow/backend/app/core/oci_client.py": true,
+    "mediflow/backend/app/core/oci_transfer.py": true,
+    "mediflow/backend/app/models/schemas.py": true,
+    "mediflow/backend/app/core/contrato.json": true,
+    "mediflow/data_ai/score_confianza.py": true,
+    "mediflow/data_ai/confidence_profiles.py": true,
+    "mediflow/data_ai/rules/confidence_profiles_mvp.json": true,
+    "mediflow/data_ai/urgency_detector.py": true,
+    "mediflow/data_ai/urgency_json_adapter.py": true,
+    "mediflow/data_ai/synthetic_demo_rules.py": true,
+    "mediflow/data_ai/rules/urgency_catalog_v1_1.json": true,
+    "mediflow/data_ai/rules/triage_rules_v1.json": true,
+    "mediflow/data_ai/prompts/master_prompt.txt": true
+  },
+  "unmerged_git_entries": false,
+  "diff_check_passed": true,
+  "duplicate_top_level_definitions_in_scoped_runtime": {},
+  "general_demo_isolation": "passed: test replaces demo evaluator with a failing sentinel; it is never called in general",
+  "commit": false,
+  "push": false,
+  "merge": false
+}

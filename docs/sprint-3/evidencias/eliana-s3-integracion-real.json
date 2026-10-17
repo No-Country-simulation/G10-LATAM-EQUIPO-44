@@ -1,0 +1,223 @@
+{
+  "task": "Eliana S3-05",
+  "started_at_utc": "2026-10-17T20:19:12.803121+00:00",
+  "profile": "synthetic_demo_v1",
+  "real_components": [
+    "HTTP",
+    "Gemini",
+    "validation",
+    "confidence",
+    "urgency",
+    "routing",
+    "OCI native copy",
+    "JSON persistence",
+    "GET"
+  ],
+  "mocks": false,
+  "automatic_retries": false,
+  "cases": [
+    {
+      "case_id": "MF_001",
+      "scenario": "NOR",
+      "filename": "MF_001_2026_REC_NOR_PDF.pdf",
+      "source_sha256": "8ff31196cfab247f5662c4ddeceb051be9a522f18bdbf65645651d431e7d61dc",
+      "expected": {
+        "priority": "Rutina",
+        "destination": "Cola_Farmacia",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": true,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Farmacia",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": true,
+        "destination": true,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-E42C5744B2EF4940B0C38FAA081C0C7A",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "passed",
+      "duration_seconds": 7.044,
+      "scenario_name": "NORMAL",
+      "source_metadata": {
+        "bucket": "recibidos",
+        "size": 2124,
+        "etag": "21fa6295-293a-40a3-a035-e688a5164222",
+        "sha256": "8ff31196cfab247f5662c4ddeceb051be9a522f18bdbf65645651d431e7d61dc"
+      },
+      "copy_metadata": {
+        "bucket": "procesados",
+        "size": 2124,
+        "etag": "badc037a-5af4-457a-bb5e-88960c902991",
+        "sha256": "8ff31196cfab247f5662c4ddeceb051be9a522f18bdbf65645651d431e7d61dc"
+      },
+      "json_metadata": {
+        "bucket": "procesados",
+        "size": 1203,
+        "etag": "1c7f7478-a119-4b26-b635-5befa6af1d52",
+        "sha256": "b4551ecdcaccbaeca986f2ea874855754ac1268e7d88ad29f978c72c9d182d96"
+      },
+      "direct_integrity": {
+        "source_bytes_match_fixture": true,
+        "copy_bytes_equal_source": true,
+        "sizes_equal": true,
+        "sha256_equal": true,
+        "original_retained": true,
+        "received_json_retained": true,
+        "final_json_equals_get": true,
+        "only_public_top_level_fields": true
+      },
+      "list_http_status": 200,
+      "list_single_current_result": true
+    },
+    {
+      "case_id": "MF_004",
+      "scenario": "URG",
+      "filename": "MF_004_2026_LAB_URG_TXT.txt",
+      "source_sha256": "c081eb29f0c5f46ebe19b6d03035f2a98170ba5e29720b8e5c30ecbda88a8fd7",
+      "expected": {
+        "priority": "Urgente",
+        "destination": "Cola_Emergencia_Medica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": true,
+      "http_status": 201,
+      "observed": {
+        "priority": "Urgente",
+        "destination": "Cola_Emergencia_Medica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": true,
+        "destination": true,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-2E83BF2620084588B202336E5120659C",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "passed",
+      "duration_seconds": 5.944,
+      "scenario_name": "URGENTE",
+      "source_metadata": {
+        "bucket": "recibidos",
+        "size": 577,
+        "etag": "fa66fdf9-5451-403a-a945-7c9d09966719",
+        "sha256": "c081eb29f0c5f46ebe19b6d03035f2a98170ba5e29720b8e5c30ecbda88a8fd7"
+      },
+      "copy_metadata": {
+        "bucket": "procesados",
+        "size": 577,
+        "etag": "c3104546-7ee8-489d-a4c7-40fcdf493d08",
+        "sha256": "c081eb29f0c5f46ebe19b6d03035f2a98170ba5e29720b8e5c30ecbda88a8fd7"
+      },
+      "json_metadata": {
+        "bucket": "procesados",
+        "size": 1147,
+        "etag": "7a120415-cf66-4ba3-a992-2648b8e3fcd5",
+        "sha256": "bb66298969b6229ab79b1eacd64df1e64662d6c47567cba37a4eb1e9257c2255"
+      },
+      "direct_integrity": {
+        "source_bytes_match_fixture": true,
+        "copy_bytes_equal_source": true,
+        "sizes_equal": true,
+        "sha256_equal": true,
+        "original_retained": true,
+        "received_json_retained": true,
+        "final_json_equals_get": true,
+        "only_public_top_level_fields": true
+      },
+      "list_http_status": 200,
+      "list_single_current_result": true
+    },
+    {
+      "case_id": "ELIANA_SYNTHETIC_AUDIT",
+      "scenario": "AMB",
+      "filename": "eliana-software-incompleto.txt",
+      "source_sha256": "3fb4ae2f5981f685f25cf085a2ea56db354b8762c0782e2811a22ed4fe736ad1",
+      "expected": {
+        "priority": "Rutina",
+        "destination": "Cola_Revision_Humana",
+        "human_review": true,
+        "status": "auditoria_humana"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": true,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Revision_Humana",
+        "human_review": true,
+        "status": "auditoria_humana"
+      },
+      "comparisons": {
+        "priority": true,
+        "destination": true,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 0.5,
+      "document_id": "DOC-CLIN-33ADF7A430DF45B4BD7527D256038804",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "passed",
+      "duration_seconds": 6.062,
+      "scenario_name": "AMBIGUO/AUDITORÍA",
+      "source_metadata": {
+        "bucket": "recibidos",
+        "size": 211,
+        "etag": "62b03a35-017e-447c-ac45-cb1f2d6071ef",
+        "sha256": "3fb4ae2f5981f685f25cf085a2ea56db354b8762c0782e2811a22ed4fe736ad1"
+      },
+      "copy_metadata": {
+        "bucket": "auditoria_humana",
+        "size": 211,
+        "etag": "43cdb9e4-a837-42f6-aa99-52d60584caa5",
+        "sha256": "3fb4ae2f5981f685f25cf085a2ea56db354b8762c0782e2811a22ed4fe736ad1"
+      },
+      "json_metadata": {
+        "bucket": "auditoria_humana",
+        "size": 1105,
+        "etag": "fa0f66a5-645b-4b65-b925-231ebcd5bcbc",
+        "sha256": "4413ac2ae03591e634904e5a9fca1b9fe6e1f646876a7ebe787834989320fd50"
+      },
+      "direct_integrity": {
+        "source_bytes_match_fixture": true,
+        "copy_bytes_equal_source": true,
+        "sizes_equal": true,
+        "sha256_equal": true,
+        "original_retained": true,
+        "received_json_retained": true,
+        "final_json_equals_get": true,
+        "only_public_top_level_fields": true
+      },
+      "list_http_status": 200,
+      "list_single_current_result": true
+    }
+  ],
+  "passed": true,
+  "finished_at_utc": "2026-10-17T20:19:45.313763+00:00"
+}

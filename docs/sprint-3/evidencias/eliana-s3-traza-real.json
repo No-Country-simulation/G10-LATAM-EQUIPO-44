@@ -1,0 +1,189 @@
+{
+  "profile": "synthetic_demo_v1",
+  "instrumentation": "forwarding_wrappers_no_component_substitution",
+  "events": [
+    {
+      "stage": "persist_received",
+      "document_id": "DOC-CLIN-E42C5744B2EF4940B0C38FAA081C0C7A",
+      "status": "recibido",
+      "priority": "Rutina",
+      "destination": "Cola_Procesamiento_Inicial",
+      "review": false
+    },
+    {
+      "stage": "classification_validated",
+      "document_id": "DOC-CLIN-E42C5744B2EF4940B0C38FAA081C0C7A",
+      "status": "procesado",
+      "priority": "Rutina",
+      "destination": "Cola_Farmacia",
+      "review": false,
+      "source_text_available": true
+    },
+    {
+      "stage": "confidence",
+      "document_id": "DOC-CLIN-E42C5744B2EF4940B0C38FAA081C0C7A",
+      "status": "procesado",
+      "priority": "Rutina",
+      "destination": "Cola_Farmacia",
+      "review": false,
+      "confidence_requires_review": false
+    },
+    {
+      "stage": "urgency",
+      "document_id": "DOC-CLIN-E42C5744B2EF4940B0C38FAA081C0C7A",
+      "status": "procesado",
+      "priority": "Rutina",
+      "destination": "Cola_Farmacia",
+      "review": false,
+      "urgency_requires_review": false,
+      "urgent_by_rules": false
+    },
+    {
+      "stage": "routing",
+      "document_id": "DOC-CLIN-E42C5744B2EF4940B0C38FAA081C0C7A",
+      "status": "procesado",
+      "priority": "Rutina",
+      "destination": "Cola_Farmacia",
+      "review": false
+    },
+    {
+      "stage": "copy_verified",
+      "document_id": "DOC-CLIN-E42C5744B2EF4940B0C38FAA081C0C7A",
+      "status": "procesado",
+      "priority": "Rutina",
+      "destination": "Cola_Farmacia",
+      "review": false,
+      "bucket": "procesados"
+    },
+    {
+      "stage": "persist_final",
+      "document_id": "DOC-CLIN-E42C5744B2EF4940B0C38FAA081C0C7A",
+      "status": "procesado",
+      "priority": "Rutina",
+      "destination": "Cola_Farmacia",
+      "review": false
+    },
+    {
+      "stage": "persist_received",
+      "document_id": "DOC-CLIN-2E83BF2620084588B202336E5120659C",
+      "status": "recibido",
+      "priority": "Rutina",
+      "destination": "Cola_Procesamiento_Inicial",
+      "review": false
+    },
+    {
+      "stage": "classification_validated",
+      "document_id": "DOC-CLIN-2E83BF2620084588B202336E5120659C",
+      "status": "procesado",
+      "priority": "Rutina",
+      "destination": "Cola_Historia_Clinica",
+      "review": false,
+      "source_text_available": true
+    },
+    {
+      "stage": "confidence",
+      "document_id": "DOC-CLIN-2E83BF2620084588B202336E5120659C",
+      "status": "procesado",
+      "priority": "Rutina",
+      "destination": "Cola_Historia_Clinica",
+      "review": false,
+      "confidence_requires_review": false
+    },
+    {
+      "stage": "urgency",
+      "document_id": "DOC-CLIN-2E83BF2620084588B202336E5120659C",
+      "status": "procesado",
+      "priority": "Rutina",
+      "destination": "Cola_Historia_Clinica",
+      "review": false,
+      "urgency_requires_review": false,
+      "urgent_by_rules": true
+    },
+    {
+      "stage": "routing",
+      "document_id": "DOC-CLIN-2E83BF2620084588B202336E5120659C",
+      "status": "procesado",
+      "priority": "Urgente",
+      "destination": "Cola_Emergencia_Medica",
+      "review": false
+    },
+    {
+      "stage": "copy_verified",
+      "document_id": "DOC-CLIN-2E83BF2620084588B202336E5120659C",
+      "status": "procesado",
+      "priority": "Urgente",
+      "destination": "Cola_Emergencia_Medica",
+      "review": false,
+      "bucket": "procesados"
+    },
+    {
+      "stage": "persist_final",
+      "document_id": "DOC-CLIN-2E83BF2620084588B202336E5120659C",
+      "status": "procesado",
+      "priority": "Urgente",
+      "destination": "Cola_Emergencia_Medica",
+      "review": false
+    },
+    {
+      "stage": "persist_received",
+      "document_id": "DOC-CLIN-33ADF7A430DF45B4BD7527D256038804",
+      "status": "recibido",
+      "priority": "Rutina",
+      "destination": "Cola_Procesamiento_Inicial",
+      "review": false
+    },
+    {
+      "stage": "classification_validated",
+      "document_id": "DOC-CLIN-33ADF7A430DF45B4BD7527D256038804",
+      "status": "auditoria_humana",
+      "priority": "Rutina",
+      "destination": "Cola_Revision_Humana",
+      "review": true,
+      "source_text_available": true
+    },
+    {
+      "stage": "confidence",
+      "document_id": "DOC-CLIN-33ADF7A430DF45B4BD7527D256038804",
+      "status": "auditoria_humana",
+      "priority": "Rutina",
+      "destination": "Cola_Revision_Humana",
+      "review": true,
+      "confidence_requires_review": true
+    },
+    {
+      "stage": "urgency",
+      "document_id": "DOC-CLIN-33ADF7A430DF45B4BD7527D256038804",
+      "status": "auditoria_humana",
+      "priority": "Rutina",
+      "destination": "Cola_Revision_Humana",
+      "review": true,
+      "urgency_requires_review": false,
+      "urgent_by_rules": false
+    },
+    {
+      "stage": "routing",
+      "document_id": "DOC-CLIN-33ADF7A430DF45B4BD7527D256038804",
+      "status": "auditoria_humana",
+      "priority": "Rutina",
+      "destination": "Cola_Revision_Humana",
+      "review": true
+    },
+    {
+      "stage": "copy_verified",
+      "document_id": "DOC-CLIN-33ADF7A430DF45B4BD7527D256038804",
+      "status": "auditoria_humana",
+      "priority": "Rutina",
+      "destination": "Cola_Revision_Humana",
+      "review": true,
+      "bucket": "auditoria_humana"
+    },
+    {
+      "stage": "persist_final",
+      "document_id": "DOC-CLIN-33ADF7A430DF45B4BD7527D256038804",
+      "status": "auditoria_humana",
+      "priority": "Rutina",
+      "destination": "Cola_Revision_Humana",
+      "review": true
+    }
+  ]
+}
