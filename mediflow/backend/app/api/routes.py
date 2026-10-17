@@ -10,7 +10,8 @@ from starlette.concurrency import run_in_threadpool
 from app.core.oci_client import OCIStorageManager
 from app.models.schemas import TriageResponse
 # Agregado por Edil: la nueva integración se mantiene en un servicio separado.
-from app.services.triage_pipeline import analyze_received_document
+# Importación actualizada para usar el orquestador del Sprint 3
+from app.services.servicio_orquestador import procesar_con_orquestador
 from app.services.llm_errors import (
     LLMConfigurationError, LLMAuthenticationError, LLMInputError,
     LLMQuotaError, LLMTimeoutError, LLMNetworkError, LLMUnavailableError,
@@ -107,7 +108,8 @@ async def post_triage(file: UploadFile = File(...), analyze: bool = Form(False))
         }
         try:
             result = await run_in_threadpool(
-                analyze_received_document, file_bytes, file.filename, doc_id, storage
+                #modificado por Eliana
+                procesar_con_orquestador, file_bytes, file.filename, doc_id, storage
             )
             # Drazen S3-04A: guardar resultado; Edil: no ocultar el fallo de escritura.
             await _persist_triage_result(gestor, result, doc_id)
