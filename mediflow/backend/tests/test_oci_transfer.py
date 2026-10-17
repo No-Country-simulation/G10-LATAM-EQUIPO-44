@@ -63,6 +63,15 @@ def test_success_verifies_content_before_deleting_source():
     )
 
 
+def test_copy_verifies_content_and_retains_source():
+    client = MagicMock()
+    result = ready_mover(client).copy("sample.txt", "recibidos", "procesados")
+
+    assert result.source_size == result.destination_size == len(b"safe test content")
+    client.copy_object.assert_called_once()
+    client.delete_object.assert_not_called()
+
+
 def test_delete_is_not_called_when_source_lookup_fails():
     client = MagicMock()
     client.head_object.side_effect = OCIError(500)

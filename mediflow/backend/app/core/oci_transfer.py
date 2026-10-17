@@ -44,7 +44,7 @@ class TransferResult:
 
 
 class OCIObjectMover:
-    """Move one OCI object without deleting an unverified source."""
+    """Copy or move one OCI object with content verification."""
 
     def __init__(
         self,
@@ -69,12 +69,32 @@ class OCIObjectMover:
         source_bucket: str,
         destination_bucket: str,
     ) -> TransferResult:
-        """Copy, verify, and delete ``object_name``.
+        """Copy, verify, and delete ``object_name`` from the source bucket.
 
         ``destination_object_if_none_match_e_tag="*"`` protects the copy
         against an object appearing at the destination between the preflight
         check and the copy request.
         """
+        result = self.copy(object_name, source_bucket, destination_bucket)
+        try:
+            self.object_storage.delete_object(
+                namespace_name=self.namespace,
+                bucket_name=source_bucket,
+                object_name=object_name,
+            )
+        except Exception as error:
+            raise ObjectTransferError(
+                f"La copia fue verificada, pero no se eliminó el origen '{object_name}'."
+            ) from error
+        return result
+
+    def copy(
+        self,
+        object_name: str,
+        source_bucket: str,
+        destination_bucket: str,
+    ) -> TransferResult:
+        """Copy and verify ``object_name`` while retaining the source."""
         source_head = self._head_source(source_bucket, object_name)
         self._ensure_destination_is_empty(destination_bucket, object_name)
 
@@ -114,17 +134,6 @@ class OCIObjectMover:
             raise TransferVerificationError(
                 f"El tamaño copiado no coincide para '{object_name}'."
             )
-
-        try:
-            self.object_storage.delete_object(
-                namespace_name=self.namespace,
-                bucket_name=source_bucket,
-                object_name=object_name,
-            )
-        except Exception as error:
-            raise ObjectTransferError(
-                f"La copia fue verificada, pero no se eliminó el origen '{object_name}'."
-            ) from error
 
         return TransferResult(
             object_name=object_name,

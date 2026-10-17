@@ -115,7 +115,7 @@ async def post_triage(file: UploadFile = File(...)):
             try:
                 manager = await run_in_threadpool(OCIStorageManager)
                 result = await run_in_threadpool(
-                    manager.mover_archivo,
+                    manager.copiar_archivo,
                     object_name,
                     settings.OCI_BUCKET_RECIBIDOS,
                     destination_bucket,

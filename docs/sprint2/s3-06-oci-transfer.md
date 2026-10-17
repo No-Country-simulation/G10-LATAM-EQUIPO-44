@@ -145,3 +145,4 @@ reutilizaron como evidencia de acceso real.
 - 2026-10-16: Pendiente de confirmación: combinar solo funciones compatibles de Eliana/Laura/Nicolás con el extractor Cohere y `mover_archivo()` local; preservar OCI y evitar checkout completo de ramas.
 - 2026-10-16: Se integró `origin/feature/orquestador` con sus módulos de pipeline, reglas y APIs OCI; se conservaron Cohere y `oci_transfer.py`, y `mover_archivo()` fue conectado al verificador SHA-256/tamaño.
 - 2026-10-16: Se añadió `score_confianza.py` de la corrección MVP de Laura y se corrigió el catálogo de urgencia. Matriz simulada: normal→procesados, urgente→procesados, ambiguo→auditoria_humana; falla de permiso→HTTP 502 y original conservado.
+- 2026-10-16: Cambio solicitado: el flujo automático usa `copiar_archivo()` (copiar + verificar SHA-256/tamaño) y conserva el objeto en `recibidos`; `mover_archivo()` queda disponible para compatibilidad manual.

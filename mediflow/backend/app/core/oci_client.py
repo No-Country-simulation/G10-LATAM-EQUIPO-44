@@ -187,6 +187,16 @@ class OCIStorageManager:
             self.config["region"],
         ).move(nombre_archivo, bucket_origen, bucket_destino)
 
+    def copiar_archivo(
+        self, nombre_archivo: str, bucket_origen: str, bucket_destino: str
+    ) -> Any:
+        """Copia y verifica un objeto, conservando el original en origen."""
+        return OCIObjectMover(
+            self.object_storage,
+            self.namespace,
+            self.config["region"],
+        ).copy(nombre_archivo, bucket_origen, bucket_destino)
+
     # Métodos agregados por Drazen para Sprint 3 (S3-04A): persistencia, recuperación y verificación
     def obtener_objeto_bytes(self, nombre_bucket: str, nombre_objeto: str) -> bytes:
         """Obtiene el contenido binario de un objeto en memoria sin guardar en disco."""
