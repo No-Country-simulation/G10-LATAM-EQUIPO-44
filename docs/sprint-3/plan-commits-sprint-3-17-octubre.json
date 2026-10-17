@@ -1,0 +1,214 @@
+{
+  "date": "2026-10-17",
+  "status": "PROPOSED_NOT_EXECUTED",
+  "base_commit": "47701cb991c9e720587863f1f1b69120482ea963",
+  "current_branch": "cierre/edil-sprint-3-2026-10-16",
+  "proposed_branch": "cierre/sprint-3-consolidado-2026-10-17",
+  "note": "Responsabilidad funcional, no atribucion de autoria Git. Un archivo compartido se incorpora una sola vez con su version final. No aplicar los parches historicos.",
+  "expected_staged_entries_sha256_before_repartition": "e7669d29936258d3fac83a3c76f2c7dfd573623ce0f11548ea155cd4e3f86f78",
+  "input_sha256": {
+    ".gitattributes": "a65a4defa217612eae9af262c956e333b5a0d24a66a30b62f643e560c2402ad3",
+    "docs/sprint-3/S3-06-brando-josue-traslado-oci.md": "d52d1d8461713fa9efbc361317ee15a81f12d53e3580f12b12c864aafce17d19",
+    "docs/sprint-3/api_documentos_flor.md": "2d41e2457a32df688facecdbe464913fe1bd7db3a819980743f2c36bcfafb64c",
+    "docs/sprint-3/cierre-drazen-brando-sprint-3-17-octubre.md": "2a01d698904cce824f01dcee83f3f9faddfcc64dc43b0a6afeb7ff19c38f04e8",
+    "docs/sprint-3/cierre-edil-flutter-15-octubre.md": "ed80bb54971f8244f42a85ebed40ce88fe7a6e4ac347122cd0ef9497d05c43a4",
+    "docs/sprint-3/cierre-edil-sprint-3-16-octubre.md": "ab0661d536772ddaee7c200746cd33467acfca08cfd3494593dcb46b0d12788b",
+    "docs/sprint-3/cierre-integracion-eliana.md": "e4c24e56c28ceff766a778a1def90b6416fcf3cfc5a9c8c6bd7e6f4fdc390324",
+    "docs/sprint-3/correccion-urgencia-demo-17-octubre.md": "2c15c8a7ac0c7cead1c8d623b5f44a7968ab056dc15d49ace6a5ca6570caa5ed",
+    "docs/sprint-3/edil-s3-08-y-s3-04b.md": "09ec37205a90d37acf70e2a4cea6a74be4258115a37a249b0b30a7eafd437f25",
+    "docs/sprint-3/evidencias/drazen-brando-s3-api-real.json": "e349f97b179bfa002fbecdc3a80b47a122d74d45470530d9a0b37e54cb4b17a6",
+    "docs/sprint-3/evidencias/drazen-brando-s3-auditoria-real.json": "9dfacd66b8f52fc63ccab82c32103bf78ecf00d8a7ff31424227e0e9716cad47",
+    "docs/sprint-3/evidencias/drazen-brando-s3-oci-real.json": "bc1567f8be04353270c078dd6576c84c0435adefb2386073aad6318f4fd171e7",
+    "docs/sprint-3/evidencias/edil-cierre-16-octubre.json": "f902ea793e32b435b68c9fee32e1ea2a65986b03374f0d5b22933a6d23fc93c3",
+    "docs/sprint-3/evidencias/edil-revalidacion-17-octubre.json": "6c548f600c77ed154afe4535f7e8a508e5228a0e0a4cc59fa039c7f9061aa18c",
+    "docs/sprint-3/evidencias/eliana-s3-integracion-real.json": "7b890dcc5090a5da2c896e55805768984b0482deba7deea90342f50339929171",
+    "docs/sprint-3/evidencias/eliana-s3-pruebas-locales.txt": "a53d5f62833ee89cde2d7afba30accaa5414de2703fef66385e60e0ac6be9340",
+    "docs/sprint-3/evidencias/eliana-s3-traza-real.json": "0982a24477138863eabfaacbf72aaa4d2be68c5879112402fc113c6507eda0b5",
+    "docs/sprint-3/evidencias/eliana-s3-verificacion.json": "2a7620800f7d93abed9207b9f0a7659a4921c8a9723d6a70d1efc20534f1edf3",
+    "docs/sprint-3/evidencias/flor-s3-cambios.patch": "104e30ac5f40327bb6c24f1c6b1be80818b60002b92e87985726d80d4cce7ed0",
+    "docs/sprint-3/evidencias/flor-s3-detalle.png": "db223b37b2bdfe4d0fbc3676ab3aca57c7e9ebf93bda98b9e1402c5c409be5fa",
+    "docs/sprint-3/evidencias/flor-s3-get-individual.json": "72a4e3aa35d6321b45a23a7f54886bc4f0bf338f734fc3f21334952f0ecd6932",
+    "docs/sprint-3/evidencias/flor-s3-verificacion.json": "7ef2644abc6068c5ac85fc71f2ca87ba662fdba737657eea38c74fa41410d65a",
+    "docs/sprint-3/evidencias/laura-s3-demo-regression.json": "394359a46b19a511f067f1653b08ecbc56abb66eac03f7db4b100db21b832409",
+    "docs/sprint-3/evidencias/nico-correccion-diagnostico-antes-17-octubre.json": "c90185841c9fd5c9ffc801c22b1312ede729ab38eb21f4c8b95429c0f0b30727",
+    "docs/sprint-3/evidencias/nico-diagnostico-dataset-urgente-17-octubre.json": "7b0e4a29ffa089177264c0231d739ffbb1e4b4b6d65db4629daf92bc148e3155",
+    "docs/sprint-3/evidencias/nico-mf001-pdf-transporte-17-octubre.json": "692ab40286c18c45954f5d43437b56a8a7c7f21228feaaa1f414bbc87cde8a56",
+    "docs/sprint-3/evidencias/nico-mf001-repeticion-17-octubre.json": "6052845fe4e73862a840fec70ef467b5acb6eaacaa5147369cbec9a103487cbf",
+    "docs/sprint-3/evidencias/nico-s3-01-4-consolidado-17-octubre.json": "00424f9f0f305e5ae7764983a77f602ad6aaac127626300098584256a3417dd2",
+    "docs/sprint-3/evidencias/nico-s3-01-4-corregido-demo-17-octubre.json": "75b053e4a0b7a044447308df3ef06a7c14019aba33e4c2c895c096c55ae152f5",
+    "docs/sprint-3/evidencias/nico-s3-01-4-dataset-17-octubre.json": "5a3969a73ead4382a37c1166c60e0ae0875c009fac4e69b3bb6ac0cb7d3f5e0c",
+    "docs/sprint-3/evidencias/nico-traza-persistencia-corregida-17-octubre.json": "7bac59de2c3695a09e16dae2caa59010da15128045478b85df9ecf4f28834e7c",
+    "docs/sprint-3/guia-verificacion-json-oci.md": "9f257dfcd869a5924bc0cd4ba160b8567d906d6c64be51f8dad2d975793724ba",
+    "docs/sprint-3/nico-s3-01-4-pruebas-dataset-17-octubre.md": "1e917216031fc346e35af568befc65abadcc34207715f4b50ffe7c4bc34652f2",
+    "mediflow/.env.example": "5af1aa29cd49c4a1ce00073c0374a0531a00250dfd65f5e0b04f913854074a05",
+    "mediflow/backend/app/core/orquestador.py": "21d1a170403447e73cbc9b91722f02eda5feb2ab7f653d31f7b5d6e4b9c64a87",
+    "mediflow/backend/app/services/gemini_client.py": "e58cd1b46a0c079c2da70b5fb372d0d80632ac46970494d5af18767ea67be758",
+    "mediflow/backend/app/services/triage_pipeline.py": "03deb4daf3e5ac7742f72814eb6c491251c0750633e9bbf64f52afb875a03ef3",
+    "mediflow/backend/conexion-oci.md": "6e855d50edba57fc5484193c46a87255dcb4b096a2d7db13de775c820e876752",
+    "mediflow/backend/scripts/verify_sprint3_oci.py": "62fe08e0f22995d2f08fea8943c46ad86d3985f1c70d49264758117dda126471",
+    "mediflow/backend/tests/test_confidence_profiles.py": "d3d7191ebd007ebdf2b22d80fcfb5f474974295fa0b44295eaf8cbae1dbf09bf",
+    "mediflow/backend/tests/test_document_source_evidence.py": "496f61cb1de33c063f0fb4bf4918358d4ce63ac863c6d036858abe2623581caf",
+    "mediflow/backend/tests/test_eliana_integration.py": "81a9a899f93343f90ab1a7ad523f0c6393d706f04d447a3c5f3dedc009bd385e",
+    "mediflow/backend/tests/test_sprint3_oci_verifier.py": "15b86961bcc2b9a1a3a6e174b3d5d79e211c3fe37762118dbc8a916dfd1715e3",
+    "mediflow/backend/tests/test_synthetic_demo_urgency.py": "1aaa0335636c45e88ca844a5dcf0efc510095918bf36bb04258d613e13466e30",
+    "mediflow/data_ai/README.md": "13e494286f64d36dac624f286ba69b3dd2d8aa1d591bc48d4ba610db037045f3",
+    "mediflow/data_ai/README_ENTREGA_ELIANA.md": "baaf28371efeca894ab9aea098c2896091c5d9258bd1e6bec758326c83ac7f23",
+    "mediflow/data_ai/confidence_profiles.py": "6ddcbd4cb2a2c58be062000de222f8f958cae74c074c7d75ab8e28fcd8c530d9",
+    "mediflow/data_ai/docs/criterios_por_tipo_propuesta_s3_02_1.md": "472f546dd3c38b65c6f73d7a2bb13d0db393016bcfbfbe6ee02b9d6f34db94ec",
+    "mediflow/data_ai/rules/confidence_profiles_mvp.json": "0638d299a9b34ba7984976152c76940d04bfabbce645f676663c4591994990aa",
+    "mediflow/data_ai/synthetic_demo_rules.py": "98e733c1a49884e0ba9e708fd08643b7d876d3cdcfcca4ba08e9ef38bc92cd3c",
+    "mediflow/data_ai/test/test_dataset_pipeline_evaluator.py": "ad2b42153dcb335d56f92aa7c330302b62d182fd1ab19f6cdeca11438167d0da",
+    "mediflow/data_ai/validate_dataset_pipeline.py": "3024b9a57ee9202db95ef8041969a4c51c7aaa3dbf0fb8cae4571d7b04398941",
+    "mediflow/frontend_mobile/mediflow_app/README.md": "16646e9b463ed229f094ad833ae29312b4416c701a0a131ba6ae2185b39ac419",
+    "mediflow/frontend_mobile/mediflow_app/test/triage_live_http_test.dart": "29bdfc1902a2b3e2b65480f0b16b72c3c2a3e37e06c7e32c7e83f3b4ec4e3228",
+    "mediflow/frontend_web/S3-07-cierre.md": "e93ffbed80f8add74f90e6ee8e5cf61d41533417e9357e2a85483560386a676e",
+    "mediflow/frontend_web/src/README.md": "ab488793cc1b38f3a0e847856092bc9feb3ede757e99824e39d4a90771e1178a",
+    "mediflow/frontend_web/src/assets/js/document-detail.js": "45031778ebfc59ace12610bf9037e94864cff10b3e3ec31f8130743e3c337d0e",
+    "mediflow/frontend_web/src/assets/js/documents-api.js": "7079d9b1e5ff3f75dddf47089e0f727654577260a13fb7993218e155c95712b0",
+    "mediflow/frontend_web/src/historial/app.js": "246d1d88d7bdf570e9c7434eec090d08fec8e9c0ebaa80628486128cdf83c5e5",
+    "mediflow/frontend_web/src/historial/index.html": "6f65a32bc7c7044193a9fef59d2769e9f29ecffa036cb2e04decc82029ac201d",
+    "mediflow/frontend_web/tests/document-detail.test.js": "6c6e26a2aef509b82591d0d17649c40f81cd5a6e24061f4f97a0f68f7115992c"
+  },
+  "commits": [
+    {
+      "id": "01",
+      "owners": [
+        "Transversal"
+      ],
+      "message": "chore(dataset): preservar PDF como binarios",
+      "files": [
+        ".gitattributes"
+      ]
+    },
+    {
+      "id": "02",
+      "owners": [
+        "Nicolas",
+        "Laura",
+        "Eliana (orquestacion compartida)"
+      ],
+      "message": "feat(triage): consolidar perfiles de confianza y demo sintetica",
+      "files": [
+        "docs/sprint-3/evidencias/laura-s3-demo-regression.json",
+        "mediflow/.env.example",
+        "mediflow/backend/app/core/orquestador.py",
+        "mediflow/backend/app/services/gemini_client.py",
+        "mediflow/backend/app/services/triage_pipeline.py",
+        "mediflow/backend/tests/test_confidence_profiles.py",
+        "mediflow/backend/tests/test_document_source_evidence.py",
+        "mediflow/backend/tests/test_synthetic_demo_urgency.py",
+        "mediflow/data_ai/README.md",
+        "mediflow/data_ai/README_ENTREGA_ELIANA.md",
+        "mediflow/data_ai/confidence_profiles.py",
+        "mediflow/data_ai/docs/criterios_por_tipo_propuesta_s3_02_1.md",
+        "mediflow/data_ai/rules/confidence_profiles_mvp.json",
+        "mediflow/data_ai/synthetic_demo_rules.py"
+      ]
+    },
+    {
+      "id": "03",
+      "owners": [
+        "Nicolas"
+      ],
+      "message": "test(data-ai): registrar evaluacion del dataset y urgencia demo",
+      "files": [
+        "docs/sprint-3/correccion-urgencia-demo-17-octubre.md",
+        "docs/sprint-3/evidencias/nico-correccion-diagnostico-antes-17-octubre.json",
+        "docs/sprint-3/evidencias/nico-diagnostico-dataset-urgente-17-octubre.json",
+        "docs/sprint-3/evidencias/nico-mf001-pdf-transporte-17-octubre.json",
+        "docs/sprint-3/evidencias/nico-mf001-repeticion-17-octubre.json",
+        "docs/sprint-3/evidencias/nico-s3-01-4-consolidado-17-octubre.json",
+        "docs/sprint-3/evidencias/nico-s3-01-4-corregido-demo-17-octubre.json",
+        "docs/sprint-3/evidencias/nico-s3-01-4-dataset-17-octubre.json",
+        "docs/sprint-3/evidencias/nico-traza-persistencia-corregida-17-octubre.json",
+        "docs/sprint-3/nico-s3-01-4-pruebas-dataset-17-octubre.md",
+        "mediflow/data_ai/test/test_dataset_pipeline_evaluator.py",
+        "mediflow/data_ai/validate_dataset_pipeline.py"
+      ]
+    },
+    {
+      "id": "04",
+      "owners": [
+        "Drazen",
+        "Brando",
+        "Edil (apoyo OCI)"
+      ],
+      "message": "test(oci): verificar persistencia y recuperacion Sprint 3",
+      "files": [
+        "docs/sprint-3/S3-06-brando-josue-traslado-oci.md",
+        "docs/sprint-3/api_documentos_flor.md",
+        "docs/sprint-3/cierre-drazen-brando-sprint-3-17-octubre.md",
+        "docs/sprint-3/evidencias/drazen-brando-s3-api-real.json",
+        "docs/sprint-3/evidencias/drazen-brando-s3-auditoria-real.json",
+        "docs/sprint-3/evidencias/drazen-brando-s3-oci-real.json",
+        "docs/sprint-3/guia-verificacion-json-oci.md",
+        "mediflow/backend/conexion-oci.md",
+        "mediflow/backend/scripts/verify_sprint3_oci.py",
+        "mediflow/backend/tests/test_sprint3_oci_verifier.py"
+      ]
+    },
+    {
+      "id": "05",
+      "owners": [
+        "Flor"
+      ],
+      "message": "feat(web): consultar detalle individual con estados y pruebas",
+      "files": [
+        "docs/sprint-3/evidencias/flor-s3-cambios.patch",
+        "docs/sprint-3/evidencias/flor-s3-detalle.png",
+        "docs/sprint-3/evidencias/flor-s3-get-individual.json",
+        "docs/sprint-3/evidencias/flor-s3-verificacion.json",
+        "mediflow/frontend_web/S3-07-cierre.md",
+        "mediflow/frontend_web/src/README.md",
+        "mediflow/frontend_web/src/assets/js/document-detail.js",
+        "mediflow/frontend_web/src/assets/js/documents-api.js",
+        "mediflow/frontend_web/src/historial/app.js",
+        "mediflow/frontend_web/src/historial/index.html",
+        "mediflow/frontend_web/tests/document-detail.test.js"
+      ]
+    },
+    {
+      "id": "06",
+      "owners": [
+        "Eliana"
+      ],
+      "message": "test(integracion): consolidar cierre del pipeline Sprint 3",
+      "files": [
+        "docs/sprint-3/cierre-integracion-eliana.md",
+        "docs/sprint-3/evidencias/eliana-s3-integracion-real.json",
+        "docs/sprint-3/evidencias/eliana-s3-pruebas-locales.txt",
+        "docs/sprint-3/evidencias/eliana-s3-traza-real.json",
+        "docs/sprint-3/evidencias/eliana-s3-verificacion.json",
+        "mediflow/backend/tests/test_eliana_integration.py"
+      ]
+    },
+    {
+      "id": "07",
+      "owners": [
+        "Edil"
+      ],
+      "message": "test(flutter): documentar cierre y verificacion HTTP existente",
+      "files": [
+        "docs/sprint-3/cierre-edil-flutter-15-octubre.md",
+        "docs/sprint-3/cierre-edil-sprint-3-16-octubre.md",
+        "docs/sprint-3/edil-s3-08-y-s3-04b.md",
+        "docs/sprint-3/evidencias/edil-cierre-16-octubre.json",
+        "docs/sprint-3/evidencias/edil-revalidacion-17-octubre.json",
+        "mediflow/frontend_mobile/mediflow_app/README.md",
+        "mediflow/frontend_mobile/mediflow_app/test/triage_live_http_test.dart"
+      ]
+    },
+    {
+      "id": "08",
+      "owners": [
+        "Entrega transversal"
+      ],
+      "message": "docs(sprint3): agregar auditoria y plan de cierre consolidado",
+      "files": [
+        "docs/sprint-3/entrega-sprint-3-17-octubre.md",
+        "docs/sprint-3/plan-commits-sprint-3-17-octubre.json",
+        "docs/sprint-3/evidencias/preparacion-git-sprint-3-17-octubre.json"
+      ]
+    }
+  ]
+}

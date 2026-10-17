@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-17",
+  "base_commit": "47701cb991c9e720587863f1f1b69120482ea963",
+  "main_commit": "47701cb991c9e720587863f1f1b69120482ea963",
+  "branch": "cierre/edil-sprint-3-2026-10-16",
+  "initial_pending_files": 56,
+  "final_planned_files": 64,
+  "initial_staged_files": 31,
+  "mixed_index_worktree_files": [
+    "docs/sprint-3/guia-verificacion-json-oci.md",
+    "mediflow/backend/app/core/orquestador.py",
+    "mediflow/backend/tests/test_synthetic_demo_urgency.py",
+    "mediflow/data_ai/docs/criterios_por_tipo_propuesta_s3_02_1.md"
+  ],
+  "original_working_files_sha256_verified": true,
+  "index_entries_sha256": "e7669d29936258d3fac83a3c76f2c7dfd573623ce0f11548ea155cd4e3f86f78",
+  "audit_initial_files": {
+    "pending_files_scanned": 56,
+    "json_files_parsed": 17,
+    "secret_findings": [],
+    "sensitive_pending_filenames": [],
+    "potential_sensitive_evidence": [],
+    "ast_duplicate_definitions": [],
+    "conflict_markers": [],
+    "unmerged_entries": false,
+    "pdfs": [
+      {
+        "path": "mediflow/data_ai/dataset/ambiguo/MF_003_2025_LAB_AMB_PDF.pdf",
+        "matches_HEAD_bytes": true,
+        "matches_index_bytes": true,
+        "strict_pdf_valid": true,
+        "pages": 1,
+        "sha256": "0c7fe18cb4e82d62bad35c8ab65272911ab328273b57c3c0b27af5a2d3fbc2e4"
+      },
+      {
+        "path": "mediflow/data_ai/dataset/normal/MF_001_2026_REC_NOR_PDF.pdf",
+        "matches_HEAD_bytes": true,
+        "matches_index_bytes": true,
+        "strict_pdf_valid": true,
+        "pages": 1,
+        "sha256": "8ff31196cfab247f5662c4ddeceb051be9a522f18bdbf65645651d431e7d61dc"
+      },
+      {
+        "path": "mediflow/data_ai/dataset/normal/MF_006_2026_IMG_NOR_PDF.pdf",
+        "matches_HEAD_bytes": true,
+        "matches_index_bytes": true,
+        "strict_pdf_valid": true,
+        "pages": 1,
+        "sha256": "f103646729b17d56c623b23bb0a41f285e037a1443b663be32327502914cb710"
+      },
+      {
+        "path": "mediflow/data_ai/dataset/normal/MF_012_2026_CER_NOR_PDF.pdf",
+        "matches_HEAD_bytes": true,
+        "matches_index_bytes": true,
+        "strict_pdf_valid": true,
+        "pages": 1,
+        "sha256": "9d285cc8dacb3cd50faf276c3359d88112e8e4d5ccaa2900187ca3d3e6ab479f"
+      },
+      {
+        "path": "mediflow/data_ai/dataset/urgente/MF_009_2026_ORD_URG_PDF.pdf",
+        "matches_HEAD_bytes": true,
+        "matches_index_bytes": true,
+        "strict_pdf_valid": true,
+        "pages": 1,
+        "sha256": "ace690efb4ea6eccad1bfd70f3639ef21c85c9ed8d7e42ea80e6e1fc5e6233f3"
+      },
+      {
+        "path": "mediflow/data_ai/dataset/urgente/MF_011_2026_EPI_URG_PDF.pdf",
+        "matches_HEAD_bytes": true,
+        "matches_index_bytes": true,
+        "strict_pdf_valid": true,
+        "pages": 1,
+        "sha256": "0127cc778cf5259b65e9f4fe92c0287bf44a1b7bfdcedfd55abddbcf75ea117d"
+      }
+    ],
+    "gitignore_verified_for_env_pem_key_oci": true,
+    "local_paths_and_object_ids_present_are_metadata_not_credentials": true
+  },
+  "recovered_artifacts": [
+    {
+      "path": "docs/sprint-3/evidencias/laura-s3-demo-regression.json",
+      "source": "C:\\Users\\leno\\Documents\\Codex\\2026-10-17\\contin-a-el-cierre-del-sprint\\outputs\\laura-s3-demo-regression.json",
+      "sha256": "394359a46b19a511f067f1653b08ecbc56abb66eac03f7db4b100db21b832409",
+      "treatment": "copied unchanged"
+    },
+    {
+      "path": "docs/sprint-3/evidencias/flor-s3-get-individual.json",
+      "source": "C:\\Users\\leno\\Documents\\Codex\\2026-10-17\\contin-a-el-cierre-del-sprint\\outputs\\flor-s3-get-individual.json",
+      "sha256": "72a4e3aa35d6321b45a23a7f54886bc4f0bf338f734fc3f21334952f0ecd6932",
+      "treatment": "copied unchanged"
+    },
+    {
+      "path": "docs/sprint-3/evidencias/flor-s3-detalle.png",
+      "source": "C:\\Users\\leno\\Documents\\Codex\\2026-10-17\\contin-a-el-cierre-del-sprint\\outputs\\flor-s3-detalle.png",
+      "sha256": "db223b37b2bdfe4d0fbc3676ab3aca57c7e9ebf93bda98b9e1402c5c409be5fa",
+      "treatment": "copied unchanged"
+    },
+    {
+      "path": "docs/sprint-3/evidencias/flor-s3-verificacion.json",
+      "source": "C:\\Users\\leno\\Documents\\Codex\\2026-10-17\\contin-a-el-cierre-del-sprint\\outputs\\flor-s3-verificacion.json",
+      "sha256": "7ef2644abc6068c5ac85fc71f2ca87ba662fdba737657eea38c74fa41410d65a",
+      "treatment": "copied unchanged"
+    },
+    {
+      "path": "docs/sprint-3/evidencias/flor-s3-cambios.patch",
+      "source": "C:\\Users\\leno\\Documents\\Codex\\2026-10-17\\contin-a-el-cierre-del-sprint\\outputs\\flor-s3-cambios.patch",
+      "sha256": "104e30ac5f40327bb6c24f1c6b1be80818b60002b92e87985726d80d4cce7ed0",
+      "treatment": "historical reference only; never applied"
+    }
+  ],
+  "screenshot_review": "MF_004 synthetic case; document ID matches GET evidence; synthetic names and clinical content visible, authorized synthetic dataset only. No keys or tokens visible.",
+  "artifact_patch_note": "Historical four-file patch, incomplete compared with current seven-file web implementation; copied only, not applied or used as source of final code.",
+  "tests": {
+    "backend_data_ai": {
+      "passed": 363,
+      "subtests_passed": 21,
+      "integration_deselected": 5,
+      "warnings": 2,
+      "command": "python -m pytest tests ../data_ai -m \"not integration\" -q -p no:cacheprovider --basetemp <temporary-directory>"
+    },
+    "web": {
+      "passed": 40,
+      "failed": 0,
+      "syntax_checks": 3,
+      "command": "node --test tests/*.test.js"
+    },
+    "flutter": {
+      "passed": 178,
+      "opt_in_skipped": 2,
+      "analyze": "No issues found",
+      "commands": [
+        "flutter analyze --no-pub",
+        "flutter test --no-pub --reporter expanded"
+      ]
+    }
+  },
+  "real_services_run_this_review": false,
+  "previous_real_evidence": "Retained historical reports, not a fresh Gemini/OCI run. Laura demo regression 9/9; Eliana 3 real cases; Flor read-only GET; OCI verifier uses synthetic fixture without Gemini.",
+  "backup_directory": "C:\\Users\\leno\\AppData\\Local\\Temp\\MediFlow-sprint3-git-review-17oct-pmtnas6f",
+  "flutter_logs_directory": "C:\\Users\\leno\\AppData\\Local\\Temp\\MediFlow-s3-flutter-verificacion-0dfa529bae2a4cd597eaa7fe659630cd",
+  "operations_not_performed": [
+    "commit",
+    "push",
+    "merge",
+    "switch branch",
+    "modify main",
+    "modify Flutter files",
+    "apply historical patches"
+  ]
+}
