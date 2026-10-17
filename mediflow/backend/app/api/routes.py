@@ -109,6 +109,9 @@ async def post_triage(file: UploadFile = File(...), analyze: bool = Form(False))
             result = await run_in_threadpool(
                 analyze_received_document, file_bytes, file.filename, doc_id, storage
             )
+            # Agregado por Edil: integrar copia verificada de Brando antes de
+            # confirmar el resultado final. Nunca borrar el original recibido.
+            result = await _copy_original_to_result_bucket(gestor, result, doc_id, bucket_name, object_name)
             # Drazen S3-04A: guardar resultado; Edil: no ocultar el fallo de escritura.
             await _persist_triage_result(gestor, result, doc_id)
             return result
@@ -177,6 +180,29 @@ async def post_triage(file: UploadFile = File(...), analyze: bool = Form(False))
     # await _persist_triage_result(gestor, initial_response, doc_id)
     # return initial_response
     return initial_response
+
+
+async def _copy_original_to_result_bucket(gestor, payload, document_id, source_bucket, object_name):
+    try:
+        result = TriageResponse.model_validate(payload, strict=True)
+        if result.documento_id != document_id or result.status == "recibido":
+            raise ValueError("El resultado no corresponde al análisis recibido.")
+        target_bucket = gestor.determinar_bucket_por_estado(result.status)
+        if not isinstance(target_bucket, str) or not target_bucket.strip() or target_bucket == source_bucket:
+            raise ValueError("El bucket final no es válido.")
+        await run_in_threadpool(gestor.copiar_archivo, object_name, source_bucket, target_bucket)
+        # El contrato sigue describiendo un archivo original, ahora su copia
+        # verificada; no se añaden hashes ni campos internos al JSON público.
+        data = result.model_dump()
+        data["almacenamiento_oci"] = {
+            "bucket": target_bucket, "ruta_objeto": object_name, "status_backup": "exito",
+        }
+        return TriageResponse.model_validate(data, strict=True)
+    except Exception as error:
+        logger.warning("triage_verified_copy_failed category=%s document_id=%s", type(error).__name__, document_id)
+        raise HTTPException(status_code=503,
+            detail="No se pudo verificar la copia OCI. El documento original sigue recibido.",
+            headers={"X-Document-ID": document_id}) from None
 
 
 async def _persist_triage_result(gestor, payload, document_id: str):

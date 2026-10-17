@@ -219,3 +219,16 @@ Agregado por Edil: si falla el guardado JSON, POST devuelve 503 y conserva el or
 El JSON recibido se guarda antes del análisis. Si Gemini falla, el archivo y su JSON recibido quedan consultables por ID.
 El código anterior se conserva comentado en routes.py. El listado deduplica primero las versiones procesadas/auditoría antes de filtrar estado, para no mostrar una recepción antigua como pendiente.
 No hay aún reprocesamiento idempotente ni cambios de estado clínicos aprobados; reenvíos generan otro ID.
+# Integración Sprint 3 — 16 de octubre de 2026
+
+Agregado por Edil: el POST actual conserva analyze por consentimiento y Gemini.
+Después de la extracción aplica el orquestador, el umbral MVP 0.70 de Laura y el
+detector de Nicolás; copia el original con verificación SHA-256/tamaño/ETag al
+bucket final antes de guardar el JSON. El original y JSON de recepción siguen
+en recibidos si falla análisis, copia o persistencia final. La respuesta exitosa
+identifica la copia verificada en procesados o auditoria_humana.
+Los GET actuales y la carga única de mediflow/.env se conservan.
+Las notas anteriores describen etapas previas; consultar
+docs/sprint-3/integracion-ramas-16-octubre.md para procedencia, criterios MVP,
+decisiones sobre las ramas y límites de validación real. No se declara precisión
+clínica ni revisión humana completada por almacenar auditoria_humana.

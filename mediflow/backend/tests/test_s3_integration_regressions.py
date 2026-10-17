@@ -23,6 +23,8 @@ def test_persistence_failure_never_reports_success(analyze, caplog):
          patch("app.api.routes.analyze_received_document") as llm:
         manager = factory.return_value
         manager.settings.bucket_recibidos = "recibidos"
+        # Agregado por Edil: la copia termina antes de probar el fallo JSON final.
+        manager.determinar_bucket_por_estado.return_value = "procesados"
         manager.subir_a_recibidos.side_effect = lambda body, name: name
         # Agregado por Edil: recepción exitosa y fallo final si hubo análisis.
         manager.guardar_resultado_triage.side_effect = [None, PermissionError("private-secret")] if analyze else PermissionError("private-secret")

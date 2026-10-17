@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mediflow_app/models/selected_document.dart';
@@ -53,15 +54,102 @@ void main() {
     expect(await service.pickDocument(), isNull);
   });
 
-  test('acepta tamaño cero y ruta no disponible', () async {
-    final service = FilePickerService(
-      pickFile: () async =>
-          StubPlatformFile(name: 'vacio.txt', bytes: 0, localPath: null),
-    );
+  // Prueba anterior conservada como referencia:
+  // test('acepta tamaño cero y ruta no disponible', ...)
+  // expect(document?.size, 0);
+  // expect(document?.formattedSize, '0 B');
+  // Agregado por Edil: un archivo vacío no puede procesarse; ahora se rechaza
+  // al seleccionar para no trasladar ese error al backend ni al usuario tarde.
+  for (final path in <String?>[null, '/local/documento.txt']) {
+    test('rechaza tamaño cero antes de leer bytes con ruta $path', () async {
+      final file = _MeasuredPlatformFile(
+        metadataLength: 0,
+        actualLength: 0,
+        localPath: path,
+      );
+      final service = FilePickerService(pickFile: () async => file);
+
+      await expectLater(
+        service.pickDocument(),
+        throwsA(isA<DocumentEmptyException>()),
+      );
+      expect(file.readCalls, 0);
+    });
+
+    test('rechaza más de 10 MiB antes de leer con ruta $path', () async {
+      final file = _MeasuredPlatformFile(
+        metadataLength: FilePickerService.maxFileBytes + 1,
+        actualLength: FilePickerService.maxFileBytes + 1,
+        localPath: path,
+      );
+      final service = FilePickerService(pickFile: () async => file);
+
+      await expectLater(
+        service.pickDocument(),
+        throwsA(isA<DocumentTooLargeException>()),
+      );
+      expect(file.readCalls, 0);
+    });
+
+    test('acepta exactamente 10 MiB con ruta $path', () async {
+      final file = _MeasuredPlatformFile(
+        metadataLength: FilePickerService.maxFileBytes,
+        actualLength: FilePickerService.maxFileBytes,
+        localPath: path,
+      );
+      final service = FilePickerService(pickFile: () async => file);
+
+      final document = await service.pickDocument();
+
+      expect(document?.size, FilePickerService.maxFileBytes);
+      expect(file.readCalls, path == null ? 1 : 0);
+      expect(document?.bytes?.length, path == null ? document?.size : null);
+    });
+  }
+
+  // Agregado por Edil: estos casos comprueban el contenido real que entrega un
+  // proveedor sin ruta, incluso cuando su tamaño anunciado parece aceptable.
+  test(
+    'rechaza bytes vacíos aunque los metadatos anuncien contenido',
+    () async {
+      final file = _MeasuredPlatformFile(metadataLength: 100, actualLength: 0);
+      final service = FilePickerService(pickFile: () async => file);
+
+      await expectLater(
+        service.pickDocument(),
+        throwsA(isA<DocumentEmptyException>()),
+      );
+      expect(file.readCalls, 1);
+    },
+  );
+
+  test(
+    'rechaza bytes reales excesivos aunque el tamaño anunciado sea menor',
+    () async {
+      final file = _MeasuredPlatformFile(
+        metadataLength: 100,
+        actualLength: FilePickerService.maxFileBytes + 1,
+      );
+      final service = FilePickerService(pickFile: () async => file);
+
+      await expectLater(
+        service.pickDocument(),
+        throwsA(isA<DocumentTooLargeException>()),
+      );
+      expect(file.readCalls, 1);
+    },
+  );
+
+  test('conserva el tamaño real de los bytes cuando no existe ruta', () async {
+    final file = _MeasuredPlatformFile(metadataLength: 100, actualLength: 500);
+    final service = FilePickerService(pickFile: () async => file);
+
     final document = await service.pickDocument();
-    expect(document?.size, 0);
-    expect(document?.formattedSize, '0 B');
+
+    expect(document?.size, 500);
+    expect(document?.bytes?.length, 500);
     expect(document?.path, isNull);
+    expect(file.readCalls, 1);
   });
 
   test(
@@ -111,4 +199,46 @@ void main() {
       expect(document.formattedSize, entry.value);
     }
   });
+}
+
+// Agregado por Edil: permite demostrar que un rechazo temprano no leyó el
+// documento y que los bytes pueden diferir de los metadatos del selector.
+final class _MeasuredPlatformFile extends PlatformFile {
+  _MeasuredPlatformFile({
+    required this.metadataLength,
+    required this.actualLength,
+    this.localPath,
+  });
+
+  final int metadataLength;
+  final int actualLength;
+  final String? localPath;
+  int readCalls = 0;
+
+  @override
+  String get name => 'documento.txt';
+
+  @override
+  String? get path => localPath;
+
+  @override
+  Uri get uri => localPath == null
+      ? Uri.parse('content://local.documents/document/1')
+      : Uri.file(localPath!);
+
+  @override
+  int? lengthSync() => metadataLength;
+
+  @override
+  Future<int?> length() async => metadataLength;
+
+  @override
+  Future<Uint8List> readAsBytes() async {
+    readCalls += 1;
+    return Uint8List(actualLength);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw StateError('Acceso inesperado: ${invocation.memberName}');
 }

@@ -259,66 +259,65 @@ void main() {
     'timeout',
     'JSON inválido',
   ]) {
-    testWidgets(
-      '$scenario muestra error y permite reintentar sin perder archivo',
-      (tester) async {
-        var calls = 0;
-        final lateResponse = Completer<http.Response>();
-        final api = TriageApiService(
-          clientFactory: () => MockClient((_) async {
-            calls++;
-            if (calls > 1) {
-              return http.Response(
-                '{"status":"recibido","documento_id":"DOC-RETRY"}',
-                200,
-              );
-            }
-            // Agregado por Edil: HTTP 200 sin contrato también debe mostrar error.
-            if (scenario == 'JSON inválido') {
-              return http.Response('{}', 200);
-            }
-            if (scenario == 'sin conexión') {
-              throw const SocketException('no network');
-            }
-            if (scenario == 'timeout') return lateResponse.future;
+    testWidgets('$scenario muestra error y permite reintentar sin perder archivo', (
+      tester,
+    ) async {
+      var calls = 0;
+      final lateResponse = Completer<http.Response>();
+      final api = TriageApiService(
+        clientFactory: () => MockClient((_) async {
+          calls++;
+          if (calls > 1) {
             return http.Response(
-              'detalle técnico privado',
-              int.parse(scenario),
+              '{"status":"recibido","documento_id":"DOC-RETRY"}',
+              200,
             );
-          }),
-        );
-        await ready(tester, api);
-        await press(
-          tester,
-          'Procesar documento',
-          settle: scenario != 'timeout',
-        );
-        if (scenario == 'timeout') {
-          await tester.pump(const Duration(seconds: 31));
-          await tester.pumpAndSettle();
-        }
-        final message = switch (scenario) {
-          'JSON inválido' => 'El servidor devolvió una respuesta inválida.',
-          '400' => 'El servidor rechazó el documento.',
-          '500' => 'El servidor no está disponible. Inténtalo más tarde.',
-          'sin conexión' => 'No se pudo conectar con el servidor.',
-          _ => 'El servidor tardó demasiado en responder.',
-        };
-        expect(find.text(message), findsOneWidget);
-        if (scenario == '500') {
-          expect(find.text('Código HTTP: 500'), findsOneWidget);
-        }
-        expect(find.text('detalle técnico privado'), findsNothing);
-        expect(find.text('nota.txt'), findsOneWidget);
-        await press(tester, 'Reintentar');
-        expect(calls, 2);
-        expect(find.text('Documento recibido correctamente.'), findsOneWidget);
-        expect(find.text(message), findsNothing);
-        lateResponse.complete(
-          http.Response('{"status":"recibido","documento_id":"DOC-TEST"}', 200),
-        );
-      },
-    );
+          }
+          // Agregado por Edil: HTTP 200 sin contrato también debe mostrar error.
+          if (scenario == 'JSON inválido') {
+            return http.Response('{}', 200);
+          }
+          if (scenario == 'sin conexión') {
+            throw const SocketException('no network');
+          }
+          if (scenario == 'timeout') return lateResponse.future;
+          return http.Response('detalle técnico privado', int.parse(scenario));
+        }),
+      );
+      await ready(tester, api);
+      await press(tester, 'Procesar documento', settle: scenario != 'timeout');
+      if (scenario == 'timeout') {
+        // Agregado por Edil: el timeout actual incluye almacenamiento y análisis (90 s).
+        // await tester.pump(const Duration(seconds: 31));
+        await tester.pump(const Duration(seconds: 91));
+        await tester.pumpAndSettle();
+      }
+      final message = switch (scenario) {
+        'JSON inválido' => 'El servidor devolvió una respuesta inválida.',
+        '400' => 'El servidor rechazó el documento.',
+        '500' => 'El servidor no está disponible. Inténtalo más tarde.',
+        'sin conexión' => 'No se pudo conectar con el servidor.',
+        _ => 'El servidor tardó demasiado en responder.',
+      };
+      expect(find.text(message), findsOneWidget);
+      if (scenario == '500') {
+        expect(find.text('Código HTTP: 500'), findsOneWidget);
+      }
+      expect(find.text('detalle técnico privado'), findsNothing);
+      expect(find.text('nota.txt'), findsOneWidget);
+      await press(tester, 'Reintentar');
+      // Agregado por Edil: después de una respuesta incierta no repetir POST sin avisar.
+      if (scenario != '400') {
+        expect(calls, 1);
+        await press(tester, 'Enviar de nuevo');
+      }
+      expect(calls, 2);
+      expect(find.text('Documento recibido correctamente.'), findsOneWidget);
+      expect(find.text(message), findsNothing);
+      lateResponse.complete(
+        http.Response('{"status":"recibido","documento_id":"DOC-TEST"}', 200),
+      );
+    });
   }
 
   testWidgets(

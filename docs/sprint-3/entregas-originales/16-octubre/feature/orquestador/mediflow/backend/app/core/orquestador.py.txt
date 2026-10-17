@@ -1,0 +1,139 @@
+import sys
+import os
+import json
+from typing import TypedDict
+from langgraph.graph import StateGraph, END
+
+# Agrega la ruta raíz del proyecto al sistema para encontrar la carpeta data_ai
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
+
+# Importamos las dependencias
+from data_ai.score_confianza import evaluar_confianza_con_dosis
+from data_ai.urgency_json_adapter import evaluate_analysis
+
+# 1. Estado del Grafo (Memoria compartida entre nodos)
+class DocumentState(TypedDict):
+    documento: dict
+    es_urgente: bool
+    es_ambiguo: bool
+    requiere_revision_nico: bool
+    decision_enrutamiento: dict
+
+# 2. Nodo Detector de Urgencia y Reglas Clínicas
+def nodo_detector_urgencia(state: DocumentState):
+    doc = state["documento"]
+
+    # Obtenemos el texto original extraído. Si no existe, serializamos los datos
+    # extraídos para que el código no opere "a ciegas" y fuerce revisión.
+    texto_completo = doc.get("texto_extraido")
+    if not texto_completo:
+        texto_completo = json.dumps(doc.get("datos_extraidos", {}), ensure_ascii=False)
+
+    # Evaluamos el documento usando el catálogo y lógica
+    resultado_nico = evaluate_analysis(doc, source_text=texto_completo)
+
+    # Extraemos las conclusiones
+    es_urgente = resultado_nico.get("suggested_priority") == "Urgente"
+    requiere_revision = resultado_nico.get("review_recommended", False)
+
+    return {
+        "es_urgente": es_urgente,
+        "requiere_revision_nico": requiere_revision
+    }
+
+# 3. Nodo Detector de Ambigüedad y Confianza
+def nodo_detector_ambiguedad(state: DocumentState):
+    doc = state["documento"]
+    datos = doc.get("datos_extraidos", {})
+    clasificacion = doc.get("clasificacion", {})
+
+    # Preparamos los argumentos matemáticos para la función de confianza
+    score_ml = clasificacion.get("score_confianza_clasificacion", 0.0)
+
+    # 4 criterios ajustados
+    criterios = [
+        bool(clasificacion.get("tipo_documento") != "Pendiente de procesamiento"),
+        bool(datos.get("paciente", {}).get("nombre")),
+        bool(datos.get("medico_solicitante", {}).get("nombre")),
+        bool(datos.get("diagnostico_principal") or datos.get("estudio_realizado"))
+    ]
+
+    medicamentos = datos.get("medicamentos_recetados", [])
+    lista_dosis = [med.get("dosis") for med in medicamentos if isinstance(med, dict)]
+
+    # Calculamos la ambigüedad con el umbral 0.70 oficial del MVP
+    resultado_laura = evaluar_confianza_con_dosis(
+        score_clasificacion=score_ml,
+        criterios_cumplidos=criterios,
+        dosis_medicamentos=lista_dosis,
+        umbral=0.70
+    )
+
+    return {"es_ambiguo": resultado_laura["es_ambiguo"]}
+
+# 4. Nodo Orquestador y Decisión Final
+def nodo_orquestador(state: DocumentState):
+    doc = state["documento"]
+    es_urgente = state["es_urgente"]
+    es_ambiguo = state["es_ambiguo"]
+    requiere_revision_nico = state["requiere_revision_nico"]
+
+    tipo_documento = doc.get("clasificacion", {}).get("tipo_documento", "")
+
+    # Valores por defecto para el flujo estándar
+    decision = {
+        "status": "procesado",
+        "prioridad": "Rutina",
+        "destino_principal": "Cola_Historia_Clinica",
+        "requiere_auditoria_humana": False,
+        "justificacion_enrutamiento": "Procesamiento automático exitoso."
+    }
+
+    # Evaluamos si alguna de las dependencias exige revisión humana
+    necesita_auditoria = es_ambiguo or requiere_revision_nico
+
+    # Reglas de enrutamiento basadas en la matriz de estados
+    # Prioridad 1: Auditoría humana (sobreescribe cualquier destino)
+    if necesita_auditoria:
+        decision["status"] = "auditoria_humana"
+        decision["prioridad"] = "Rutina"
+        decision["destino_principal"] = "Cola_Revision_Humana"
+        decision["requiere_auditoria_humana"] = True
+
+        # Construimos un motivo dinámico para la justificación
+        motivos = []
+        if es_ambiguo:
+            motivos.append("ambigüedad en datos o confianza baja")
+        if requiere_revision_nico:
+            motivos.append("reglas clínicas")
+        decision["justificacion_enrutamiento"] = f"Derivado a auditoría humana por: {' y '.join(motivos)}."
+
+    # Prioridad 2: Emergencias médicas
+    elif es_urgente:
+        decision["prioridad"] = "Urgente"
+        decision["destino_principal"] = "Cola_Emergencia_Medica"
+        decision["justificacion_enrutamiento"] = "Identificado como Urgente por el motor de reglas clínicas."
+
+    # Prioridad 3: Flujos estándar por tipo de documento
+    elif tipo_documento == "Receta Médica":
+        decision["destino_principal"] = "Cola_Farmacia"
+        decision["justificacion_enrutamiento"] = "Receta de rutina enrutada a dispensación."
+
+    return {"decision_enrutamiento": decision}
+
+# 5. Compilación del Grafo de LangGraph
+workflow = StateGraph(DocumentState)
+
+# Añadimos los nodos con nombres funcionales
+workflow.add_node("detector_urgencia", nodo_detector_urgencia)
+workflow.add_node("detector_ambiguedad", nodo_detector_ambiguedad)
+workflow.add_node("orquestador_enrutamiento", nodo_orquestador)
+
+# Definimos las conexiones
+workflow.set_entry_point("detector_urgencia")
+workflow.add_edge("detector_urgencia", "detector_ambiguedad")
+workflow.add_edge("detector_ambiguedad", "orquestador_enrutamiento")
+workflow.add_edge("orquestador_enrutamiento", END)
+
+# Exportamos el pipeline listo para usarse en main.py o por Brando
+pipeline_v1_2 = workflow.compile()

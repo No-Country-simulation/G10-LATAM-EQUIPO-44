@@ -131,17 +131,19 @@ El módulo de score no debe mover archivos, modificar OCI ni alterar directament
 
 ## 9. Política de umbral
 
-El umbral permanece configurable.
+Para el MVP y Demo de MediFlow se adopta un umbral operativo de confianza de `0.70`.
 
-Los tests actuales utilizan `0.60` únicamente como valor de prueba para comprobar el comportamiento matemático y los casos de frontera.
+La escala se interpreta entre `0.0` y `1.0`, donde un valor mayor representa mayor confianza.
 
-No se considera todavía un umbral clínico ni una política definitiva de MediFlow.
+La regla implementada es:
 
-La regla matemática implementada es:
+`score_operativo < 0.70` → ambiguo
 
-`score_operativo < umbral` → ambiguo
+`score_operativo >= 0.70` → no ambiguo por umbral
 
-`score_operativo >= umbral` → no ambiguo
+El valor `0.70` corresponde a una decisión operativa del MVP y no debe interpretarse como una probabilidad clínica de acierto.
+
+El umbral se mantiene técnicamente configurable para permitir futuras pruebas y calibraciones con un conjunto de datos más amplio.
 
 ## 10. Estado de implementación v1
 
@@ -166,9 +168,6 @@ Incluye:
 
 La integración definitiva con el pipeline depende de decisiones que deben mantenerse externas al motor matemático:
 
-- definición del umbral oficial;
 - definición de criterios de completitud por tipo documental;
 - identificación de señales críticas adicionales que puedan obtenerse de forma objetiva;
 - conexión del resultado `es_ambiguo` con el orquestador del sistema.
-
-Hasta que estas decisiones sean acordadas, el umbral utilizado en los tests (`0.60`) se considera exclusivamente un valor de prueba y no una política clínica o productiva definitiva.

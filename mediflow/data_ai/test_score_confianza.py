@@ -1,4 +1,5 @@
 from mediflow.data_ai.score_confianza import (
+    UMBRAL_CONFIANZA_MVP,
     calcular_completitud,
     calcular_score_operativo,
     detectar_alerta_dosis_ilegible,
@@ -40,11 +41,12 @@ def test_score_003_alerta_critica_domina():
 
 def test_score_004_detecta_ambiguo_segun_umbral():
     resultado = es_ambiguo(
-        score_operativo=0.55,
-        umbral=0.60,
+        score_operativo=0.65,
+        umbral=UMBRAL_CONFIANZA_MVP,
     )
 
     assert resultado is True
+
 
 def test_score_005_completitud_total():
     resultado = calcular_completitud(
@@ -76,9 +78,10 @@ def test_score_008_completitud_rechaza_tipo_incorrecto():
         calcular_completitud(
             [True, True, "si"]
         )
-
-UMBRAL_PRUEBA = 0.60
-
+def test_umbral_mvp_es_070():
+    assert UMBRAL_CONFIANZA_MVP == 0.70
+    assert es_ambiguo(0.699) is True
+    assert es_ambiguo(0.70) is False
 
 def test_score_009_caso_normal_no_es_ambiguo():
     completitud = calcular_completitud(
@@ -92,7 +95,7 @@ def test_score_009_caso_normal_no_es_ambiguo():
     )
 
     assert score == 0.95
-    assert es_ambiguo(score, UMBRAL_PRUEBA) is False
+    assert es_ambiguo(score, UMBRAL_CONFIANZA_MVP) is False
 
 
 def test_score_010_caso_ambiguo_por_alerta_critica():
@@ -107,7 +110,7 @@ def test_score_010_caso_ambiguo_por_alerta_critica():
     )
 
     assert score == 0.0
-    assert es_ambiguo(score, UMBRAL_PRUEBA) is True
+    assert es_ambiguo(score, UMBRAL_CONFIANZA_MVP) is True
 
 
 def test_score_011_urgente_no_significa_ambiguo():
@@ -122,14 +125,14 @@ def test_score_011_urgente_no_significa_ambiguo():
     )
 
     assert score == 0.90
-    assert es_ambiguo(score, UMBRAL_PRUEBA) is False
+    assert es_ambiguo(score, UMBRAL_CONFIANZA_MVP) is False
 
 def test_score_012_evaluacion_completa_confiable():
     resultado = evaluar_confianza(
         score_clasificacion=0.90,
         criterios_cumplidos=[True, True, True, True],
         alerta_critica=False,
-        umbral=UMBRAL_PRUEBA,
+        umbral=UMBRAL_CONFIANZA_MVP,
     )
 
     assert resultado["completitud"] == 1.0
@@ -142,7 +145,7 @@ def test_score_013_evaluacion_completa_ambigua():
         score_clasificacion=0.95,
         criterios_cumplidos=[True, True, True, False],
         alerta_critica=True,
-        umbral=UMBRAL_PRUEBA,
+        umbral=UMBRAL_CONFIANZA_MVP,
     )
 
     assert resultado["completitud"] == 0.75
@@ -151,17 +154,16 @@ def test_score_013_evaluacion_completa_ambigua():
 
 def test_score_014_score_igual_al_umbral_no_es_ambiguo():
     resultado = es_ambiguo(
-        score_operativo=0.60,
-        umbral=0.60,
+        score_operativo=0.70,
+        umbral=UMBRAL_CONFIANZA_MVP,
     )
 
     assert resultado is False
 
-
 def test_score_015_score_apenas_debajo_es_ambiguo():
     resultado = es_ambiguo(
-        score_operativo=0.599,
-        umbral=0.60,
+        score_operativo=0.699,
+        umbral=UMBRAL_CONFIANZA_MVP,
     )
 
     assert resultado is True
@@ -215,7 +217,7 @@ def test_score_019_respuesta_mediflow_dosis_ilegible_es_ambigua():
         ],
         criterios_cumplidos=[True, True, True, False],
         dosis_medicamentos=dosis,
-        umbral=UMBRAL_PRUEBA,
+        umbral=UMBRAL_CONFIANZA_MVP,
     )
 
     assert resultado["score_operativo"] == 0.0
@@ -249,7 +251,7 @@ def test_score_020_respuesta_mediflow_dosis_legible_no_es_ambigua():
         ],
         criterios_cumplidos=[True, True, True, True],
         dosis_medicamentos=dosis,
-        umbral=UMBRAL_PRUEBA,
+        umbral=UMBRAL_CONFIANZA_MVP,
     )
 
     assert resultado["score_operativo"] == 0.95

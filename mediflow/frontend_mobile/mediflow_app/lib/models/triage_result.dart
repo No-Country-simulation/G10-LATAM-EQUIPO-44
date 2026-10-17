@@ -19,6 +19,18 @@ class TriageResult {
   String? get tipoDocumento => _asText(_classification['tipo_documento']);
   String? get prioridad => _asText(_classification['nivel_prioridad']);
 
+  // Agregado por Edil: mostrar únicamente la confianza de clasificación que
+  // ya existe en el contrato. No calcular confianza de extracción ni un umbral.
+  // Un documento recibido aún no tiene un análisis que presentar al usuario.
+  double? get confianzaClasificacion {
+    if (!isAnalyzed) return null;
+    final value = _classification['score_confianza_clasificacion'];
+    if (value is! num || !value.isFinite || value < 0 || value > 1) {
+      return null;
+    }
+    return value.toDouble();
+  }
+
   // Agregado por Edil: la urgencia viene del backend, no del nombre del archivo.
   bool get isAnalyzed => status == 'procesado' || status == 'auditoria_humana';
   bool get isUrgent => isAnalyzed && prioridad == 'Urgente';

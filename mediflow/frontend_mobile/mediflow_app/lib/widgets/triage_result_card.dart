@@ -50,6 +50,19 @@ class TriageResultCard extends StatelessWidget {
               child: Divider(),
             ),
             Text('Tipo: ${result.tipoDocumento}'),
+            // Agregado por Edil: este dato del backend no equivale a exactitud
+            // clínica, completitud de extracción ni decisión de auditoría.
+            if (result.confianzaClasificacion case final confidence?) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Confianza de clasificación: ${(confidence * 100).toStringAsFixed(0)} %',
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Este valor describe la confianza del sistema en el tipo de documento; no mide la calidad de extracción ni la urgencia clínica.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
             const SizedBox(height: AppSpacing.sm),
             Text('Prioridad: ${result.prioridad}'),
             const SizedBox(height: AppSpacing.sm),

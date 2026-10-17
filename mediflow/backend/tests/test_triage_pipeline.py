@@ -23,8 +23,10 @@ def clinical_payload(review=False):
         "clasificacion": {"tipo_documento": "Receta médica", "especialidad": "General",
                           "nivel_prioridad": "Rutina", "score_confianza_clasificacion": 0.8},
         "datos_extraidos": {
-            "paciente": {"nombre": None, "edad": None},
-            "medico_solicitante": {"nombre": None, "matricula": None},
+            # Agregado por Edil: caso completo ficticio para la completitud MVP.
+            # Antes ambos nombres eran None; ahora eso debe ir a auditoría.
+            "paciente": {"nombre": "Persona Ficticia", "edad": None},
+            "medico_solicitante": {"nombre": "Profesional Ficticio", "matricula": None},
             "estudio_realizado": None, "diagnostico_principal": None, "cie10_sugerido": None,
             "medicamentos_recetados": [{"medicamento": "Medicamento ficticio", "dosis": "dosis de prueba"}],
         },
@@ -45,6 +47,7 @@ def test_full_http_oci_gemini_validation_flow(monkeypatch, review, status):
          patch("app.services.gemini_client.genai.Client") as gemini_factory:
         storage = storage_factory.return_value
         storage.settings.bucket_recibidos = "recibidos"
+        storage.determinar_bucket_por_estado.side_effect = lambda state: {"procesado": "procesados", "auditoria_humana": "auditoria_humana"}[state]
         def upload(body, name):
             events.append("oci")
             assert body == b"Nota sintetica"
@@ -61,10 +64,13 @@ def test_full_http_oci_gemini_validation_flow(monkeypatch, review, status):
         result = TriageResponse.model_validate(response.json())
         assert result.status == status
         assert result.datos_extraidos.medicamentos_recetados[0].medicamento == "Medicamento ficticio"
-        assert result.almacenamiento_oci.bucket == "recibidos"
+        # Agregado por Edil: la respuesta identifica la copia final verificada.
+        # assert result.almacenamiento_oci.bucket == "recibidos"
+        assert result.almacenamiento_oci.bucket == ("auditoria_humana" if review else "procesados")
         assert events == ["oci", "gemini"]
         gemini_factory.return_value.close.assert_called_once()
         storage.mover_archivo.assert_not_called()
+        storage.copiar_archivo.assert_called_once()
 
 
 @pytest.mark.parametrize("failure,code", [

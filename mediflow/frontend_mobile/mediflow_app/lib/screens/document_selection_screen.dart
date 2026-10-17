@@ -46,8 +46,17 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
   TriageResult? _result;
   String? _error;
   int? _errorStatusCode;
+  // Agregado por Edil: un ID confirma que el servidor identificó este envío.
+  // Consultarlo usa GET; repetir POST crearía otro documento, no lo reprocesaría.
+  String? _trackedDocumentId;
+  bool _checkingStatus = false;
+  bool _confirmBeforeResend = false;
+  bool _confirmingResend = false;
+  String? _lookupError;
 
-  bool get _processing => _state == _TriageState.processing;
+  // Antes: bool get _processing => _state == _TriageState.processing;
+  // Agregado por Edil: también bloqueamos acciones mientras se consulta el ID.
+  bool get _processing => _state == _TriageState.processing || _checkingStatus;
 
   void _setDocument(SelectedDocument? document, {bool cameraPhoto = false}) {
     setState(() {
@@ -59,6 +68,10 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
       _result = null;
       _error = null;
       _errorStatusCode = null;
+      _trackedDocumentId = null;
+      _checkingStatus = false;
+      _confirmBeforeResend = false;
+      _lookupError = null;
     });
   }
 
@@ -67,20 +80,53 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
     if (document == null ||
         _processing ||
         _pickerOpen ||
+        _confirmingResend ||
+        _trackedDocumentId != null ||
         _state == _TriageState.success) {
       return;
+    }
+    // Agregado por Edil: un timeout o fallo de red no demuestra que el backend
+    // rechazó el archivo. El usuario decide antes de crear un posible duplicado.
+    if (_confirmBeforeResend) {
+      _confirmingResend = true;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('¿Enviar el documento de nuevo?'),
+          content: const Text(
+            'El servidor puede haber recibido el envío anterior, aunque no llegó '
+            'su respuesta. Enviar de nuevo puede crear un documento duplicado. '
+            'Revisa el historial antes de continuar.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Enviar de nuevo'),
+            ),
+          ],
+        ),
+      );
+      _confirmingResend = false;
+      if (!mounted || confirmed != true) return;
     }
     setState(() {
       _state = _TriageState.processing;
       _result = null;
       _error = null;
       _errorStatusCode = null;
+      _lookupError = null;
+      _confirmBeforeResend = false;
     });
     try {
       final result = await _api.sendDocument(document, analyze: _analyze);
       if (!mounted) return;
       setState(() {
         _result = result;
+        _trackedDocumentId = result.documentoId;
         _state = _TriageState.success;
       });
     } on TriageApiException catch (error) {
@@ -88,6 +134,8 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
       setState(() {
         _error = error.message;
         _errorStatusCode = error.statusCode;
+        _trackedDocumentId = error.documentId;
+        _confirmBeforeResend = error.requestMayHaveBeenReceived;
         _state = _TriageState.error;
       });
     } catch (_) {
@@ -95,8 +143,38 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
       setState(() {
         _error = 'Ocurrió un error al procesar el documento.';
         _errorStatusCode = null;
+        _confirmBeforeResend = true;
         _state = _TriageState.error;
       });
+    }
+  }
+
+  Future<void> _consultDocument() async {
+    final documentId = _trackedDocumentId;
+    if (documentId == null || _processing || _pickerOpen) return;
+    setState(() {
+      _checkingStatus = true;
+      _lookupError = null;
+    });
+    try {
+      final result = await _api.getDocument(documentId);
+      if (!mounted) return;
+      setState(() {
+        _result = result;
+        _state = _TriageState.success;
+        _error = null;
+        _errorStatusCode = null;
+      });
+    } on TriageApiException catch (error) {
+      if (mounted) setState(() => _lookupError = error.message);
+    } catch (_) {
+      if (mounted) {
+        setState(() => _lookupError = 'No se pudo consultar el documento.');
+      }
+    } finally {
+      // Agregado por Edil: fallar al consultar no borra el resultado anterior
+      // ni ofrece un POST nuevo para el mismo documento ya identificado.
+      if (mounted) setState(() => _checkingStatus = false);
     }
   }
 
@@ -166,6 +244,12 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
       _setDocument(document);
     } on UnsupportedDocumentFormat {
       if (mounted) _showMessage('Formato de archivo no permitido.');
+    } on DocumentEmptyException {
+      if (mounted) {
+        _showMessage('El archivo está vacío. Selecciona otro documento.');
+      }
+    } on DocumentTooLargeException {
+      if (mounted) _showMessage('El archivo supera el tamaño máximo de 10 MB.');
     } catch (_) {
       if (mounted) {
         _showMessage('No se pudo seleccionar el archivo. Inténtalo de nuevo.');
@@ -263,15 +347,16 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
                         : () => _setDocument(null),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  if (_processing)
+                  if (_state == _TriageState.processing)
                     const AppStatusPanel(
                       title: 'Procesando documento...',
                       loading: true,
                       message:
                           'Espera la respuesta del servidor. No necesitas enviarlo otra vez.',
                     ),
-                  if (_state == _TriageState.success && _result != null)
-                    TriageResultCard(result: _result!),
+                  // Antes: se mostraba solo en estado success. Agregado por Edil:
+                  // el resultado confirmado sigue visible si una consulta falla.
+                  if (_result != null) TriageResultCard(result: _result!),
                   if (_state == _TriageState.error)
                     AppStatusPanel(
                       title: 'No se pudo completar el procesamiento',
@@ -283,7 +368,59 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
                       padding: const EdgeInsets.only(top: AppSpacing.sm),
                       child: Text('Código HTTP: $_errorStatusCode'),
                     ),
-                  if (_state != _TriageState.success) ...[
+                  if (_trackedDocumentId != null) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    if (_result == null) ...[
+                      SelectableText('Documento: $_trackedDocumentId'),
+                      const SizedBox(height: AppSpacing.sm),
+                      const AppStatusPanel(
+                        title: 'Consulta el envío identificado',
+                        message:
+                            'El servidor identificó este documento. Consulta su estado antes de realizar otro envío. La consulta no reinicia el análisis.',
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    if (_checkingStatus) ...[
+                      const AppStatusPanel(
+                        title: 'Consultando estado...',
+                        message: 'Esta consulta no envía el archivo otra vez.',
+                        loading: true,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    if (_lookupError != null) ...[
+                      AppStatusPanel(
+                        title: 'No se pudo actualizar el estado',
+                        message: _lookupError,
+                        tone: AppStatusTone.warning,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    AppButton(
+                      label: _result == null
+                          ? 'Consultar documento'
+                          : 'Actualizar estado',
+                      icon: Icons.refresh_rounded,
+                      variant: AppButtonVariant.secondary,
+                      onPressed: _processing || _pickerOpen
+                          ? null
+                          : _consultDocument,
+                    ),
+                  ],
+                  // Agregado por Edil: conservar el envío original en comentarios
+                  // y ocultarlo cuando ya hay un ID evita duplicados accidentales.
+                  // Antes: if (_state != _TriageState.success) ...[
+                  if (_state != _TriageState.success &&
+                      _trackedDocumentId == null) ...[
+                    if (_confirmBeforeResend) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      const AppStatusPanel(
+                        title: 'No se pudo confirmar la recepción',
+                        message:
+                            'El servidor puede haber recibido el documento. Un nuevo envío puede duplicarlo; revisa el historial antes de reintentar.',
+                        tone: AppStatusTone.warning,
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.lg),
                     // Agregado por Edil: solo cambia el contenedor; el consentimiento y callbacks se conservan.
                     AppCard(

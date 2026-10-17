@@ -204,6 +204,24 @@ class OCIStorageManager:
             time.sleep(wait_seconds)
         raise TimeoutError(f"OCI no confirmó la copia de '{object_name}'.")
 
+    # Agregado por Edil: reutilizar la copia verificada de Brando sin cambiar el
+    # método mover_archivo histórico ni sus parámetros de espera. El flujo
+    # automático conserva siempre el original en recibidos; aquí no se borra.
+    def copiar_archivo(
+        self, nombre_archivo: str, bucket_origen: str, bucket_destino: str
+    ) -> Any:
+        from .oci_transfer import OCIObjectMover
+
+        object_name = _required_name(nombre_archivo, "objeto")
+        source_bucket = _required_name(bucket_origen, "bucket origen")
+        destination_bucket = _required_name(bucket_destino, "bucket destino")
+        region = self.config.get("region") or self.settings.region
+        if not region:
+            raise OCIConfigurationError("Falta la región OCI para copiar el documento.")
+        return OCIObjectMover(
+            self.object_storage, self.namespace, region
+        ).copy(object_name, source_bucket, destination_bucket)
+
     # Métodos agregados por Drazen para Sprint 3 (S3-04A): persistencia, recuperación y verificación
     def obtener_objeto_bytes(self, nombre_bucket: str, nombre_objeto: str) -> bytes:
         """Obtiene el contenido binario de un objeto en memoria sin guardar en disco."""

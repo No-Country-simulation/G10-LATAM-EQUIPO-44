@@ -87,3 +87,63 @@ AppButton, AppCard, AppHeader y AppStatusPanel comparten estilo y controles Mate
 Roboto está empaquetada localmente con licencia. Inicio, selección, archivo, revisión de foto, progreso y resultado comparten el lenguaje visual.
 Éxito se distingue de auditoría y error mediante texto, iconos y colores. La prioridad propuesta por el servidor no se presenta como decisión clínica definitiva.
 Ver docs/sprint-3/design-system.md para tokens, verificación y alcance.
+
+## Correcciones de cierre de Flutter Sprint 3 — Agregado por Edil
+
+El selector rechaza documentos vacíos o mayores de 10 MiB antes de enviarlos.
+El servicio HTTP vuelve a comprobar el tamaño real al preparar el multipart,
+porque el archivo local puede cambiar después de seleccionarlo.
+
+Si falla el análisis y el backend entrega X-Document-ID, la app conserva el ID
+y muestra Consultar documento. Usa GET /api/documents/{id}: no vuelve a subir
+el archivo, no ejecuta Gemini y no reinicia el análisis. Un resultado recibido
+confirma almacenamiento/recepción; no representa extracción terminada.
+Actualizar estado permite consultar cambios posteriores sin otro POST.
+Si la consulta falla, se conserva el último resultado confirmado y se avisa
+que no pudo actualizarse; no se presenta ese resultado como recién consultado.
+
+Tras un timeout o fallo de red sin ID, Reintentar pide confirmación y explica
+el posible duplicado. No hay reintentos automáticos. Cambiar o quitar archivo
+reinicia el seguimiento y el consentimiento. Volver a seleccionar el mismo
+archivo puede crear otro envío: el backend aún no tiene idempotencia.
+El ID se mantiene solo en memoria durante esta pantalla; no se guarda contenido
+clínico ni se añade almacenamiento persistente de identificadores.
+
+Los cambios no agregan campos JSON ni cambian endpoints o reglas de triaje.
+No se calcula score operativo ni urgencia desde Flutter. La consulta depende
+del backend existente; sin resultado JSON persistido, puede devolver 404 y la
+app conserva el ID para consultar con el equipo.
+
+Ver docs/sprint-3/cierre-edil-flutter-15-octubre.md para pruebas y aceptación pendiente.
+
+## Diagnóstico frente a main 8ef6e09 — Agregado por Edil
+
+La auditoría del 15 de octubre revisó main: en ese commit el servicio Flutter
+tenía sendDocument (POST), sin getDocument ni botones de consulta. La recuperación
+se implementó después en los cambios locales de feature/s3-edil-cierre-flutter.
+Mientras esos cambios no se incorporen mediante un commit autorizado, main no
+contiene esta función. No confundir una implementación local con código publicado.
+
+Se reutilizan getDocument, Consultar documento y Actualizar estado existentes en
+esta rama. Las consultas son manuales, con el mismo ID confirmado por el POST o
+la cabecera X-Document-ID, y nunca vuelven a enviar el archivo ni ejecutan IA.
+Sin ID, una recepción incierta no puede recuperarse inequívocamente desde Flutter:
+no hay consulta por nombre de archivo ni se inventa un endpoint para localizarla.
+El ID permanece solo en memoria mientras la pantalla sigue abierta.
+
+La tarjeta presenta score_confianza_clasificacion del JSON actual como Confianza
+de clasificación. No aplica umbrales, colores de aprobación ni decisiones a partir
+de ese número. No muestra la confianza de recepción como si fuera un análisis.
+Urgencia y revisión humana pueden coexistir y siguen dependiendo de la respuesta
+validada del backend, no del porcentaje mostrado.
+
+Dependencias pendientes del contrato definitivo: significado y calibración de la
+confianza; reglas de completitud por tipo; invocación del detector y del score en
+el pipeline; política de revisión y eventual reprocesamiento/idempotencia. No se
+añaden score_operativo, es_ambiguo ni campos nuevos a las peticiones o respuestas.
+
+Verificación de esta revisión: flutter analyze --no-pub sin problemas;
+flutter test --no-pub con 178 pruebas aprobadas y una prueba real optativa omitida.
+Incluye recuperación por ID, conservación de resultado tras fallo GET,
+confirmación de reenvío y 16 casos nuevos de lectura/visualización de confianza.
+No se llamaron OCI/Gemini ni se verificó cámara física en esta ejecución.
