@@ -141,3 +141,5 @@ reutilizaron como evidencia de acceso real.
 - 2026-10-16: Rama `feature/s3-06-traslado-oci` creada y estado previo guardado en `28cacbc`; se trajeron los dos módulos y se adaptaron al JSON existente.
 - 2026-10-16: Cambio en `routes.py` aplicado: `procesado` va a `OCI_BUCKET_PROCESADOS` y `auditoria_humana` a `OCI_BUCKET_AUDITORIA`; ambos llaman a `mover_archivo()` con copia, verificación y borrado seguro.
 - 2026-10-16: Pruebas unitarias OCI: `9 passed`; contrato de orquestación normal y de auditoría verificado; prueba real OCI de esta integración pendiente para no mover un objeto sin confirmación explícita.
+- 2026-10-16: Diagnóstico de ramas completado en `feature/s3-06-integracion`; no existe `PLAN_S3-06.md`, se usó este documento como contexto. `origin/main` (8ef6e09) es el consolidado más reciente, pero elimina `oci_transfer.py` y cambia el extractor; no se integrará completo.
+- 2026-10-16: Pendiente de confirmación: combinar solo funciones compatibles de Eliana/Laura/Nicolás con el extractor Cohere y `mover_archivo()` local; preservar OCI y evitar checkout completo de ramas.
