@@ -1,3 +1,14 @@
+> Verificación real del 17-10-2026: listado e individual HTTP 200, filtros
+> coherentes con el resultado final, IDs inexistentes 404 e inválidos 400.
+> Ambas ramas (procesado y auditoria_humana) recuperaron el JSON persistido.
+> [Cierre y evidencias actuales](cierre-drazen-brando-sprint-3-17-octubre.md).
+>
+> El listado también devuelve 502 si el JSON persistido es inválido; parámetros
+> de consulta inválidos devuelven 422. La copia/persistencia del POST falla con
+> 503 y X-Document-ID; se conserva la recepción. Los GET no llaman IA. El detalle
+> web ya consulta individualmente por ID. Estas notas prevalecen sobre cualquier
+> descripción histórica de integración pendiente.
+
 # MediFlow — Documentación de Endpoints GET para Frontend Web (Flor) 📄✨
 
 **Autor:** Drazen Gamboa | Backend Developer

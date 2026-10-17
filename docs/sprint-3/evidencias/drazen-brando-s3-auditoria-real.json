@@ -1,0 +1,166 @@
+{
+  "task": "Drazen S3-03/S3-04A; Brando S3-06",
+  "started_at_utc": "2026-10-17T20:10:48.114066+00:00",
+  "oci_real": true,
+  "http_real": true,
+  "gemini_called": false,
+  "analysis_input": "local_fixed_software_fixture_not_llm_output",
+  "rules_profile": "general",
+  "deletes_performed": false,
+  "iam_changes": false,
+  "events": [
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "errors": [
+        {
+          "category": "ServiceError",
+          "status": 404,
+          "operation_name": "head_object"
+        }
+      ]
+    },
+    {
+      "operation": "copy_object",
+      "source_etag_condition": true,
+      "destination_no_overwrite": true,
+      "http_status": 202,
+      "work_request_id": "d6a7186f-d92b-440f-8087-d43f3ae28712"
+    },
+    {
+      "operation": "get_work_request",
+      "http_status": 200,
+      "work_request_status": "ACCEPTED"
+    },
+    {
+      "operation": "get_work_request",
+      "http_status": 200,
+      "work_request_status": "COMPLETED"
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "put_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "errors": [
+        {
+          "category": "ServiceError",
+          "status": 404,
+          "code": "ObjectNotFound",
+          "operation_name": "get_object"
+        }
+      ]
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    }
+  ],
+  "passed": true,
+  "region": "sa-santiago-1",
+  "receipt_http": 201,
+  "document_id": "DOC-CLIN-1A73E28DC0264C6F9FDC94B3EF171129",
+  "object_name": "DOC-CLIN-1A73E28DC0264C6F9FDC94B3EF171129.txt",
+  "source_before": {
+    "bucket": "recibidos",
+    "size": 76,
+    "etag": "2d0df500-500f-4229-bd99-bfcbe7dc7739",
+    "sha256": "2a95e50f4720626d45d69c8b1844c0f8f4e8568207d28ae2bd2a44d53cedbc68"
+  },
+  "received_json_matches_http": true,
+  "expected": {
+    "id": "DOC-CLIN-1A73E28DC0264C6F9FDC94B3EF171129",
+    "status": "auditoria_humana",
+    "priority": "Rutina",
+    "destination": "Cola_Revision_Humana"
+  },
+  "source_after": {
+    "bucket": "recibidos",
+    "size": 76,
+    "etag": "2d0df500-500f-4229-bd99-bfcbe7dc7739",
+    "sha256": "2a95e50f4720626d45d69c8b1844c0f8f4e8568207d28ae2bd2a44d53cedbc68"
+  },
+  "destination": {
+    "bucket": "auditoria_humana",
+    "size": 76,
+    "etag": "87a99ffa-e2da-43a4-8e11-8ad344cd2851",
+    "sha256": "2a95e50f4720626d45d69c8b1844c0f8f4e8568207d28ae2bd2a44d53cedbc68"
+  },
+  "integrity": {
+    "original_retained": true,
+    "source_etag_unchanged": true,
+    "sizes_match": true,
+    "sha256_match": true,
+    "copy_bytes_match": true,
+    "etag_equality_not_required_between_objects": true
+  },
+  "final_json_metadata": {
+    "bucket": "auditoria_humana",
+    "size": 1124,
+    "etag": "0c74e62d-905a-4e44-a1c3-c02f53abe96d",
+    "sha256": "5318bd9d75b146188e64a7f4f9cb851cf4a4db75bac7a7e3df126a164dd93222"
+  },
+  "final_json_equals_model": true,
+  "get_by_id_http": 200,
+  "get_by_id_equals_final": true,
+  "get_list_http": 200,
+  "list_contains_single_current_version": true,
+  "missing_id_http": 404,
+  "finished_at_utc": "2026-10-17T20:10:57.045355+00:00"
+}

@@ -1,0 +1,65 @@
+{
+  "real_http": true,
+  "real_oci": true,
+  "mutations": false,
+  "checks": [
+    {
+      "path": "/api/documents",
+      "params": {},
+      "http_status": 200,
+      "document_id": "DOC-CLIN-37B1501AC59C40A48C45C1956BB41A56",
+      "id_state_priority_destination_match": true
+    },
+    {
+      "path": "/api/documents",
+      "params": {
+        "status": "procesado",
+        "prioridad": "Rutina",
+        "limit": 500
+      },
+      "http_status": 200,
+      "document_id": "DOC-CLIN-37B1501AC59C40A48C45C1956BB41A56",
+      "id_state_priority_destination_match": true
+    },
+    {
+      "path": "/api/documents",
+      "params": {
+        "status": "recibido",
+        "limit": 500
+      },
+      "http_status": 200,
+      "document_id": "DOC-CLIN-37B1501AC59C40A48C45C1956BB41A56",
+      "old_receipt_excluded": true
+    },
+    {
+      "path": "/api/documents",
+      "params": {},
+      "http_status": 200,
+      "document_id": "DOC-CLIN-1A73E28DC0264C6F9FDC94B3EF171129",
+      "id_state_priority_destination_match": true
+    },
+    {
+      "path": "/api/documents",
+      "params": {
+        "status": "auditoria_humana",
+        "prioridad": "Rutina",
+        "limit": 500
+      },
+      "http_status": 200,
+      "document_id": "DOC-CLIN-1A73E28DC0264C6F9FDC94B3EF171129",
+      "id_state_priority_destination_match": true
+    },
+    {
+      "path": "/api/documents",
+      "params": {
+        "status": "recibido",
+        "limit": 500
+      },
+      "http_status": 200,
+      "document_id": "DOC-CLIN-1A73E28DC0264C6F9FDC94B3EF171129",
+      "old_receipt_excluded": true
+    }
+  ],
+  "passed": true,
+  "invalid_id_http": 400
+}

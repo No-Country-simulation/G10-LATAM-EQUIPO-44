@@ -1,3 +1,45 @@
+# Conexión OCI vigente — Sprint 3
+
+Actualizado el 17-10-2026. El backend utiliza tres buckets independientes:
+
+```dotenv
+OCI_BUCKET_RECIBIDOS=recibidos
+OCI_BUCKET_PROCESADOS=procesados
+OCI_BUCKET_AUDITORIA=auditoria_humana
+```
+
+`OCI_BUCKET_NAME` y `gestor.bucket_name` del ejemplo histórico no describen la
+configuración vigente. Se usa `gestor.settings.bucket_recibidos` y sus pares.
+Se carga `mediflow/.env`, sin depender del directorio de ejecución.
+
+Autenticación: elegir perfil SDK (`OCI_CONFIG_FILE` opcional,
+`OCI_CONFIG_PROFILE=DEFAULT`) o las cinco variables explícitas
+`OCI_USER_OCID`, `OCI_FINGERPRINT`, `OCI_KEY_FILE`, `OCI_TENANCY_OCID`, `OCI_REGION`.
+El cliente exige las cinco si aparece alguna de ellas; no mezclar una región
+aislada con un perfil completo. En modo perfil, la región proviene del archivo
+SDK. `OCI_NAMESPACE` es opcional; en su ausencia se obtiene por el SDK.
+No publicar valores de credenciales ni el contenido del perfil.
+
+La copia activa utiliza CopyObject nativo con verificación de tamaño/SHA-256
+y versiones condicionadas por ETag, conservando el origen. La autorización del
+servicio regional de copia es adicional a los permisos del usuario. Consulte
+el [cierre S3-03/S3-04A/S3-06](../../docs/sprint-3/cierre-drazen-brando-sprint-3-17-octubre.md) para las operaciones,
+permisos, pruebas y comandos reproducibles. No se requieren cambios IAM para las
+dos muestras verificadas hoy; no se auditó la política efectiva.
+
+Diagnóstico de lectura, desde backend:
+
+```powershell
+& .\.venv\Scripts\python.exe scripts/oci_diagnose.py
+```
+
+La prueba real optativa `scripts/verify_sprint3_oci.py` requiere
+`--allow-oci-writes --confirm-synthetic` y un informe nuevo; conserva muestras y
+no elimina objetos. No confundir un diagnóstico de conexión con copia verificada.
+
+<details>
+<summary>Referencia histórica de configuración y movimiento — no usar como guía vigente</summary>
+
 <!-- Agregado por Edil: conservamos la guía de Eliana y aclaramos primero la configuración vigente para no seguir ejemplos antiguos por error. -->
 # Nota de integración: configuración vigente
 
@@ -320,3 +362,4 @@ Ejecutar test_oci.py
         ▼
 Conexión OCI verificada
 ```
+</details>

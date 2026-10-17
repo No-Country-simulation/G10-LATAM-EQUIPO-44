@@ -1,0 +1,185 @@
+{
+  "task": "Drazen S3-03/S3-04A; Brando S3-06",
+  "started_at_utc": "2026-10-17T20:09:50.644622+00:00",
+  "oci_real": true,
+  "http_real": true,
+  "gemini_called": false,
+  "analysis_input": "local_fixed_software_fixture_not_llm_output",
+  "rules_profile": "general",
+  "deletes_performed": false,
+  "iam_changes": false,
+  "events": [
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "errors": [
+        {
+          "category": "ServiceError",
+          "status": 404,
+          "operation_name": "head_object"
+        }
+      ]
+    },
+    {
+      "operation": "copy_object",
+      "source_etag_condition": true,
+      "destination_no_overwrite": true,
+      "http_status": 202,
+      "work_request_id": "16e07f25-6c3f-4d11-b83c-9c3bfb022fc8"
+    },
+    {
+      "operation": "get_work_request",
+      "http_status": 200,
+      "work_request_status": "ACCEPTED"
+    },
+    {
+      "operation": "get_work_request",
+      "http_status": 200,
+      "work_request_status": "ACCEPTED"
+    },
+    {
+      "operation": "get_work_request",
+      "http_status": 200,
+      "work_request_status": "ACCEPTED"
+    },
+    {
+      "operation": "get_work_request",
+      "http_status": 200,
+      "work_request_status": "ACCEPTED"
+    },
+    {
+      "operation": "get_work_request",
+      "http_status": 200,
+      "work_request_status": "ACCEPTED"
+    },
+    {
+      "operation": "get_work_request",
+      "http_status": 200,
+      "work_request_status": "ACCEPTED"
+    },
+    {
+      "operation": "get_work_request",
+      "http_status": 200,
+      "work_request_status": "ACCEPTED"
+    },
+    {
+      "operation": "get_work_request",
+      "http_status": 200,
+      "work_request_status": "COMPLETED"
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "put_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "head_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    },
+    {
+      "operation": "get_object",
+      "http_status": 200
+    }
+  ],
+  "passed": true,
+  "region": "sa-santiago-1",
+  "receipt_http": 201,
+  "document_id": "DOC-CLIN-37B1501AC59C40A48C45C1956BB41A56",
+  "object_name": "DOC-CLIN-37B1501AC59C40A48C45C1956BB41A56.txt",
+  "source_before": {
+    "bucket": "recibidos",
+    "size": 76,
+    "etag": "3b04486d-e33a-40f2-a426-1390eda7940f",
+    "sha256": "2a95e50f4720626d45d69c8b1844c0f8f4e8568207d28ae2bd2a44d53cedbc68"
+  },
+  "received_json_matches_http": true,
+  "expected": {
+    "id": "DOC-CLIN-37B1501AC59C40A48C45C1956BB41A56",
+    "status": "procesado",
+    "priority": "Rutina",
+    "destination": "Cola_Farmacia"
+  },
+  "source_after": {
+    "bucket": "recibidos",
+    "size": 76,
+    "etag": "3b04486d-e33a-40f2-a426-1390eda7940f",
+    "sha256": "2a95e50f4720626d45d69c8b1844c0f8f4e8568207d28ae2bd2a44d53cedbc68"
+  },
+  "destination": {
+    "bucket": "procesados",
+    "size": 76,
+    "etag": "37a32c62-a64f-4d49-b0da-cffebc070f01",
+    "sha256": "2a95e50f4720626d45d69c8b1844c0f8f4e8568207d28ae2bd2a44d53cedbc68"
+  },
+  "integrity": {
+    "original_retained": true,
+    "source_etag_unchanged": true,
+    "sizes_match": true,
+    "sha256_match": true,
+    "copy_bytes_match": true,
+    "etag_equality_not_required_between_objects": true
+  },
+  "final_json_metadata": {
+    "bucket": "procesados",
+    "size": 1070,
+    "etag": "aa7df9c5-0c50-4c85-81ed-abb2e0e22538",
+    "sha256": "24b2fc51b9ed8ab88204c43144862575f48295997319e94e41b8fc3fd21a84f1"
+  },
+  "final_json_equals_model": true,
+  "get_by_id_http": 200,
+  "get_by_id_equals_final": true,
+  "get_list_http": 200,
+  "list_contains_single_current_version": true,
+  "missing_id_http": 404,
+  "finished_at_utc": "2026-10-17T20:10:05.860303+00:00"
+}

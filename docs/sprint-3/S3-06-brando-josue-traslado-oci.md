@@ -1,3 +1,8 @@
+> Cierre del 17-10-2026: CopyObject nativo aprobado en ambos destinos,
+> sin borrar recibidos. HTTP 202 seguido de COMPLETED, integridad y JSON/GET
+> comprobados. No se reprodujo el error histórico de permisos. Ver
+> [cierre técnico, límites y reproducción](cierre-drazen-brando-sprint-3-17-octubre.md).
+
 > Agregado por Edil: integración del 16 de octubre. Se conserva la entrega original como referencia. El flujo activo usa Gemini con consentimiento, GET y JSON de recepción; verifica la copia y conserva el original. Cohere, la configuración paralela y las rutas manuales de movimiento describen la propuesta de la rama, no el API actual. Ver docs/sprint-3/integracion-ramas-16-octubre.md.
 
 # S3-06 — Copia de documentos procesados a OCI
@@ -18,9 +23,9 @@ subida → recibidos
           └── copia verificada en procesados o auditoria_humana
 ```
 
-El endpoint manual `/api/oci/move` conserva su semántica anterior: copia,
-verifica y elimina el origen. La conservación del origen aplica al flujo
-automático de `/api/triage`.
+El router activo no expone `/api/oci/move`. Los métodos de movimiento
+históricos están separados; el flujo automático de `/api/triage` llama a
+copiar_archivo y conserva el original.
 
 ## Cambios realizados y ubicación
 
@@ -34,9 +39,9 @@ Archivo: [`mediflow/backend/app/api/routes.py`](../../mediflow/backend/app/api/r
   - `auditoria_humana` → `OCI_BUCKET_AUDITORIA`.
 - La llamada automática usa `manager.copiar_archivo(...)` en lugar de
   `manager.mover_archivo(...)`.
-- El resultado de la copia actualiza `almacenamiento_oci` con bucket, estado,
-  SHA-256 y tamaño.
-- Si OCI falla, se registra el error y la API responde `502`; el origen no se
+- El resultado actualiza `almacenamiento_oci` con bucket, ruta_objeto y
+  status_backup. SHA-256 y tamaños son internos, sin ampliar el contrato.
+- Si OCI falla, se registra el error y la API responde `503`; el origen no se
   elimina.
 
 Sección específica: función `post_triage`, bloque de transferencia posterior a
@@ -127,12 +132,14 @@ PYTHONPATH=.:.. \
 
 ## Cómo ejecutar la prueba manual con FastAPI
 
-Con el backend activo, subir un archivo no sensible:
+Con el backend y los servicios de análisis autorizados, subir una muestra
+sintética con analyze=true. Sin ese campo, el POST solo confirma recepción:
 
 ```bash
 curl -X POST \
   http://127.0.0.1:8000/api/triage \
   -H 'accept: application/json' \
+  -F 'analyze=true' \
   -F 'file=@archivo.pdf;type=application/pdf'
 ```
 
@@ -160,7 +167,7 @@ auditoria_humana/<ruta_objeto>
 
 El tamaño y el SHA-256 de ambas copias deben coincidir. Si la copia falla, el
 archivo debe permanecer únicamente en `recibidos` y la API debe responder con
-error `502`.
+error `503`.
 
 ## Punto de control
 
