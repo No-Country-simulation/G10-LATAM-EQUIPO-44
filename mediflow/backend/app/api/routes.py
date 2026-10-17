@@ -5,9 +5,11 @@ from starlette.concurrency import run_in_threadpool
 from app.core.config import settings
 from app.core.oci_client import OCIStorageManager
 from app.core.llm_client import CohereClient, LLMError, LLMInputError
-from app.core.oci_transfer import OCIObjectMover
+from app.services.servicio_orquestador import procesar_con_orquestador
+import logging
 
 router = APIRouter(prefix="/api", tags=["Triage"])
+logger = logging.getLogger(__name__)
 
 ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".txt"}
 MAX_FILE_BYTES = 10 * 1024 * 1024
@@ -104,6 +106,34 @@ async def post_triage(file: UploadFile = File(...)):
         response["decision_enrutamiento"]["justificacion_enrutamiento"] = (
             f"Extraccion Cohere completada; archivo almacenado en '{bucket_name}/{object_name}'"
         )
+        response = procesar_con_orquestador(response)
+        destination_bucket = {
+            "procesado": settings.OCI_BUCKET_PROCESADOS,
+            "auditoria_humana": settings.OCI_BUCKET_AUDITORIA,
+        }.get(response["status"])
+        if destination_bucket:
+            try:
+                manager = await run_in_threadpool(OCIStorageManager)
+                result = await run_in_threadpool(
+                    manager.mover_archivo,
+                    object_name,
+                    settings.OCI_BUCKET_RECIBIDOS,
+                    destination_bucket,
+                )
+                response["almacenamiento_oci"].update(
+                    {
+                        "bucket": result.destination_bucket,
+                        "status_backup": "procesado",
+                        "sha256": result.sha256,
+                        "tamano": result.destination_size,
+                    }
+                )
+            except Exception as error:
+                logger.exception("document_transfer_failed object=%s", object_name)
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail="El análisis terminó, pero no se pudo trasladar el documento.",
+                ) from error
         return response
     return response
 
@@ -116,11 +146,7 @@ async def move_to_processed(object_name: str):
     try:
         manager = await run_in_threadpool(OCIStorageManager)
         result = await run_in_threadpool(
-            OCIObjectMover(
-                manager.object_storage,
-                manager.namespace,
-                manager.config["region"],
-            ).move,
+            manager.mover_archivo,
             object_name,
             settings.OCI_BUCKET_RECIBIDOS,
             settings.OCI_BUCKET_PROCESADOS,

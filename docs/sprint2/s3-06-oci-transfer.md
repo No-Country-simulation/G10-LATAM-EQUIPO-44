@@ -138,4 +138,6 @@ reutilizaron como evidencia de acceso real.
 
 - 2026-10-16: Estado inicial revisado; `oci_transfer.py` ya implementa copia, verificación SHA-256/tamaño y borrado seguro.
 - 2026-10-16: Rama de Eliana identificada como `origin/feature/orquestador`; contiene `core/orquestador.py` y `app/services/servicio_orquestador.py`, pero ese servicio requiere módulos ausentes en la rama actual.
-- Archivos traídos de Eliana: pendiente; cambio en `routes.py`: pendiente; integración y prueba OCI: pendiente.
+- 2026-10-16: Rama `feature/s3-06-traslado-oci` creada y estado previo guardado en `28cacbc`; se trajeron los dos módulos y se adaptaron al JSON existente.
+- 2026-10-16: Cambio en `routes.py` aplicado: `procesado` va a `OCI_BUCKET_PROCESADOS` y `auditoria_humana` a `OCI_BUCKET_AUDITORIA`; ambos llaman a `mover_archivo()` con copia, verificación y borrado seguro.
+- 2026-10-16: Pruebas unitarias OCI: `9 passed`; contrato de orquestación normal y de auditoría verificado; prueba real OCI de esta integración pendiente para no mover un objeto sin confirmación explícita.
