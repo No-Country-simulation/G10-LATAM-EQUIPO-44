@@ -22,7 +22,8 @@ HTTPS. No hay un modo mock en producción ni credenciales OCI/LLM en la aplicaci
 
 Sprint 2: la respuesta `201` con `status=recibido` confirma la recepción; no
 indica que el análisis clínico haya terminado. Se muestran estado e identificador.
-El detalle clínico completo pertenece al Sprint 3. El envío real escribe en OCI.
+Sprint 3 incorpora resultado, urgencia provisional, confianza de clasificación
+y consulta por ID. El envío real escribe en OCI.
 
 Pruebas locales sin OCI:
 
@@ -121,8 +122,8 @@ Ver docs/sprint-3/cierre-edil-flutter-15-octubre.md para pruebas y aceptación p
 La auditoría del 15 de octubre revisó main: en ese commit el servicio Flutter
 tenía sendDocument (POST), sin getDocument ni botones de consulta. La recuperación
 se implementó después en los cambios locales de feature/s3-edil-cierre-flutter.
-Mientras esos cambios no se incorporen mediante un commit autorizado, main no
-contiene esta función. No confundir una implementación local con código publicado.
+Agregado por Edil: esos cambios ya se incorporaron en `main` `47701cb` el 16 de
+octubre. La discrepancia del informe era entre dos revisiones distintas de Git.
 
 Se reutilizan getDocument, Consultar documento y Actualizar estado existentes en
 esta rama. Las consultas son manuales, con el mismo ID confirmado por el POST o
@@ -138,8 +139,9 @@ Urgencia y revisión humana pueden coexistir y siguen dependiendo de la respuest
 validada del backend, no del porcentaje mostrado.
 
 Dependencias pendientes del contrato definitivo: significado y calibración de la
-confianza; reglas de completitud por tipo; invocación del detector y del score en
-el pipeline; política de revisión y eventual reprocesamiento/idempotencia. No se
+confianza; reglas de completitud por tipo y eventual reprocesamiento/idempotencia.
+Agregado por Edil: detector, score y revisión ya están integrados al pipeline
+desde `47701cb`; Flutter muestra su respuesta, sin repetir esas reglas. No se
 añaden score_operativo, es_ambiguo ni campos nuevos a las peticiones o respuestas.
 
 Verificación de esta revisión: flutter analyze --no-pub sin problemas;
@@ -147,3 +149,27 @@ flutter test --no-pub con 178 pruebas aprobadas y una prueba real optativa omiti
 Incluye recuperación por ID, conservación de resultado tras fallo GET,
 confirmación de reenvío y 16 casos nuevos de lectura/visualización de confianza.
 No se llamaron OCI/Gemini ni se verificó cámara física en esta ejecución.
+
+## Cierre Sprint 3 — 16 de octubre — Agregado por Edil
+
+La prueba real optativa utiliza ahora `TriageApiService` tanto para POST como
+para GET, igual que la app. La prueba de análisis requiere además un flag
+separado: la suite habitual nunca llama Gemini ni OCI. Registra solo metadatos,
+sin respuestas clínicas completas, y no reenvía si falla el análisis.
+
+Ver [cierre y resultados de Edil](../../../docs/sprint-3/cierre-edil-sprint-3-16-octubre.md)
+y [configuración y comandos de verificación OCI](../../../docs/sprint-3/guia-verificacion-json-oci.md).
+La comprobación en teléfono físico y el binario de distribución quedan en Sprint 4.
+
+Resultado local del 16 de octubre: analyze sin problemas; 178 pruebas aprobadas
+y dos reales omitidas en la suite habitual. La primera ejecución real falló
+en la copia OCI por `InsufficientServicePermissions`; la app recuperó el documento
+como recibido, sin repetir POST.
+
+Agregado por Edil, 17 de octubre: tras la corrección OCI del usuario, **cinco
+pruebas OCI reales y las dos Flutter HTTP aprobaron**. El análisis sintético
+con Gemini terminó procesado, se verificó la copia por SHA-256 y el JSON final
+coincidió con GET. S3-08 y S3-04B quedan técnicamente cerrados para Edil.
+Esta muestra real fue de rutina; no certifica precisión clínica, todos los
+escenarios ni cámara física. Se conserva la evidencia previa y la nueva en
+[el informe de cierre](../../../docs/sprint-3/cierre-edil-sprint-3-16-octubre.md).

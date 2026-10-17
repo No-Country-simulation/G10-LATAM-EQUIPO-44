@@ -1,0 +1,70 @@
+{
+  "agregado_por": "Edil",
+  "date_local": "2026-10-17",
+  "generated_at_utc": "2026-10-17T04:30:39.017759+00:00",
+  "base_commit": "47701cb991c9e720587863f1f1b69120482ea963",
+  "branch": "cierre/edil-sprint-3-2026-10-16",
+  "synthetic_only": true,
+  "flutter_live_test_sha256": "29bdfc1902a2b3e2b65480f0b16b72c3c2a3e37e06c7e32c7e83f3b4ec4e3228",
+  "oci_real_tests": {
+    "passed": 5,
+    "exit_code": 0,
+    "covers": [
+      "upload_download",
+      "json_recibido",
+      "json_procesado",
+      "json_auditoria_humana",
+      "verified_copy_retains_original"
+    ],
+    "own_test_objects_cleaned": true
+  },
+  "flutter_real_tests": {
+    "passed": 2,
+    "exit_code": 0,
+    "gemini_analysis_requests": 1,
+    "automatic_post_retries": 0
+  },
+  "checks": [
+    {
+      "document_id": "DOC-CLIN-627565E6187444ECAB76D271AAFD031D",
+      "status": "recibido",
+      "bucket": "recibidos",
+      "object_name": "DOC-CLIN-627565E6187444ECAB76D271AAFD031D.txt",
+      "stored_json_matches_get": true,
+      "received_json_retained": true,
+      "original_retained": true,
+      "copy_matches_original": true,
+      "sha256": "d153e6c2358e88101f6d6153b858c273b93309791e12d1cbb61adb2263880118",
+      "gemini_requested": false
+    },
+    {
+      "document_id": "DOC-CLIN-0F1C916CBC1B4E38B8D408F7A2745D37",
+      "status": "procesado",
+      "bucket": "procesados",
+      "object_name": "DOC-CLIN-0F1C916CBC1B4E38B8D408F7A2745D37.txt",
+      "stored_json_matches_get": true,
+      "received_json_retained": true,
+      "original_retained": true,
+      "copy_matches_original": true,
+      "sha256": "906232816c54d85e7862a3f7a5cbb0c88fe1c746dc999c6f286f006761c41128",
+      "gemini_requested": true,
+      "priority": "Rutina",
+      "classification_confidence": 1.0,
+      "requires_human_review": false
+    }
+  ],
+  "all_checks_passed": true,
+  "prior_InsufficientServicePermissions": "not_reproduced_after_user_oci_correction",
+  "verdict": "synthetic_real_transport_analysis_copy_persistence_and_get_passed",
+  "limits": [
+    "No clinical accuracy certification",
+    "No real patient documents",
+    "No physical camera or release binary acceptance",
+    "No claim of joint personal signoff from Drazen"
+  ],
+  "local_evidence_directory": "C:\\Users\\leno\\AppData\\Local\\Temp\\MediFlow-edil-retest-17oct-5f6a8590755e4614862ed2fd11324c28",
+  "main_unchanged": true,
+  "commit_created": false,
+  "push_performed": false,
+  "credentials_or_iam_changed_by_agent": false
+}

@@ -1,0 +1,112 @@
+{
+  "agregado_por": "Edil",
+  "scope": "Sprint 3 S3-08 y S3-04B",
+  "generated_at_utc": "2026-10-17T03:58:13.157477+00:00",
+  "base_commit": "47701cb991c9e720587863f1f1b69120482ea963",
+  "branch": "cierre/edil-sprint-3-2026-10-16",
+  "synthetic_only": true,
+  "flutter_live_test_sha256": "29bdfc1902a2b3e2b65480f0b16b72c3c2a3e37e06c7e32c7e83f3b4ec4e3228",
+  "checks": {
+    "flutter_analyze": {
+      "exit_code": 0,
+      "issues": 0
+    },
+    "flutter_local_tests": {
+      "exit_code": 0,
+      "passed": 178,
+      "skipped": 2,
+      "cloud_calls": false
+    },
+    "oci_json_real": {
+      "exit_code": 0,
+      "passed": 3,
+      "deselected": 1,
+      "states": [
+        "recibido",
+        "procesado",
+        "auditoria_humana"
+      ],
+      "checks": [
+        "guardar_resultado_triage",
+        "recuperar_json",
+        "recuperar_resultado_triage",
+        "exact_json_equality"
+      ],
+      "own_unique_test_objects_cleaned": true
+    },
+    "flutter_http_real": {
+      "exit_code": 1,
+      "passed": 1,
+      "failed": 1,
+      "receipt": {
+        "synthetic": true,
+        "document_id": "DOC-CLIN-E476B74E171C4B8FB4653418D73B12E4",
+        "status": "recibido",
+        "get_matches_post": true,
+        "gemini_requested": false,
+        "api_origin": "http://127.0.0.1:8137",
+        "executed_at_utc": "2026-10-17T03:55:45.955660Z"
+      },
+      "analysis": {
+        "synthetic": true,
+        "document_id": "DOC-CLIN-171D3B0BF3284A57AAA0218A97F0A7BC",
+        "http_status": 503,
+        "recovered_status": "recibido",
+        "analysis_completed": false,
+        "gemini_requested": true,
+        "api_origin": "http://127.0.0.1:8137",
+        "executed_at_utc": "2026-10-17T03:55:50.682350Z"
+      }
+    },
+    "direct_json_and_original_verification": {
+      "synthetic_only": true,
+      "checks": [
+        {
+          "document_id": "DOC-CLIN-E476B74E171C4B8FB4653418D73B12E4",
+          "status": "recibido",
+          "stored_json_matches_get": true,
+          "original_exists_nonempty": true,
+          "source_retained": true
+        },
+        {
+          "document_id": "DOC-CLIN-171D3B0BF3284A57AAA0218A97F0A7BC",
+          "status": "recibido",
+          "stored_json_matches_get": true,
+          "original_exists_nonempty": true,
+          "source_retained": true
+        }
+      ],
+      "all_checks_passed": true
+    },
+    "copy_diagnostic_without_new_gemini_call": {
+      "copy_completed": false,
+      "error_chain": [
+        {
+          "category": "ObjectTransferError"
+        },
+        {
+          "category": "ServiceError",
+          "http_status": 400,
+          "oci_code": "InsufficientServicePermissions"
+        }
+      ],
+      "source_retained": true
+    }
+  },
+  "verdict": {
+    "flutter_implementation_and_local_checks": "complete",
+    "json_persistence_technical_verification_and_guide": "complete",
+    "drazen_joint_signoff": "not_claimed",
+    "real_analysis_end_to_end": "blocked_by_oci_InsufficientServicePermissions",
+    "clinical_quality_or_physical_camera_acceptance": "not_certified"
+  },
+  "preservation": {
+    "main_unchanged": true,
+    "commit_created": false,
+    "push_performed": false,
+    "backend_or_web_changed": false,
+    "credentials_or_iam_changed": false,
+    "original_synthetic_http_documents_retained": true,
+    "repeat_post_after_analysis_error": false
+  }
+}

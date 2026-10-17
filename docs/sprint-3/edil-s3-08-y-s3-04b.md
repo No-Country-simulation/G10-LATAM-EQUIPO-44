@@ -1,5 +1,32 @@
 # Sprint 3 — tareas de Edil
 
+> Agregado por Edil, 17 de octubre: S3-08 y S3-04B técnicamente cerrados. La
+> repetición aprobó cinco pruebas OCI reales y dos Flutter HTTP reales, incluido
+> Gemini, copia verificada y JSON final recuperado por ID. Evidencia y límites
+> en [el cierre actualizado](cierre-edil-sprint-3-16-octubre.md).
+
+## Estado vigente — 16 de octubre de 2026
+
+Agregado por Edil: la implementación de S3-08 está incorporada en `main`
+`47701cb`. Incluye POST con consentimiento, consulta GET por ID, conservación
+del resultado ante fallos de consulta, prevención de reenvío con ID conocido,
+confirmación ante recepción incierta sin ID, urgencia provisional, confianza
+de clasificación y revisión humana. No agrega campos al contrato.
+
+S3-04A también está incorporado: ya existe persistencia y recuperación JSON.
+Las tres pruebas reales de escritura/lectura en OCI se repitieron el 16 de
+octubre y aprobaron. Las afirmaciones de bloqueo de abajo son históricas.
+
+El cierre y los resultados actuales se registran en
+[cierre-edil-sprint-3-16-octubre.md](cierre-edil-sprint-3-16-octubre.md), y los
+comandos reproducibles de S3-04B en
+[guia-verificacion-json-oci.md](guia-verificacion-json-oci.md).
+La aceptación con servicios reales se distingue de las pruebas simuladas;
+no se atribuye a Edil la implementación clínica ni las tareas de sus compañeros.
+
+<details>
+<summary>Historial de la entrega inicial; no representa el estado vigente</summary>
+
 > Actualización del 14 de octubre: la entrega S3-04A de Drazen está incorporada localmente con correcciones y pruebas. La ejecución real y evidencia OCI siguen pendientes. Ver integracion-ramas-14-octubre.md; las notas de ausencia de implementación de abajo describen el estado anterior.
 
 Agregado por Edil: este informe separa implementación local y aceptación con servicios reales. No atribuye a Edil la lógica clínica ni la persistencia pendiente de otros integrantes.
@@ -48,3 +75,5 @@ No se modificaron módulos ajenos para sustituir esas dependencias.
 
 Archivos de implementación: triage_result.dart, triage_api_service.dart, document_selection_screen.dart y nuevo widgets/triage_result_card.dart.
 Pruebas: se conservan y adaptan triage_api_service_test.dart y triage_flow_test.dart; se agregan triage_result_s3_test.dart y helpers/triage_fixture.dart con datos sintéticos.
+
+</details>

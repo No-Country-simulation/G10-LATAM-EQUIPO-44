@@ -1,5 +1,11 @@
 # Correcciones de Flutter — Edil — Sprint 3
 
+> Agregado por Edil, 16 de octubre: informe histórico de la revisión del día 15.
+> Sus cambios ya están incorporados en `main` `47701cb`; detector y score están
+> conectados al pipeline. Para el cierre y la evidencia actual consultar
+> [cierre-edil-sprint-3-16-octubre.md](cierre-edil-sprint-3-16-octubre.md).
+> Las frases sobre cambios sin commit o integración pendiente describen ese día.
+
 Agregado por Edil: implementación local para cerrar los pendientes de la app.
 Este informe no declara terminadas las tareas de IA, orquestación ni auditoría web.
 
