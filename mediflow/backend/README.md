@@ -1,0 +1,221 @@
+# MediFlow Backend 🏥⚡
+
+Backend REST API con FastAPI e integración con Oracle Cloud Infrastructure (OCI) para triaje médico inteligente.
+
+---
+
+## 🚀 Requisitos Previos
+
+- Python 3.10 o superior (validado en 3.12 y 3.14).
+- Perfil del SDK OCI en `~/.oci/config` con acceso a los buckets `recibidos`, `procesados` y `auditoria_humana`.
+
+Instalar dependencias del proyecto:
+```bash
+pip install -r mediflow/requirements.txt
+```
+
+---
+
+## ⚙️ Variables de Entorno
+
+Al iniciar, el backend carga `mediflow/.env` mediante `python-dotenv`, con una
+ruta relativa al código, independiente de la carpeta desde la que ejecutes Uvicorn.
+Las variables exportadas en la terminal tienen prioridad y no se sobrescriben.
+Puedes copiar `mediflow/.env.example` a `mediflow/.env`; está ignorado por Git.
+No se busca un segundo `.env` en `mediflow/backend/`.
+Por defecto usa el perfil local `DEFAULT` del SDK; no copies credenciales al repositorio.
+
+| Variable | Descripción | Valor por defecto |
+| :--- | :--- | :--- |
+| `ENVIRONMENT` | Entorno de ejecución (`development` / `production`) | `development` |
+| `PORT` | Puerto del servidor FastAPI | `8000` |
+| `HOST` | Dirección de escucha | `0.0.0.0` |
+| `OCI_CONFIG_PROFILE` | Perfil local del SDK | `DEFAULT` |
+| `OCI_BUCKET_RECIBIDOS` | Bucket de ingesta | `recibidos` |
+| `OCI_BUCKET_AUDITORIA` | Bucket para revisión | `auditoria_humana` |
+| `OCI_BUCKET_PROCESADOS` | Bucket para documentos completados | `procesados` |
+
+---
+
+## 🏃 Cómo Ejecutar el Servidor
+
+Desde la carpeta `mediflow/backend`:
+```bash
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+O desde la raíz del repositorio:
+```bash
+python -m uvicorn app.main:app --app-dir mediflow/backend --reload --port 8000
+```
+
+- **API Base:** [http://localhost:8000](http://localhost:8000)
+- **Documentación Interactiva (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Documentación Redoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+---
+
+## 📬 Endpoint de Triaje: `POST /api/triage`
+
+Recibe PDF, JPG/JPEG, PNG o TXT vía `multipart/form-data`, rechaza archivos
+vacíos o mayores de 10 MiB y genera un identificador UUID completo.
+La validación inicial revisa extensión y tamaño; todavía no analiza el contenido
+para comprobar que corresponde al formato declarado.
+Guarda el archivo en el bucket independiente `recibidos` y retorna JSON con estado
+`recibido`. Agregado por Edil: sin analyze conserva la recepción original; con analyze=true invoca Gemini y valida el contrato.
+
+### Ejemplo con cURL
+
+```bash
+curl -X POST "http://localhost:8000/api/triage" \
+  -H "accept: application/json" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@ruta/a/tu/receta_medica.pdf"
+```
+
+### Ejemplo de Solicitud en Postman
+
+1. **Método:** `POST`
+2. **URL:** `http://localhost:8000/api/triage`
+3. **Pestaña Body:** Seleccionar `form-data`
+4. **Campo:**
+   - Key: `file` (cambiar el selector de tipo de `Text` a `File`)
+   - Value: Seleccionar el archivo local (ej. receta o estudio)
+5. **Enviar (Send)**
+
+### Ejemplo de Respuesta Exitosa (`201 Created`):
+
+```json
+{
+  "status": "recibido",
+  "documento_id": "DOC-CLIN-2026-E4A2",
+  "clasificacion": {
+    "tipo_documento": "Pendiente de procesamiento",
+    "especialidad": "General",
+    "nivel_prioridad": "Rutina",
+    "score_confianza_clasificacion": 0.0
+  },
+  "datos_extraidos": {
+    "paciente": {
+      "nombre": null,
+      "edad": null
+    },
+    "medico_solicitante": {
+      "nombre": null,
+      "matricula": null
+    },
+    "estudio_realizado": null,
+    "diagnostico_principal": null,
+    "cie10_sugerido": null
+  },
+  "decision_enrutamiento": {
+    "destino_principal": "Cola_Procesamiento_Inicial",
+    "requiere_auditoria_humana": false,
+    "justificacion_enrutamiento": "Archivo almacenado en recibidos/"
+  },
+  "notificacion_generada": null,
+  "almacenamiento_oci": {
+    "bucket": "recibidos",
+    "ruta_objeto": "DOC-CLIN-<uuid>.pdf",
+    "status_backup": "exito"
+  }
+}
+```
+
+---
+
+## 🧪 Ejecución de Pruebas
+
+### 1. Pruebas Unitarias de Manejo de Errores OCI (Sin conexión OCI requerida, con Mocks):
+```bash
+cd mediflow/backend
+python -m pytest tests -m "not integration" -v
+```
+
+### 2. Pruebas de Integración con OCI (Requiere credenciales en `~/.oci/config`):
+```bash
+# PowerShell, desde mediflow/backend; crea y elimina solo un objeto único.
+$env:RUN_OCI_INTEGRATION = '1'
+try {
+    python -m pytest tests/test_oci_integration.py -v -s
+} finally {
+    Remove-Item Env:RUN_OCI_INTEGRATION -ErrorAction SilentlyContinue
+}
+```
+
+La prueba real se omite por defecto. Para detalles, permisos y resultado esperado,
+consulta [la documentación Sprint 1](../../docs/sprint-1/manejo_errores_oci.md).
+
+## Flutter
+
+El emulador Android consume `http://10.0.2.2:8000/api/triage` por defecto.
+Inicia la API y el emulador antes de ejecutar Flutter. La selección local de archivos
+puede usarse sin backend; procesar el documento requiere API y acceso OCI.
+
+## Opciones del servidor
+
+ENVIRONMENT se valida como texto y se muestra en el health check.
+DEBUG se valida como booleano; por defecto es False y debe permanecer
+desactivado en despliegue. Estas mejoras proceden de c839a90 y se alojan
+en environment.py para no duplicar la carga de configuración.
+Al usar Uvicorn CLI, HOST y PORT no se aplican automáticamente:
+indica --host y --port al iniciar el servidor.
+
+
+Compatibilidad Windows: si otra herramienta exporta DEBUG=release, se interpreta
+como depuración desactivada. Valores distintos que no sean booleanos válidos
+producen un error de configuración al iniciar.
+
+## Módulo LLM separado (Sprint 2)
+
+El cliente Gemini, prompt, extracción TXT/PDF y pruebas están documentados en
+[Data e IA](../data_ai/README.md). Agregado por Edil: ahora se invocan solo cuando POST /api/triage recibe analyze=true.
+
+## Cierre técnico de Sprint 2 — Agregado por Edil
+
+Se conserva la recepción original. Para solicitar IA de manera explícita,
+agrega el campo multipart analyze=true junto con file. No se debe habilitar
+automáticamente para documentos sensibles sin permiso para enviarlos a Google.
+Flutter obtiene esa autorización por archivo; las pruebas automáticas usan mocks.
+Configura GEMINI_API_KEY y GEMINI_MODEL en mediflow/.env local. Nunca publiques
+la clave. El modelo no se fija automáticamente; verifica capacidades, cuota y coste.
+Los errores IA producen HTTP controlados: 422 entrada, 429 cuota, 502 proveedor/
+salida inválida, 503 configuración/red y 504 timeout. El original queda en recibidos.
+No se ejecutan movimientos automáticos a procesados ni aprobación humana:
+son alcance posterior. El estado procesado indica extracción JSON validada.
+La respuesta incluye medicamentos opcionales y mantiene el contrato previo.
+
+## 📂 Endpoints de Consulta de Documentos (Sprint 3)
+
+### 1. Listar Documentos: `GET /api/documents`
+Lista los documentos almacenados en los buckets de OCI (`recibidos`, `procesados`, `auditoria_humana`).
+- **Query Params:**
+  - `status`: Filtrar por estado (`recibido`, `procesado`, `auditoria_humana`).
+  - `prioridad`: Filtrar por prioridad (`Rutina`, `Urgente`).
+  - `limit`: Máximo de documentos a retornar (default: 100).
+- **Respuesta:** Array de objetos `TriageResponse` (`HTTP 200 OK`).
+
+```bash
+curl -X GET "http://localhost:8000/api/documents?status=procesado&prioridad=Urgente"
+```
+
+### 2. Consultar Documento por ID: `GET /api/documents/{document_id}`
+Recupera el resultado de triaje de un documento específico persistido en OCI.
+- **Códigos de respuesta:** `200 OK` si existe, `404 Not Found` si no existe en ningún bucket, `400 Bad Request` si el ID es inválido.
+
+```bash
+curl -X GET "http://localhost:8000/api/documents/DOC-CLIN-ABCD1234"
+```
+
+Documentación detallada para el Frontend Web disponible en [`docs/sprint-3/api_documentos_flor.md`](../../docs/sprint-3/api_documentos_flor.md).
+
+---
+
+
+Agregado por Edil: si falla el guardado JSON, POST devuelve 503 y conserva el original. GET propaga fallos OCI; no equivale a lista vacía ni 404. Las pruebas reales de S3-04B siguen pendientes.
+
+
+## Agregado por Edil: recepción consultable si falla Gemini
+El JSON recibido se guarda antes del análisis. Si Gemini falla, el archivo y su JSON recibido quedan consultables por ID.
+El código anterior se conserva comentado en routes.py. El listado deduplica primero las versiones procesadas/auditoría antes de filtrar estado, para no mostrar una recepción antigua como pendiente.
+No hay aún reprocesamiento idempotente ni cambios de estado clínicos aprobados; reenvíos generan otro ID.

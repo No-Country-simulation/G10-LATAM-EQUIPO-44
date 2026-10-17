@@ -2,6 +2,8 @@
 
 Sistema inteligente de triaje médico automatizado, extracción de información clínica mediante IA y auditoría en tiempo real en la nube Oracle Cloud Infrastructure (OCI).
 
+Pruebas OCI del Sprint 1: ver [configuración, pruebas unitarias y prueba real](docs/sprint-1/manejo_errores_oci.md).
+
 ---
 
 ## 📌 Organización Sprint 1 (G10-LATAM-EQUIPO-44)

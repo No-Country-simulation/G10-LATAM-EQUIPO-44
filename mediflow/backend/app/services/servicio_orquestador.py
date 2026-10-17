@@ -1,4 +1,4 @@
-"""Adapter between the triage JSON and Eliana's routing decision."""
+"""Apply the routing decision without replacing the triage JSON contract."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from app.core.orquestador import pipeline_v1_2
 
 
 def procesar_con_orquestador(documento: dict[str, Any]) -> dict[str, Any]:
-    """Merge the routing decision into the existing triage document."""
+    """Merge the team's routing decision into an existing triage document."""
     resultado = deepcopy(documento)
     decision = resultado.get("decision_enrutamiento") or {}
     decision_final = pipeline_v1_2.invoke({"documento": resultado})[

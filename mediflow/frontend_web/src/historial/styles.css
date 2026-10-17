@@ -350,3 +350,15 @@ th[aria-sort="descending"] .th-sort__ind::after { color: var(--navy); }
   .page-btn--edge .nowrap { display: none; }
   .page-btn--edge { min-width: 34px; }
 }
+/* Prioridades del contrato documental; no asignan niveles MTS clínicos. */
+:root {
+  --prioridad-urgente: #b42318; --prioridad-urgente-bg: #fee4e2; --prioridad-urgente-border: #fda29b; --prioridad-urgente-ink: #912018;
+  --prioridad-rutina: #067647; --prioridad-rutina-bg: #dcfae6; --prioridad-rutina-border: #75e0a7; --prioridad-rutina-ink: #05603a;
+  --prioridad-pendiente: #475467; --prioridad-pendiente-bg: #f2f4f7; --prioridad-pendiente-border: #d0d5dd; --prioridad-pendiente-ink: #344054;
+}
+.prioridad-tag { display: inline-flex; padding: 5px 10px; border-radius: 12px; font-weight: 600; }
+.prioridad-tag--urgente { color: var(--prioridad-urgente-ink); background: var(--prioridad-urgente-bg); }
+.prioridad-tag--rutina { color: var(--prioridad-rutina-ink); background: var(--prioridad-rutina-bg); }
+.prioridad-tag--pendiente { color: var(--prioridad-pendiente-ink); background: var(--prioridad-pendiente-bg); }
+#documentDetail::backdrop { background: rgb(0 0 0 / 40%); }
+[hidden] { display: none !important; }

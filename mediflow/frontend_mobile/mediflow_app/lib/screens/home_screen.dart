@@ -1,122 +1,117 @@
 import 'package:flutter/material.dart';
-
 import '../services/file_picker_service.dart';
+import '../services/document_camera_service.dart';
+import '../services/triage_api_service.dart';
+import '../design_system/app_colors.dart';
+import '../design_system/app_spacing.dart';
+import '../widgets/app_components.dart';
 import 'document_selection_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, this.filePickerService});
-
+  const HomeScreen({
+    super.key,
+    this.filePickerService,
+    this.triageApiService,
+    this.cameraService,
+  });
   final FilePickerService? filePickerService;
-
+  final TriageApiService? triageApiService;
+  final DocumentCameraService? cameraService;
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(title: const Text('MediFlow')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 680),
-            child: ListView(
-              padding: const EdgeInsets.all(24),
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Icon(
-                      Icons.health_and_safety_outlined,
-                      size: 48,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('MediFlow')),
+    body: SafeArea(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: AppSpacing.contentWidth),
+          child: ListView(
+            padding: EdgeInsets.all(
+              MediaQuery.sizeOf(context).width < 400
+                  ? AppSpacing.lg
+                  : AppSpacing.xl,
+            ),
+            children: [
+              const SizedBox(height: AppSpacing.lg),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: AppColors.primarySoft,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  ),
+                  child: const Icon(
+                    Icons.health_and_safety_outlined,
+                    size: 40,
+                    color: AppColors.primary,
                   ),
                 ),
-                const SizedBox(height: 28),
-                Text(
-                  'Triaje de documentos clínicos',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Selecciona un documento clínico para iniciar su procesamiento.',
-                  style: theme.textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 28),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Documentos admitidos',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 16),
-                        const Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            Chip(
-                              avatar: Icon(Icons.picture_as_pdf_outlined),
-                              label: Text('PDF'),
-                            ),
-                            Chip(
-                              avatar: Icon(Icons.image_outlined),
-                              label: Text('Imagen'),
-                            ),
-                            Chip(
-                              avatar: Icon(Icons.description_outlined),
-                              label: Text('Texto'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Text('PDF, JPG, JPEG, PNG y TXT'),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => DocumentSelectionScreen(
-                        filePickerService: filePickerService,
-                      ),
-                    ),
-                  ),
-                  icon: const Icon(Icons.add_rounded),
-                  label: const Text('Seleccionar documento'),
-                ),
-                const SizedBox(height: 24),
-                Row(
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              const AppHeader(
+                eyebrow: 'DOCUMENTOS CLÍNICOS',
+                title: 'Triaje de documentos clínicos',
+                subtitle:
+                    'Organiza el ingreso de tus documentos y consulta la respuesta del servidor.',
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              AppCard(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.phonelink_lock_outlined,
-                      color: theme.colorScheme.primary,
-                      size: 20,
+                    Text(
+                      'Documentos admitidos',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Selección local y sin conexión..',
-                      ),
+                    const SizedBox(height: AppSpacing.lg),
+                    const Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: [
+                        Chip(
+                          avatar: Icon(Icons.picture_as_pdf_outlined),
+                          label: Text('PDF'),
+                        ),
+                        Chip(
+                          avatar: Icon(Icons.image_outlined),
+                          label: Text('Imagen'),
+                        ),
+                        Chip(
+                          avatar: Icon(Icons.description_outlined),
+                          label: Text('Texto'),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: AppSpacing.md),
+                    const Text('PDF, JPG, JPEG, PNG y TXT'),
                   ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              AppButton(
+                label: 'Seleccionar documento',
+                icon: Icons.add_rounded,
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => DocumentSelectionScreen(
+                      filePickerService: filePickerService,
+                      triageApiService: triageApiService,
+                      cameraService: cameraService,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              const AppStatusPanel(
+                title: 'Tú decides cuándo enviar',
+                message:
+                    'Selecciona un archivo local. Solo se enviará al servidor cuando pulses Procesar documento.',
+              ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }

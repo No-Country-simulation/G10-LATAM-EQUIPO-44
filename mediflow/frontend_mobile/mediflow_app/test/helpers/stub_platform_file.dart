@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 
 /// Simula metadatos del selector sin leer archivos ni invocar Android.
@@ -28,6 +30,9 @@ final class StubPlatformFile extends PlatformFile {
 
   @override
   Future<int?> length() async => bytes;
+
+  @override
+  Future<Uint8List> readAsBytes() async => Uint8List(bytes ?? 0);
 
   // Fallar si la aplicación intenta leer el contenido del documento.
   @override
