@@ -1,0 +1,13 @@
+{
+  "agregado_por": "Edil",
+  "generated_at_utc": "2026-10-17T19:29:46.700438+00:00",
+  "case_id": "MF_001",
+  "cause": "core.autocrlf=true converted LF to CRLF; PDF xref offsets invalidated",
+  "original_local_sha256": "270ec5999960484fb480fad6a770c10780c68282de2ca59533da96a827065c06",
+  "original_git_sha256": "8ff31196cfab247f5662c4ddeceb051be9a522f18bdbf65645651d431e7d61dc",
+  "local_backup": "C:\\Users\\leno\\AppData\\Local\\Temp\\MediFlow-nico-pdf-original-17oct\\270ec5999960484fb480fad6a770c10780c68282de2ca59533da96a827065c06.pdf",
+  "no_other_local_changes_verified": true,
+  "restored_exact_git_blob": true,
+  "strict_pdf_parse_after_restore": true,
+  "protection_added": "*.pdf -text"
+}

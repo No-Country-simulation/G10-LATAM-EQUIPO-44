@@ -1,0 +1,54 @@
+{
+  "agregado_por": "Edil",
+  "real_get_and_local_detector_no_additional_gemini_calls": true,
+  "cases": [
+    {
+      "case_id": "MF_004",
+      "input_coverage": "full_text_and_structured",
+      "source_text_chars": 574,
+      "structured_diagnosis_present": false,
+      "clinical_alert": "none_detected",
+      "document_priority": "routine",
+      "requires_human_review": false,
+      "suggested_priority": null,
+      "matched_rules": [],
+      "match_contexts": []
+    },
+    {
+      "case_id": "MF_008",
+      "input_coverage": "structured_only",
+      "source_text_chars": null,
+      "structured_diagnosis_present": true,
+      "clinical_alert": "none_detected",
+      "document_priority": "routine",
+      "requires_human_review": false,
+      "suggested_priority": null,
+      "matched_rules": [],
+      "match_contexts": []
+    },
+    {
+      "case_id": "MF_009",
+      "input_coverage": "full_text_and_structured",
+      "source_text_chars": 814,
+      "structured_diagnosis_present": true,
+      "clinical_alert": "none_detected",
+      "document_priority": "routine",
+      "requires_human_review": false,
+      "suggested_priority": null,
+      "matched_rules": [],
+      "match_contexts": []
+    },
+    {
+      "case_id": "MF_011",
+      "input_coverage": "full_text_and_structured",
+      "source_text_chars": 1269,
+      "structured_diagnosis_present": true,
+      "clinical_alert": "none_detected",
+      "document_priority": "routine",
+      "requires_human_review": false,
+      "suggested_priority": null,
+      "matched_rules": [],
+      "match_contexts": []
+    }
+  ]
+}

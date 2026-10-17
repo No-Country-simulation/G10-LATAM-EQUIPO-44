@@ -1,0 +1,344 @@
+{
+  "agregado_por": "Edil",
+  "task": "S3-01.4 Nicolás",
+  "started_at_utc": "2026-10-17T19:27:52.470684+00:00",
+  "base_commit": "47701cb991c9e720587863f1f1b69120482ea963",
+  "user_confirmed_synthetic": true,
+  "real_pipeline": true,
+  "mocks": false,
+  "base_url": "http://127.0.0.1:8141",
+  "planned_cases": 9,
+  "runtime_sha256": {
+    "mediflow/backend/app/api/routes.py": "ce5981536714f1443ae54d7dd86b66891f4b68155c2bfa352fb65bbbd9f86a46",
+    "mediflow/backend/app/services/gemini_client.py": "db3f727085c612bbb4475b978707f967965540d697f3f89f6d9de979fd0ae63f",
+    "mediflow/backend/app/services/triage_pipeline.py": "856a0ff14a7ee891881b1c2ce103d450a037057b337b34ba303782bb754c483a",
+    "mediflow/backend/app/core/orquestador.py": "5dc0f2909405cadf4083d8758a9712c29ac1e3c063c1614c97e3d5e61d9bf673",
+    "mediflow/data_ai/urgency_detector.py": "b5fa962f437c1fa97ba52e0e05e52c9786dcdbaa96072d6819d2b25e80b097e4",
+    "mediflow/data_ai/rules/urgency_catalog_v1_1.json": "ad1f3f0ab540f50897f6095ac9edd448c8ede375a3befe4a5568a6253fbc5cef",
+    "mediflow/data_ai/prompts/master_prompt.txt": "03a42cab68f9ca2b0fbab7b16fbfc10596c4ffd0c887d337fd46c0e4fbd2bce9",
+    "mediflow/data_ai/score_confianza.py": "cb877a794dd255140971eb49bdab09668510bda28b7b628d681ed53addf5d442",
+    "mediflow/data_ai/dataset/dataset_master.csv": "2d61907337f534c6902ad0844749cba2ed333839214c3b38ca17967d9d550a49"
+  },
+  "cases": [
+    {
+      "case_id": "MF_001",
+      "scenario": "NOR",
+      "filename": "MF_001_2026_REC_NOR_PDF.pdf",
+      "source_sha256": "270ec5999960484fb480fad6a770c10780c68282de2ca59533da96a827065c06",
+      "expected": {
+        "priority": "Rutina",
+        "destination": "Cola_Farmacia",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": false,
+      "matches_dataset": false,
+      "http_status": 422,
+      "outcome": "api_error",
+      "document_id": "DOC-CLIN-C2D2B81F85D2444EBA2EC002326366D6",
+      "recovery_http_status": 200,
+      "recovered_status": "recibido",
+      "duration_seconds": 1.383
+    },
+    {
+      "case_id": "MF_004",
+      "scenario": "URG",
+      "filename": "MF_004_2026_LAB_URG_TXT.txt",
+      "source_sha256": "c081eb29f0c5f46ebe19b6d03035f2a98170ba5e29720b8e5c30ecbda88a8fd7",
+      "expected": {
+        "priority": "Urgente",
+        "destination": "Cola_Emergencia_Medica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": false,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": false,
+        "destination": false,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-A554307A99CA49568C6B4BA013177B4C",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "mismatch",
+      "duration_seconds": 12.488
+    },
+    {
+      "case_id": "MF_005",
+      "scenario": "NOR",
+      "filename": "MF_005_2026_LAB_NOR_IMG.jpg",
+      "source_sha256": "7926e10edd25340524e852301ec5cae76048ded007c2f937a7ae59311b5c9a66",
+      "expected": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": true,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": true,
+        "destination": true,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-358529C0A3084620B827323232DFAB81",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "passed",
+      "duration_seconds": 7.979
+    },
+    {
+      "case_id": "MF_006",
+      "scenario": "NOR",
+      "filename": "MF_006_2026_IMG_NOR_PDF.pdf",
+      "source_sha256": "f103646729b17d56c623b23bb0a41f285e037a1443b663be32327502914cb710",
+      "expected": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": true,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": true,
+        "destination": true,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-55775203B127429CBF9B86F17374BC69",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "passed",
+      "duration_seconds": 7.542
+    },
+    {
+      "case_id": "MF_007",
+      "scenario": "NOR",
+      "filename": "MF_007_2026_IMG_NOR_TXT.txt",
+      "source_sha256": "f567085985f850606eb9c0c76b48826ce503efda428946a543c3998cd6785990",
+      "expected": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": true,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": true,
+        "destination": true,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-24DA11DA6CED4751B902D96AA5E21758",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "passed",
+      "duration_seconds": 12.576
+    },
+    {
+      "case_id": "MF_008",
+      "scenario": "URG",
+      "filename": "MF_008_2026_IMG_URG_IMG.jpg",
+      "source_sha256": "97517f92f66d420dcd0e2af26dbefa2b30c39d1edf6f69ecf725514e7b67d300",
+      "expected": {
+        "priority": "Urgente",
+        "destination": "Cola_Emergencia_Medica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": false,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": false,
+        "destination": false,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-54E46C3D501F4D17BC269717490AE046",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "mismatch",
+      "duration_seconds": 14.771
+    },
+    {
+      "case_id": "MF_009",
+      "scenario": "URG",
+      "filename": "MF_009_2026_ORD_URG_PDF.pdf",
+      "source_sha256": "ace690efb4ea6eccad1bfd70f3639ef21c85c9ed8d7e42ea80e6e1fc5e6233f3",
+      "expected": {
+        "priority": "Urgente",
+        "destination": "Cola_Emergencia_Medica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": false,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": false,
+        "destination": false,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-A813F3822B44413FB640A29780F2B27D",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "mismatch",
+      "duration_seconds": 6.254
+    },
+    {
+      "case_id": "MF_011",
+      "scenario": "URG",
+      "filename": "MF_011_2026_EPI_URG_PDF.pdf",
+      "source_sha256": "0127cc778cf5259b65e9f4fe92c0287bf44a1b7bfdcedfd55abddbcf75ea117d",
+      "expected": {
+        "priority": "Urgente",
+        "destination": "Cola_Emergencia_Medica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": false,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": false,
+        "destination": false,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-50FB1E628EA84AA090791A0DCEE428C8",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "mismatch",
+      "duration_seconds": 7.454
+    },
+    {
+      "case_id": "MF_012",
+      "scenario": "NOR",
+      "filename": "MF_012_2026_CER_NOR_PDF.pdf",
+      "source_sha256": "9d285cc8dacb3cd50faf276c3359d88112e8e4d5ccaa2900187ca3d3e6ab479f",
+      "expected": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": true,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Historia_Clinica",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": true,
+        "destination": true,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-F4AF7340EFEF453EB9C40C3E69653DE0",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "passed",
+      "duration_seconds": 8.699
+    }
+  ],
+  "summary": {
+    "planned": 9,
+    "executed": 9,
+    "technical_passed": 8,
+    "dataset_passed": 4,
+    "priority_matched": 4,
+    "destination_matched": 4,
+    "review_matched": 8
+  },
+  "all_expectations_passed": false,
+  "finished_at_utc": "2026-10-17T19:29:11.871263+00:00"
+}

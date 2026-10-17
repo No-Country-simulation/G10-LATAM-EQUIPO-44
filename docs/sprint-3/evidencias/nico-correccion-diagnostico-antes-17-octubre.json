@@ -1,0 +1,123 @@
+{
+  "agregado_por": "Edil",
+  "real_oci_json_inspected": true,
+  "additional_gemini_calls": 0,
+  "cases": [
+    {
+      "case_id": "MF_004",
+      "extracted_field_presence": {
+        "estudio_realizado": true,
+        "diagnostico_principal": false,
+        "cie10_sugerido": false,
+        "medicamentos_recetados": false
+      },
+      "diagnosis_chars": 0,
+      "source_chars": 574,
+      "source_semantic_checks": {
+        "fasting_glucose_250": true,
+        "lung_lesion": false,
+        "spiculated": false,
+        "suspicion": false,
+        "neoplasia": false,
+        "pressure_lesion": false,
+        "stage_four": false,
+        "diabetic_foot": false,
+        "wagner_three": false
+      },
+      "isolated_before": {
+        "clinical_alert": "none_detected",
+        "document_priority": "routine",
+        "requires_human_review": false,
+        "input_coverage": "full_text_and_structured"
+      },
+      "matched_rules_before": []
+    },
+    {
+      "case_id": "MF_008",
+      "extracted_field_presence": {
+        "estudio_realizado": true,
+        "diagnostico_principal": true,
+        "cie10_sugerido": false,
+        "medicamentos_recetados": false
+      },
+      "diagnosis_chars": 41,
+      "source_chars": null,
+      "source_semantic_checks": {
+        "fasting_glucose_250": false,
+        "lung_lesion": false,
+        "spiculated": false,
+        "suspicion": true,
+        "neoplasia": true,
+        "pressure_lesion": false,
+        "stage_four": false,
+        "diabetic_foot": false,
+        "wagner_three": false
+      },
+      "isolated_before": {
+        "clinical_alert": "none_detected",
+        "document_priority": "routine",
+        "requires_human_review": false,
+        "input_coverage": "structured_only"
+      },
+      "matched_rules_before": []
+    },
+    {
+      "case_id": "MF_009",
+      "extracted_field_presence": {
+        "estudio_realizado": true,
+        "diagnostico_principal": true,
+        "cie10_sugerido": false,
+        "medicamentos_recetados": false
+      },
+      "diagnosis_chars": 34,
+      "source_chars": 814,
+      "source_semantic_checks": {
+        "fasting_glucose_250": false,
+        "lung_lesion": false,
+        "spiculated": false,
+        "suspicion": false,
+        "neoplasia": false,
+        "pressure_lesion": true,
+        "stage_four": true,
+        "diabetic_foot": false,
+        "wagner_three": false
+      },
+      "isolated_before": {
+        "clinical_alert": "none_detected",
+        "document_priority": "routine",
+        "requires_human_review": false,
+        "input_coverage": "full_text_and_structured"
+      },
+      "matched_rules_before": []
+    },
+    {
+      "case_id": "MF_011",
+      "extracted_field_presence": {
+        "estudio_realizado": false,
+        "diagnostico_principal": true,
+        "cie10_sugerido": false,
+        "medicamentos_recetados": false
+      },
+      "diagnosis_chars": 87,
+      "source_chars": 1269,
+      "source_semantic_checks": {
+        "fasting_glucose_250": false,
+        "lung_lesion": false,
+        "spiculated": false,
+        "suspicion": false,
+        "neoplasia": false,
+        "pressure_lesion": false,
+        "stage_four": false,
+        "diabetic_foot": true,
+        "wagner_three": true
+      },
+      "isolated_before": {
+        "clinical_alert": "none_detected",
+        "document_priority": "routine",
+        "requires_human_review": false,
+        "input_coverage": "full_text_and_structured"
+      },
+      "matched_rules_before": []
+    }
+  ]
+}

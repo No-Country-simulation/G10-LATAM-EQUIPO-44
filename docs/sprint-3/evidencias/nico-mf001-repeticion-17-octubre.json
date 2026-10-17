@@ -1,0 +1,71 @@
+{
+  "agregado_por": "Edil",
+  "task": "S3-01.4 Nicolás",
+  "started_at_utc": "2026-10-17T19:30:01.335088+00:00",
+  "base_commit": "47701cb991c9e720587863f1f1b69120482ea963",
+  "user_confirmed_synthetic": true,
+  "real_pipeline": true,
+  "mocks": false,
+  "base_url": "http://127.0.0.1:8141",
+  "planned_cases": 1,
+  "runtime_sha256": {
+    "mediflow/backend/app/api/routes.py": "ce5981536714f1443ae54d7dd86b66891f4b68155c2bfa352fb65bbbd9f86a46",
+    "mediflow/backend/app/services/gemini_client.py": "db3f727085c612bbb4475b978707f967965540d697f3f89f6d9de979fd0ae63f",
+    "mediflow/backend/app/services/triage_pipeline.py": "856a0ff14a7ee891881b1c2ce103d450a037057b337b34ba303782bb754c483a",
+    "mediflow/backend/app/core/orquestador.py": "5dc0f2909405cadf4083d8758a9712c29ac1e3c063c1614c97e3d5e61d9bf673",
+    "mediflow/data_ai/urgency_detector.py": "b5fa962f437c1fa97ba52e0e05e52c9786dcdbaa96072d6819d2b25e80b097e4",
+    "mediflow/data_ai/rules/urgency_catalog_v1_1.json": "ad1f3f0ab540f50897f6095ac9edd448c8ede375a3befe4a5568a6253fbc5cef",
+    "mediflow/data_ai/prompts/master_prompt.txt": "03a42cab68f9ca2b0fbab7b16fbfc10596c4ffd0c887d337fd46c0e4fbd2bce9",
+    "mediflow/data_ai/score_confianza.py": "cb877a794dd255140971eb49bdab09668510bda28b7b628d681ed53addf5d442",
+    "mediflow/data_ai/dataset/dataset_master.csv": "2d61907337f534c6902ad0844749cba2ed333839214c3b38ca17967d9d550a49"
+  },
+  "cases": [
+    {
+      "case_id": "MF_001",
+      "scenario": "NOR",
+      "filename": "MF_001_2026_REC_NOR_PDF.pdf",
+      "source_sha256": "8ff31196cfab247f5662c4ddeceb051be9a522f18bdbf65645651d431e7d61dc",
+      "expected": {
+        "priority": "Rutina",
+        "destination": "Cola_Farmacia",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "attempted": true,
+      "technical_ok": true,
+      "matches_dataset": true,
+      "http_status": 201,
+      "observed": {
+        "priority": "Rutina",
+        "destination": "Cola_Farmacia",
+        "human_review": false,
+        "status": "procesado"
+      },
+      "comparisons": {
+        "priority": true,
+        "destination": true,
+        "human_review": true,
+        "status": true
+      },
+      "coherent_routing": true,
+      "final_storage_declared": true,
+      "classification_confidence": 1.0,
+      "document_id": "DOC-CLIN-77EEB510A6374FCFB64F822EC935683C",
+      "get_http_status": 200,
+      "get_matches_post": true,
+      "outcome": "passed",
+      "duration_seconds": 14.61
+    }
+  ],
+  "summary": {
+    "planned": 1,
+    "executed": 1,
+    "technical_passed": 1,
+    "dataset_passed": 1,
+    "priority_matched": 1,
+    "destination_matched": 1,
+    "review_matched": 1
+  },
+  "all_expectations_passed": true,
+  "finished_at_utc": "2026-10-17T19:30:16.155901+00:00"
+}

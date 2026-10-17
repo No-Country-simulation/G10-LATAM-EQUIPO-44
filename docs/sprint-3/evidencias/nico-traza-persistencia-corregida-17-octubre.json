@@ -1,0 +1,317 @@
+{
+  "agregado_por": "Edil",
+  "generated_at_utc": "2026-10-17T19:48:20.028016+00:00",
+  "rules_profile": "synthetic_demo_v1",
+  "user_approved_synthetic_profile": true,
+  "synthetic_only": true,
+  "all_checks_passed": true,
+  "cases": [
+    {
+      "case_id": "MF_001",
+      "document_id": "DOC-CLIN-00FEEA3814294776B9D05E55C7A40F58",
+      "stored_json_equals_get": true,
+      "original_sha256_equals_input": true,
+      "copy_equals_original": true,
+      "received_json_retained": true,
+      "only_public_contract_fields": true,
+      "source_method": "local_text_extraction",
+      "pipeline_trace": {
+        "document_id": "DOC-CLIN-00FEEA3814294776B9D05E55C7A40F58",
+        "isolated_detector": {
+          "clinical_alert": "none_detected",
+          "document_priority": "routine",
+          "requires_human_review": false,
+          "input_coverage": "full_text_and_structured"
+        },
+        "isolated_demo": {
+          "profile": "synthetic_demo_v1",
+          "policy_version": "1.2-dataset-sintetico",
+          "matched_rules": [],
+          "suggested_priority": null
+        },
+        "confidence_review_before": false,
+        "extracted_priority": "Rutina",
+        "extracted_review": false,
+        "source_chars": 516,
+        "source_forwarded_separately": true,
+        "final_priority": "Rutina",
+        "final_status": "procesado",
+        "final_review": false
+      }
+    },
+    {
+      "case_id": "MF_004",
+      "document_id": "DOC-CLIN-2A5F20C1AE554DED81180B56729D09DF",
+      "stored_json_equals_get": true,
+      "original_sha256_equals_input": true,
+      "copy_equals_original": true,
+      "received_json_retained": true,
+      "only_public_contract_fields": true,
+      "source_method": "local_text_extraction",
+      "pipeline_trace": {
+        "document_id": "DOC-CLIN-2A5F20C1AE554DED81180B56729D09DF",
+        "isolated_detector": {
+          "clinical_alert": "none_detected",
+          "document_priority": "routine",
+          "requires_human_review": false,
+          "input_coverage": "full_text_and_structured"
+        },
+        "isolated_demo": {
+          "profile": "synthetic_demo_v1",
+          "policy_version": "1.2-dataset-sintetico",
+          "matched_rules": [
+            "hiperglicemia_marcada"
+          ],
+          "suggested_priority": "Urgente"
+        },
+        "confidence_review_before": false,
+        "extracted_priority": "Rutina",
+        "extracted_review": false,
+        "source_chars": 574,
+        "source_forwarded_separately": true,
+        "final_priority": "Urgente",
+        "final_status": "procesado",
+        "final_review": false
+      }
+    },
+    {
+      "case_id": "MF_005",
+      "document_id": "DOC-CLIN-80F8D91000C6425689867C25AE2E7B8E",
+      "stored_json_equals_get": true,
+      "original_sha256_equals_input": true,
+      "copy_equals_original": true,
+      "received_json_retained": true,
+      "only_public_contract_fields": true,
+      "source_method": "gemini_transcription",
+      "pipeline_trace": {
+        "document_id": "DOC-CLIN-80F8D91000C6425689867C25AE2E7B8E",
+        "isolated_detector": {
+          "clinical_alert": "none_detected",
+          "document_priority": "routine",
+          "requires_human_review": false,
+          "input_coverage": "full_text_and_structured"
+        },
+        "isolated_demo": {
+          "profile": "synthetic_demo_v1",
+          "policy_version": "1.2-dataset-sintetico",
+          "matched_rules": [],
+          "suggested_priority": null
+        },
+        "confidence_review_before": false,
+        "extracted_priority": "Rutina",
+        "extracted_review": false,
+        "source_chars": 681,
+        "source_forwarded_separately": true,
+        "final_priority": "Rutina",
+        "final_status": "procesado",
+        "final_review": false
+      }
+    },
+    {
+      "case_id": "MF_006",
+      "document_id": "DOC-CLIN-C29B846E628B497EB2B7A450E211D473",
+      "stored_json_equals_get": true,
+      "original_sha256_equals_input": true,
+      "copy_equals_original": true,
+      "received_json_retained": true,
+      "only_public_contract_fields": true,
+      "source_method": "local_text_extraction",
+      "pipeline_trace": {
+        "document_id": "DOC-CLIN-C29B846E628B497EB2B7A450E211D473",
+        "isolated_detector": {
+          "clinical_alert": "none_detected",
+          "document_priority": "routine",
+          "requires_human_review": false,
+          "input_coverage": "full_text_and_structured"
+        },
+        "isolated_demo": {
+          "profile": "synthetic_demo_v1",
+          "policy_version": "1.2-dataset-sintetico",
+          "matched_rules": [],
+          "suggested_priority": null
+        },
+        "confidence_review_before": false,
+        "extracted_priority": "Rutina",
+        "extracted_review": false,
+        "source_chars": 726,
+        "source_forwarded_separately": true,
+        "final_priority": "Rutina",
+        "final_status": "procesado",
+        "final_review": false
+      }
+    },
+    {
+      "case_id": "MF_007",
+      "document_id": "DOC-CLIN-BBA69AEEFC724A6A9B8E0F85CCA02FA9",
+      "stored_json_equals_get": true,
+      "original_sha256_equals_input": true,
+      "copy_equals_original": true,
+      "received_json_retained": true,
+      "only_public_contract_fields": true,
+      "source_method": "local_text_extraction",
+      "pipeline_trace": {
+        "document_id": "DOC-CLIN-BBA69AEEFC724A6A9B8E0F85CCA02FA9",
+        "isolated_detector": {
+          "clinical_alert": "none_detected",
+          "document_priority": "routine",
+          "requires_human_review": false,
+          "input_coverage": "full_text_and_structured"
+        },
+        "isolated_demo": {
+          "profile": "synthetic_demo_v1",
+          "policy_version": "1.2-dataset-sintetico",
+          "matched_rules": [],
+          "suggested_priority": null
+        },
+        "confidence_review_before": false,
+        "extracted_priority": "Rutina",
+        "extracted_review": false,
+        "source_chars": 833,
+        "source_forwarded_separately": true,
+        "final_priority": "Rutina",
+        "final_status": "procesado",
+        "final_review": false
+      }
+    },
+    {
+      "case_id": "MF_008",
+      "document_id": "DOC-CLIN-897ADF9E5BB041AABC757579F9BD59A0",
+      "stored_json_equals_get": true,
+      "original_sha256_equals_input": true,
+      "copy_equals_original": true,
+      "received_json_retained": true,
+      "only_public_contract_fields": true,
+      "source_method": "gemini_transcription",
+      "pipeline_trace": {
+        "document_id": "DOC-CLIN-897ADF9E5BB041AABC757579F9BD59A0",
+        "isolated_detector": {
+          "clinical_alert": "none_detected",
+          "document_priority": "routine",
+          "requires_human_review": false,
+          "input_coverage": "full_text_and_structured"
+        },
+        "isolated_demo": {
+          "profile": "synthetic_demo_v1",
+          "policy_version": "1.2-dataset-sintetico",
+          "matched_rules": [
+            "hallazgo_radiologico_sospechoso"
+          ],
+          "suggested_priority": "Urgente"
+        },
+        "confidence_review_before": false,
+        "extracted_priority": "Urgente",
+        "extracted_review": false,
+        "source_chars": 922,
+        "source_forwarded_separately": true,
+        "final_priority": "Urgente",
+        "final_status": "procesado",
+        "final_review": false
+      }
+    },
+    {
+      "case_id": "MF_009",
+      "document_id": "DOC-CLIN-9F418D89C36B467A820CB3F08568981D",
+      "stored_json_equals_get": true,
+      "original_sha256_equals_input": true,
+      "copy_equals_original": true,
+      "received_json_retained": true,
+      "only_public_contract_fields": true,
+      "source_method": "local_text_extraction",
+      "pipeline_trace": {
+        "document_id": "DOC-CLIN-9F418D89C36B467A820CB3F08568981D",
+        "isolated_detector": {
+          "clinical_alert": "none_detected",
+          "document_priority": "routine",
+          "requires_human_review": false,
+          "input_coverage": "full_text_and_structured"
+        },
+        "isolated_demo": {
+          "profile": "synthetic_demo_v1",
+          "policy_version": "1.2-dataset-sintetico",
+          "matched_rules": [
+            "lesion_por_presion_estadio_4"
+          ],
+          "suggested_priority": "Urgente"
+        },
+        "confidence_review_before": false,
+        "extracted_priority": "Rutina",
+        "extracted_review": false,
+        "source_chars": 814,
+        "source_forwarded_separately": true,
+        "final_priority": "Urgente",
+        "final_status": "procesado",
+        "final_review": false
+      }
+    },
+    {
+      "case_id": "MF_011",
+      "document_id": "DOC-CLIN-A9C4E4F36BF3444C8EB28705C95C24E5",
+      "stored_json_equals_get": true,
+      "original_sha256_equals_input": true,
+      "copy_equals_original": true,
+      "received_json_retained": true,
+      "only_public_contract_fields": true,
+      "source_method": "local_text_extraction",
+      "pipeline_trace": {
+        "document_id": "DOC-CLIN-A9C4E4F36BF3444C8EB28705C95C24E5",
+        "isolated_detector": {
+          "clinical_alert": "none_detected",
+          "document_priority": "routine",
+          "requires_human_review": false,
+          "input_coverage": "full_text_and_structured"
+        },
+        "isolated_demo": {
+          "profile": "synthetic_demo_v1",
+          "policy_version": "1.2-dataset-sintetico",
+          "matched_rules": [
+            "pie_diabetico_wagner_3"
+          ],
+          "suggested_priority": "Urgente"
+        },
+        "confidence_review_before": false,
+        "extracted_priority": "Rutina",
+        "extracted_review": false,
+        "source_chars": 1269,
+        "source_forwarded_separately": true,
+        "final_priority": "Urgente",
+        "final_status": "procesado",
+        "final_review": false
+      }
+    },
+    {
+      "case_id": "MF_012",
+      "document_id": "DOC-CLIN-947A651D789645ED9E8E220D8371C4A1",
+      "stored_json_equals_get": true,
+      "original_sha256_equals_input": true,
+      "copy_equals_original": true,
+      "received_json_retained": true,
+      "only_public_contract_fields": true,
+      "source_method": "local_text_extraction",
+      "pipeline_trace": {
+        "document_id": "DOC-CLIN-947A651D789645ED9E8E220D8371C4A1",
+        "isolated_detector": {
+          "clinical_alert": "none_detected",
+          "document_priority": "routine",
+          "requires_human_review": false,
+          "input_coverage": "full_text_and_structured"
+        },
+        "isolated_demo": {
+          "profile": "synthetic_demo_v1",
+          "policy_version": "1.2-dataset-sintetico",
+          "matched_rules": [],
+          "suggested_priority": null
+        },
+        "confidence_review_before": false,
+        "extracted_priority": "Rutina",
+        "extracted_review": false,
+        "source_chars": 755,
+        "source_forwarded_separately": true,
+        "final_priority": "Rutina",
+        "final_status": "procesado",
+        "final_review": false
+      }
+    }
+  ],
+  "mocks": false,
+  "clinical_text_logged_or_included": false
+}
