@@ -1,5 +1,21 @@
 # Módulo LLM de MediFlow para Sprint 2
 
+> Agregado por Edil: corrección posterior del 17 de octubre: **9/9 casos reales
+> del dataset aprobados**, incluidos 4/4 urgentes y 5/5 normales, exclusivamente
+> con `TRIAGE_RULES_PROFILE=synthetic_demo_v1` aprobado para datos sintéticos.
+> `general` sigue siendo el valor predeterminado y no aplica estas reglas
+> experimentales. Ver [causa raíz, configuración y evidencias](../../docs/sprint-3/correccion-urgencia-demo-17-octubre.md).
+
+> Agregado por Edil, 17 de octubre: S3-01.4 ya tiene una ejecución real de los
+> nueve documentos normales/urgentes del dataset, confirmados sintéticos por
+> el usuario. Tras resolver la conversión CRLF de un PDF, 9/9 completan el
+> pipeline; 5/5 normales coinciden, pero 0/4 urgentes coinciden con el CSV.
+> No confundir ejecución técnica con aprobación de prioridad. Ver
+> [informe y evidencias S3-01.4](../../docs/sprint-3/nico-s3-01-4-pruebas-dataset-17-octubre.md).
+> Ese fue el resultado previo a la corrección de demo enlazada arriba.
+> Las notas de ausencia de ejecución real de abajo describen el desarrollo
+> original de Sprint 2. El evaluador optativo está en `validate_dataset_pipeline.py`.
+
 Implementación preparada para la tarea S2-01 originalmente asignada a Nicolás.
 Se agregó después del commit de integración b75996e. Las pruebas son con mocks:
 no constituyen evidencia de una extracción exitosa contra el proveedor real.

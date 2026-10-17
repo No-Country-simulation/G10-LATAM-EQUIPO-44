@@ -14,7 +14,9 @@ for path in (str(PROJECT_ROOT), str(DATA_AI_ROOT)):
         sys.path.insert(0, path)
 
 from data_ai.score_confianza import UMBRAL_CONFIANZA_MVP, evaluar_confianza_con_dosis
+from data_ai.confidence_profiles import cargar_perfiles, evaluar_documento, normalizar_tipo
 from data_ai.urgency_json_adapter import evaluate_analysis
+from data_ai.synthetic_demo_rules import evaluate_synthetic_demo, rules_profile
 
 
 def _normalized_text(value: Any) -> str:
@@ -26,12 +28,14 @@ def _normalized_text(value: Any) -> str:
 
 
 def _known_document_type(value: Any) -> bool:
-    return _normalized_text(value) not in {
-        "", "desconocido", "no identificado", "noidentificado", "pendiente de procesamiento",
-    }
+    return normalizar_tipo(value) in cargar_perfiles()[1]
 
 
 def _confidence_is_ambiguous(documento: dict[str, Any]) -> bool:
+    # Solo la demo sintética conserva la referencia previa de confianza.
+    # No se usa como validación de los requisitos no representados en el contrato.
+    if rules_profile() != "synthetic_demo_v1":
+        return bool(evaluar_documento(documento)["es_ambiguo"])
     clasificacion = documento.get("clasificacion") or {}
     datos = documento.get("datos_extraidos") or {}
     tipo_conocido = _known_document_type(clasificacion.get("tipo_documento"))
@@ -65,7 +69,13 @@ def _confidence_is_ambiguous(documento: dict[str, Any]) -> bool:
     )
     # Agregado por Edil: tres criterios de cuatro dan 0.75 y podrían aprobar un
     # tipo desconocido. Esa identificación incompleta necesita revisión humana.
-    return not tipo_conocido or bool(result["es_ambiguo"])
+    profile_result = evaluar_documento(documento)
+    profile = cargar_perfiles()[1].get(normalizar_tipo(clasificacion.get("tipo_documento")))
+    unrepresented = {
+        rule["id"] for rule in profile["criteria"] if not rule["verifiable"]
+    } if profile else set()
+    missing_essential = any(key not in unrepresented for key in profile_result["bloqueos"])
+    return missing_essential or not tipo_conocido or bool(result["es_ambiguo"])
 
 
 def _urgency_requires_review(
@@ -76,11 +86,16 @@ def _urgency_requires_review(
     # source_text debe venir del archivo real, nunca de serializar el JSON LLM.
     # Sin texto la cobertura es limitada: no equivale a OCR ni a ausencia de riesgo.
     assessment = evaluate_analysis(documento, source_text=source_text)
+    # Agregado por Edil: la política experimental no se activa en el flujo
+    # general. La demo solo puede elevar prioridad; nunca quitar revisión.
+    demo_urgent = False
+    if rules_profile() == "synthetic_demo_v1":
+        demo_urgent = evaluate_synthetic_demo(source_text)["suggested_priority"] == "Urgente"
     return (
         # La cobertura limitada por sí sola no fuerza auditoría. Sí la fuerzan
         # las coincidencias clínicas del detector y las otras reglas del MVP.
         bool(assessment.get("requires_human_review")),
-        assessment.get("suggested_priority") == "Urgente",
+        assessment.get("suggested_priority") == "Urgente" or demo_urgent,
     )
 
 

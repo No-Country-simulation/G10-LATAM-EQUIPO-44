@@ -1,5 +1,13 @@
 # MediFlow — S3-01.5 | Entrega técnica a Eliana
 
+> Agregado por Edil, 17 de octubre: esta entrega original se conserva como
+> historial; detector y adaptador ya están integrados al pipeline vigente.
+> La primera ejecución S3-01.4 detectó cuatro discrepancias urgentes. La
+> corrección posterior aprobó 9/9 en un perfil opt-in de demo sintética,
+> sin convertir sus reglas experimentales en criterios clínicos generales.
+> Ver [corrección y resultados](../../docs/sprint-3/correccion-urgencia-demo-17-octubre.md)
+> y [ejecución original](../../docs/sprint-3/nico-s3-01-4-pruebas-dataset-17-octubre.md).
+
 **Alcance:** detector heurístico experimental de señales de urgencia clínica y prioridad documental. No está validado para decisiones asistenciales autónomas.
 
 ## Ubicación sugerida
