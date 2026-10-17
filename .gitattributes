@@ -1,0 +1,3 @@
+# Agregado por Edil: PDF es un formato binario. Convertir LF a CRLF cambia
+# los offsets internos de xref y puede impedir su extracción en Windows.
+*.pdf -text
