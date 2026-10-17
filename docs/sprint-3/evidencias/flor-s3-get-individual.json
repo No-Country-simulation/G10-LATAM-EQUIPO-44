@@ -1,0 +1,18 @@
+{
+  "task": "Flor S3-07.3",
+  "synthetic_case": "MF_004",
+  "document_id": "DOC-CLIN-F04C1ABCB6BF4BC59B0B7E0C66F7D56F",
+  "real_backend": true,
+  "gemini_called": false,
+  "mutations": false,
+  "requests": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/documents/DOC-CLIN-F04C1ABCB6BF4BC59B0B7E0C66F7D56F",
+      "status": 200
+    }
+  ],
+  "response_id_matches": true,
+  "public_response_validated": true,
+  "expected_priority_preserved": true
+}

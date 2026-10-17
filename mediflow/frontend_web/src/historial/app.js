@@ -88,10 +88,20 @@
   // const records = window.MediFlowDocuments.documents.map(window.MediFlowDocuments.toRow);
   // Agregado por Edil: fuente real por defecto; demo solo si se solicita ?demo=1.
   let records = [];
+  const demoMode = new URLSearchParams(window.location.search).get("demo") === "1";
+  const documentDetail = window.MediFlowDocumentDetail.createDetail({
+    dialog: $("#documentDetail"), status: $("#documentDetailStatus"), json: $("#documentDetailJson"),
+    loadDocument: id => {
+      if (!demoMode) return window.MediFlowDocumentsApi.getDocument(id);
+      const row = records.find(record => record.id === id);
+      if (!row) throw new window.MediFlowDocumentsApi.DocumentsApiError("El documento no existe o ya no esta disponible.", 404);
+      return row.documento;
+    }
+  });
   async function loadRecords() {
     const indicator = $("#documentLoadStatus");
     const refresh = $("#refreshDocuments");
-    const demo = new URLSearchParams(window.location.search).get("demo") === "1";
+    const demo = demoMode;
     refresh.disabled = true;
     indicator.textContent = demo ? "Demostracion explicita: datos simulados." : "Consultando documentos del backend...";
     try {
@@ -496,8 +506,7 @@
         const row = records.find((record) => record.id === detail.dataset.document);
         // Agregado por Edil: una recarga puede retirar la fila anterior.
         if (!row) { toast("El documento ya no esta en el listado.", "rojo"); return; }
-        $("#documentDetailJson").textContent = JSON.stringify(row.documento, null, 2);
-        $("#documentDetail").showModal();
+        documentDetail.open(row.id);
         return;
       }
       const btn = ev.target.closest("[data-ruta]");

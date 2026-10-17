@@ -307,11 +307,13 @@
 <dialog id="documentDetail" aria-labelledby="documentDetailTitle" style="max-width:720px;width:90%;padding:24px;border-radius:16px">
   <h2 id="documentDetailTitle">Detalle del documento</h2>
   <p>Vista de lectura. La revisión y aprobación conectadas se implementarán en un sprint posterior.</p>
+  <p id="documentDetailStatus" role="status" aria-live="polite"></p>
   <pre id="documentDetailJson" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
   <form method="dialog"><button class="btn" type="submit">Cerrar</button></form>
 </dialog>
 <script src="../assets/js/documents-mock.js"></script>
 <script src="../assets/js/documents-api.js"></script>
+<script src="../assets/js/document-detail.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

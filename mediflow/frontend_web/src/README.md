@@ -1,4 +1,4 @@
-> Actualización de integración: historial/ consulta GET /api/documents por defecto. La documentación anterior de mocks se conserva como referencia del Sprint 2. Las demás pantallas siguen siendo prototipos.
+> Actualización Sprint 3: historial/ consulta GET /api/documents y su diálogo consulta GET /api/documents/{id}. Carga, errores, 404, validación y deduplicación implementados. Guía y evidencia: [S3-07-cierre](../S3-07-cierre.md). Los apartados anteriores de Sprint 2 se conservan como referencia histórica; las demás pantallas mantienen su estado previo.
 
 # clinicaFRONT
 
