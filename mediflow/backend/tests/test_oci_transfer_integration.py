@@ -2,9 +2,12 @@
 
 import os
 import uuid
+from datetime import datetime, timezone
+from unittest.mock import MagicMock
 
 import pytest
 
+from app.core.error_handler import DuplicateReviewError, ReviewValidationError
 from app.core.environment import load_environment
 from app.core.oci_client import OCIStorageManager
 
@@ -53,6 +56,79 @@ def test_real_copy_of_own_synthetic_object():
                         namespace_name=manager.namespace, bucket_name=bucket,
                         object_name=name, if_match=head.headers["etag"],
                     )
+
+
+def _cleanup_s4_review_keys(manager: OCIStorageManager, object_names: list[str]) -> None:
+    """Print and optionally delete only keys created by the S4 review test."""
+    allowed_prefix = "reviews/DOC-S4-TEST-"
+    if any(not name.startswith(allowed_prefix) for name in object_names):
+        raise ReviewValidationError(
+            "La limpieza S4 recibió una clave fuera del prefijo permitido."
+        )
+    print(f"Claves S4 candidatas a limpieza: {object_names}")
+    if os.getenv("S4_CONFIRM_CLEANUP") != "1":
+        print("Limpieza S4 omitida: S4_CONFIRM_CLEANUP=1 no está definido.")
+        return
+    for name in object_names:
+        manager.object_storage.delete_object(
+            namespace_name=manager.namespace,
+            bucket_name=manager.settings.bucket_auditoria,
+            object_name=name,
+        )
+        print(f"Clave S4 eliminada: {name}")
+
+
+def test_s4_cleanup_receives_final_and_mirror_keys(monkeypatch):
+    manager = type("Manager", (), {})()
+    manager.namespace = "test-namespace"
+    manager.settings = type("Settings", (), {"bucket_auditoria": "auditoria_humana"})()
+    manager.object_storage = MagicMock()
+    monkeypatch.setenv("S4_CONFIRM_CLEANUP", "1")
+    keys = [
+        "reviews/DOC-S4-TEST-20261019T183000Z/_final.json",
+        "reviews/DOC-S4-TEST-20261019T183000Z/REV-001.json",
+    ]
+
+    _cleanup_s4_review_keys(manager, keys)
+
+    assert [
+        item.kwargs["object_name"]
+        for item in manager.object_storage.delete_object.call_args_list
+    ] == keys
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(
+    os.getenv("RUN_S4_REVIEW_INTEGRATION") != "1",
+    reason="OCI real desactivado; requiere RUN_S4_REVIEW_INTEGRATION=1 explícitamente",
+)
+def test_real_review_record_roundtrip_and_duplicate():
+    """Valida escritura/lectura de revisión sintética en OCI real."""
+    load_environment()
+    manager = OCIStorageManager()
+    document_id = f"DOC-S4-TEST-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}"
+    record = {
+        "documento_id": document_id,
+        "review_id": f"REV-{uuid.uuid4().hex[:12]}",
+        "review_status": "aprobado",
+        "reviewer_id": "s4-integration-test",
+        "observacion": None,
+        "reviewed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
+    keys = [
+        f"reviews/{document_id}/_final.json",
+        f"reviews/{document_id}/{record['review_id']}.json",
+    ]
+    try:
+        saved = manager.save_review_record(record)
+        assert saved.to_dict() == record
+        assert manager.get_review_record(document_id, record["review_id"]) == saved
+        assert manager.list_reviews_for_document(document_id) == [saved]
+        assert manager.get_latest_review_status(document_id) == "aprobado"
+        with pytest.raises(DuplicateReviewError):
+            manager.save_review_record(record)
+    finally:
+        _cleanup_s4_review_keys(manager, keys)
 
 
 # Agregado por Edil: prueba original conservada, desactivada por seguridad.
