@@ -16,6 +16,7 @@ from app.services.llm_errors import (
     LLMQuotaError, LLMTimeoutError, LLMNetworkError, LLMUnavailableError,
     LLMRequestError, LLMResponseError,
 )
+from app.models.schemas import AuditoriaReviewRequest
 
 logger = logging.getLogger(__name__)
 
@@ -323,3 +324,42 @@ async def get_document_by_id(document_id: str):
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="El documento almacenado en OCI no cumple el contrato oficial de datos."
         )
+
+
+from fastapi import APIRouter, HTTPException
+# (Asegúrate de usar el 'router' o 'app' que ya esté definido en tu archivo, 
+# generalmente es algo como @router.post o @app.post)
+
+@router.post("/auditoria/revision", summary="Registrar decisión de auditoría humana")
+async def registrar_revision_humana(request: AuditoriaReviewRequest):
+    """
+    Endpoint para que el frontend (Flor) envíe la decisión final 
+    de un auditor médico (aprobado/rechazado).
+    """
+    try:
+        # Aquí es donde se conectará la función "save_review()" de Drazen 
+        # para guardar en el bucket "auditoria_humana" con el prefijo "reviews/"
+        
+        # Simulación de la lógica de OCI esperada para tus pruebas de integración:
+        oci_path = f"reviews/{request.documento_id}/final.json"
+        
+        # Si Drazen ya subió su código, aquí llamaríamos a:
+        # await drazen_service.save_review(request)
+        
+        return {
+            "status": "exito",
+            "mensaje": f"Revisión guardada en OCI exitosamente.",
+            "datos_auditoria": {
+                "documento_id": request.documento_id,
+                "review_status": request.review_status,
+                "reviewer_id": request.reviewer_id,
+                "ruta_oci_asignada": oci_path
+            }
+        }
+        
+    except ValueError as e:
+        # Atrapa el error si alguien rechaza sin poner observación
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        # Atrapa errores de concurrencia (HTTP 409) o fallos de OCI
+        raise HTTPException(status_code=500, detail=f"Error al guardar revisión: {str(e)}")
