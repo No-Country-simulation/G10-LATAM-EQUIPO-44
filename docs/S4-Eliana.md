@@ -1,65 +1,136 @@
-# MediFlow — Contrato JSON de Auditoría Humana
-**Sprint 4 | Catálogo de campos y valores permitidos**
+# CONTRATO JSON DE AUDITORÍA HUMANA — SPRINT 4
 
-**Responsable del contrato:** Eliana — S4-03  
-**Tecnología:** FastAPI / Pydantic / OCI Object Storage  
-**Versión:** 1.0 — 20/10/2026
+**Proyecto:** MediFlow  
+**Sprint:** 4  
+**Responsable del contrato:** Eliana — S4-03 Integración y contratos JSON  
+**Fecha de actualización:** 20 de octubre de 2026  
+**Estado:** Contrato actualizado según la implementación de persistencia OCI de Brando. Integración HTTP pendiente de validación conjunta.
 
 ---
 
 ## 1. Objetivo
 
-Definir el formato JSON y el catálogo de valores permitidos para intercambiar información de auditoría humana entre el frontend, el backend y OCI Object Storage.
+Definir el contrato JSON utilizado en el proceso de auditoría humana de documentos clínicos que requieren revisión.
 
-El contrato contempla dos estructuras:
+El contrato establece:
 
-1. **`AuditoriaReviewRequest`:** solicitud enviada por el frontend.
-2. **`AuditoriaReviewRecord`:** registro completo generado por el backend para su almacenamiento en OCI.
+- Los datos enviados por el frontend al backend.
+- Las validaciones obligatorias de una decisión de auditoría.
+- El registro definitivo que el backend debe almacenar en Oracle Cloud Infrastructure (OCI).
+- Las rutas de almacenamiento y las reglas para evitar decisiones duplicadas.
+- Los criterios de integración y pruebas entre frontend, API y persistencia OCI.
 
-## 2. Contrato JSON de solicitud HTTP
+Este documento sirve como referencia compartida para Edil (frontend e integración), Drazen (backend), Brando (OCI), María (QA) y Eliana (contratos e integración).
 
-**Método:** `POST`  
-**Endpoint:** `/api/documents/{id}/review`  
-**Content-Type:** `application/json`
+## 2. Flujo funcional
 
-### Ejemplo: documento aprobado
+1. MediFlow procesa un documento y determina si requiere auditoría humana.
+2. El documento queda disponible en la cola de revisión.
+3. Un auditor consulta el documento y selecciona **aprobar** o **rechazar**.
+4. El frontend envía la decisión al backend mediante una solicitud HTTP.
+5. El backend valida la solicitud y comprueba que el documento continúa pendiente.
+6. El backend genera los datos de identificación y fecha de la revisión.
+7. El backend solicita a OCI la persistencia del registro definitivo.
+8. La API informa el resultado de la operación.
+
+**Regla principal:** un documento solo puede tener una decisión final. Una vez aprobado o rechazado, no debe volver a registrarse una decisión definitiva mediante el mismo flujo.
+
+## 3. Estados de auditoría
+
+| Estado | Descripción |
+|---|---|
+| `pendiente` | El documento todavía no tiene una decisión final de auditoría. |
+| `aprobado` | El auditor aprobó el documento. |
+| `rechazado` | El auditor rechazó el documento. |
+
+`pendiente` es el estado inicial de revisión. No constituye una decisión final y, por tanto, no es un valor permitido en el campo `decision` de la solicitud ni en `review_status` del registro definitivo.
+
+Los valores finales permitidos son exclusivamente `aprobado` y `rechazado`.
+
+## 4. Contrato HTTP: solicitud de auditoría
+
+**Endpoint previsto:** `POST /api/documents/{documento_id}/review`
+
+El frontend debe enviar un objeto JSON con los siguientes campos:
+
+| Campo | Tipo | Obligatorio | Regla |
+|---|---|---|---|
+| `decision` | string | Sí | `aprobado` o `rechazado` |
+| `reviewer_id` | string | Sí | Identificador no vacío ni compuesto únicamente por espacios |
+| `observacion` | string o null | No, salvo rechazo | Obligatoria y no vacía cuando `decision` es `rechazado` |
+| `expected_review_status` | string | Sí | Valor fijo `pendiente` |
+
+El identificador `documento_id` se proporciona en la ruta HTTP, no en el cuerpo de la solicitud.
+
+### 4.1 Ejemplo de aprobación
 
 ```json
 {
   "decision": "aprobado",
   "reviewer_id": "auditor_demo_01",
-  "observacion": "Documento revisado correctamente",
+  "observacion": "Documento sintético revisado",
   "expected_review_status": "pendiente"
 }
 ```
 
-### Ejemplo: documento rechazado
+La observación de una aprobación puede ser `null` o una cadena de texto.
+
+### 4.2 Ejemplo de rechazo
 
 ```json
 {
   "decision": "rechazado",
   "reviewer_id": "auditor_demo_01",
-  "observacion": "Documento ilegible",
+  "observacion": "El documento presenta información insuficiente para su validación.",
   "expected_review_status": "pendiente"
 }
 ```
 
-### Catálogo de campos — Solicitud HTTP
+### 4.3 Ejemplo inválido
 
-| Campo | Tipo JSON | Obligatorio | Valores / reglas |
+```json
+{
+  "decision": "rechazado",
+  "reviewer_id": "auditor_demo_01",
+  "observacion": null,
+  "expected_review_status": "pendiente"
+}
+```
+
+La solicitud debe rechazarse porque una decisión `rechazado` exige una observación con contenido.
+
+### 4.4 Validaciones
+
+El backend debe comprobar:
+
+- Que `decision` pertenezca al catálogo permitido.
+- Que `reviewer_id` no esté vacío ni contenga solamente espacios.
+- Que `observacion` tenga contenido cuando la decisión sea `rechazado`.
+- Que `expected_review_status` sea exactamente `pendiente`.
+- Que el documento exista y se encuentre disponible para revisión.
+- Que el estado real del documento continúe pendiente antes de registrar la decisión.
+- Que el usuario esté autorizado para ejecutar la operación, según las reglas de autenticación y autorización de la API.
+
+El campo `reviewer_id` identifica al auditor en el registro, pero **no sustituye la autenticación ni la autorización del backend**.
+
+## 5. Contrato OCI: registro definitivo de auditoría
+
+Una vez validada la solicitud, el backend debe construir el registro definitivo que se enviará al componente de persistencia OCI.
+
+El registro contiene **exactamente seis campos**.
+
+| Campo | Tipo | Obligatorio | Regla |
 |---|---|---|---|
-| `decision` | string | Sí | `aprobado`, `rechazado` |
-| `reviewer_id` | string | Sí | Identificador no vacío del auditor |
-| `observacion` | string / null | Condicional | Obligatoria si `decision = rechazado` |
-| `expected_review_status` | string | Sí | `pendiente` |
+| `documento_id` | string | Sí | Entre 1 y 128 caracteres; letras, números, `_` y `-` |
+| `review_id` | string | Sí | Identificador válido de revisión |
+| `review_status` | string | Sí | `aprobado` o `rechazado` |
+| `reviewer_id` | string | Sí | Identificador no vacío ni compuesto únicamente por espacios |
+| `observacion` | string o null | Sí | Obligatoria con contenido para un rechazo; puede ser `null` para aprobación |
+| `reviewed_at` | string | Sí | Fecha y hora ISO 8601 UTC terminada en `Z` |
 
-**Regla:** `documento_id` se obtiene desde `{id}` en la URL, no desde el cuerpo JSON.
+No deben enviarse campos adicionales al registro OCI.
 
-## 3. Contrato JSON de registro OCI
-
-**Modelo:** `AuditoriaReviewRecord`
-
-### Ejemplo de registro
+### 5.1 Ejemplo de registro aprobado
 
 ```json
 {
@@ -67,127 +138,200 @@ El contrato contempla dos estructuras:
   "review_id": "REV-20261020T153000Z-a1b2c3d4",
   "review_status": "aprobado",
   "reviewer_id": "auditor_demo_01",
-  "observacion": "Documento revisado correctamente",
+  "observacion": null,
   "reviewed_at": "2026-10-20T15:30:00Z"
 }
 ```
 
-### Catálogo de campos — Registro OCI
+### 5.2 Ejemplo de registro rechazado
 
-| Campo | Tipo JSON | Obligatorio | Valores / reglas |
-|---|---|---|---|
-| `documento_id` | string | Sí | ID único del documento |
-| `review_id` | string | Sí | ID único generado por el backend |
-| `review_status` | string | Sí | `aprobado`, `rechazado` |
-| `reviewer_id` | string | Sí | Identificador del auditor |
-| `observacion` | string / null | Condicional | Obligatoria si se rechaza |
-| `reviewed_at` | string | Sí | Fecha ISO 8601 con zona horaria UTC |
+```json
+{
+  "documento_id": "DOC-CLIN-ABC124",
+  "review_id": "REV-20261020T154000Z-b2c3d4e5",
+  "review_status": "rechazado",
+  "reviewer_id": "auditor_demo_02",
+  "observacion": "El documento contiene información insuficiente.",
+  "reviewed_at": "2026-10-20T15:40:00Z"
+}
+```
 
-El backend genera `review_id` y `reviewed_at`. El frontend no debe enviarlos en la solicitud HTTP.
+Los identificadores y las fechas anteriores son ejemplos sintéticos, no registros de producción.
 
-## 4. Catálogo de estados
+## 6. Catálogo y formatos de identificadores
 
-### CAT-01 — Decisión de auditoría (`ReviewStatus`)
+### 6.1 `documento_id`
 
-| Código | Descripción | Decisión final |
+Patrón permitido:
+
+```text
+[A-Za-z0-9_-]{1,128}
+```
+
+Ejemplos válidos:
+
+- `DOC-CLIN-ABC123`
+- `documento_001`
+- `ABC123`
+
+No se permiten espacios, barras de ruta ni caracteres fuera del patrón indicado.
+
+### 6.2 `review_id`
+
+La implementación OCI acepta:
+
+**Formato con prefijo `REV-`:**
+
+```text
+REV-[A-Za-z0-9_-]{1,64}
+```
+
+**O un identificador UUID versión 4.**
+
+Ejemplos:
+
+```text
+REV-001
+REV-20261020T153000Z-a1b2c3d4
+```
+
+El formato con fecha y sufijo es un ejemplo válido, pero no constituye un requisito obligatorio. El backend es responsable de generar un identificador compatible.
+
+### 6.3 `reviewed_at`
+
+El registro enviado a OCI debe contener una fecha ISO 8601 en UTC, representada como cadena y terminada en `Z`.
+
+Ejemplo válido:
+
+```text
+2026-10-20T15:30:00Z
+```
+
+El formato con sufijo `+00:00` no debe enviarse a OCI, aunque represente la misma zona horaria.
+
+El modelo Pydantic puede trabajar internamente con un objeto `datetime` en UTC. Antes de persistir, el backend debe serializarlo al formato aceptado por OCI.
+
+## 7. Transformación del contrato HTTP al registro OCI
+
+El backend debe transformar los campos de la solicitud de la siguiente manera:
+
+| Origen | Destino OCI | Responsable |
 |---|---|---|
-| `aprobado` | El auditor acepta el documento | Sí |
-| `rechazado` | El auditor rechaza el documento | Sí |
+| Parámetro de ruta `documento_id` | `documento_id` | Backend |
+| Generación interna | `review_id` | Backend |
+| `decision` | `review_status` | Backend |
+| `reviewer_id` | `reviewer_id` | Backend |
+| `observacion` | `observacion` | Backend |
+| Fecha y hora UTC generada | `reviewed_at` | Backend |
 
-**Valores no permitidos:** `solicitar_nueva_imagen`, `urgente`, `procesado` y cualquier otro valor no definido en este catálogo.
+`expected_review_status` se utiliza para comprobar el estado esperado de la revisión y **no debe almacenarse** dentro del registro OCI.
 
-### CAT-02 — Estado esperado (`expected_review_status`)
+El frontend no debe generar `review_id` ni `reviewed_at`.
 
-| Código | Descripción |
+## 8. Persistencia en OCI
+
+**Bucket de auditoría:** `auditoria_humana`
+
+La implementación de Brando utiliza dos objetos para una revisión definitiva.
+
+### 8.1 Registro final
+
+```text
+reviews/{documento_id}/_final.json
+```
+
+Ejemplo:
+
+```text
+reviews/DOC-CLIN-ABC123/_final.json
+```
+
+Este objeto representa la decisión final del documento.
+
+La implementación utiliza una escritura condicional de OCI con `if_none_match="*"`, de modo que no se sobrescriba un registro final existente.
+
+### 8.2 Copia por identificador de revisión
+
+```text
+reviews/{documento_id}/{review_id}.json
+```
+
+Ejemplo:
+
+```text
+reviews/DOC-CLIN-ABC123/REV-20261020T153000Z-a1b2c3d4.json
+```
+
+El objeto por `review_id` contiene el mismo registro serializado que `_final.json`.
+
+### 8.3 Orden de escritura
+
+La implementación de Brando escribe primero `_final.json` y posteriormente el objeto identificado por `review_id`.
+
+Si `_final.json` ya existe, OCI puede responder con un error de precondición `412`. La API debe tratarlo como un intento de registrar una decisión duplicada.
+
+**Consideración de integración:** si la escritura de `_final.json` se completa y falla la escritura de la copia por `review_id`, el documento ya puede tener una decisión final persistida. El backend debe manejar ese escenario sin asumir que ambas escrituras se revirtieron automáticamente.
+
+## 9. Operaciones disponibles en el componente OCI
+
+Brando implementó las siguientes operaciones de persistencia y consulta:
+
+| Operación | Finalidad |
 |---|---|
-| `pendiente` | El documento todavía no tiene una decisión final registrada |
+| `save_review_record(record)` | Guardar un registro definitivo |
+| `get_review_record(documento_id, review_id)` | Recuperar una revisión específica |
+| `list_reviews_for_document(documento_id)` | Listar revisiones de un documento |
+| `get_latest_review_status(documento_id)` | Obtener el estado actual de revisión |
+| `list_pending_reviews()` | Obtener documentos pendientes de auditoría |
 
-`pendiente` no es una decisión del auditor. Es el estado esperado antes de registrar la revisión.
+La función `get_latest_review_status` utiliza la existencia del registro final para distinguir entre `pendiente` y una decisión definitiva.
 
-### CAT-03 — Formato de identificadores
+La función `list_pending_reviews` está orientada a construir la cola de auditoría humana, excluyendo documentos que ya tienen una decisión final.
 
-| Campo | Formato | Ejemplo |
+Estas son operaciones internas del componente OCI; **no deben confundirse con endpoints HTTP ya verificados**.
+
+## 10. Endpoints HTTP previstos para integración
+
+| Método | Endpoint | Función |
 |---|---|---|
-| `documento_id` | Identificador asignado por MediFlow | `DOC-CLIN-ABC123` |
-| `review_id` | `REV-AAAAMMDDTHHMMSSZ-8hex` | `REV-20261020T153000Z-a1b2c3d4` |
-| `reviewer_id` | Identificador del auditor | `auditor_demo_01` |
+| `GET` | `/api/reviews/pending` | Consultar documentos pendientes |
+| `POST` | `/api/documents/{documento_id}/review` | Registrar una decisión de auditoría |
+| `GET` | `/api/documents/{documento_id}/review-history` | Consultar historial de revisiones, si se habilita |
 
-El esquema Pydantic actual exige cadenas no vacías, pero no valida mediante expresiones regulares los formatos anteriores.
+La disponibilidad, las respuestas y el comportamiento de estos endpoints deben comprobarse con la implementación de Drazen.
 
-### CAT-04 — Fecha y hora
+La cola de auditoría debe utilizar la lógica específica de documentos pendientes, no asumir que todos los documentos con estado de triaje `auditoria_humana` siguen sin decisión final.
 
-| Campo | Formato | Ejemplo |
-|---|---|---|
-| `reviewed_at` | ISO 8601 UTC | `2026-10-20T15:30:00Z` |
+## 11. Manejo de errores esperado
 
-La fecha es generada por el backend y debe incluir una zona horaria UTC válida.
+La siguiente tabla establece el comportamiento de integración recomendado. Los códigos HTTP deben verificarse contra los endpoints reales.
 
-## 5. Reglas de validación
-
-| ID | Regla |
+| Situación | HTTP esperado |
 |---|---|
-| VAL-01 | `decision` solo admite `aprobado` o `rechazado` |
-| VAL-02 | `reviewer_id` debe contener al menos un carácter |
-| VAL-03 | Si la decisión es `rechazado`, `observacion` es obligatoria |
-| VAL-04 | Una observación de rechazo no puede contener únicamente espacios |
-| VAL-05 | `expected_review_status` debe ser `pendiente` |
-| VAL-06 | `documento_id` y `review_id` deben contener al menos un carácter |
-| VAL-07 | `reviewed_at` debe incluir zona horaria UTC |
-| VAL-08 | El backend debe comprobar el estado real antes de persistir una decisión |
-| VAL-09 | No se permite sobrescribir una decisión final existente |
+| Solicitud con campos inválidos | `422` |
+| Documento o revisión inexistente | `404` |
+| Documento con decisión final existente | `409` |
+| Error de autenticación | `401` |
+| Usuario sin permisos | `403` |
+| Error de autenticación, permisos o persistencia OCI | `502` |
+| Tiempo de espera agotado en OCI | `504` |
 
-Las reglas VAL-08 y VAL-09 requieren implementación en backend y OCI; no quedan garantizadas únicamente por los modelos Pydantic.
+La escritura duplicada de `_final.json` debe impedir que se sobrescriba una decisión existente.
 
-## 6. Catálogo de almacenamiento OCI
+Una respuesta exitosa de la API debe representar una persistencia confirmada conforme a la política de éxito definida para las escrituras OCI. No debe informarse éxito antes de conocer el resultado de la operación.
 
-**Bucket:** `auditoria_humana`
+## 15. Criterio de aceptación del contrato
 
-| Objeto | Ruta | Finalidad |
-|---|---|---|
-| Historial de revisión | `reviews/{documento_id}/{review_id}.json` | Conservar el registro individual |
-| Decisión final | `reviews/{documento_id}/final.json` | Conservar la única decisión final |
+El contrato se considerará integrado cuando:
 
-La creación de `final.json` debe utilizar escritura condicional `If-None-Match: *` para impedir sobrescrituras.
-
-## 7. Catálogo de respuestas HTTP esperadas
-
-| Código HTTP | Significado |
-|---|---|
-| `200` / `201` | Revisión registrada exitosamente |
-| `400` | Solicitud inválida según reglas de negocio |
-| `401` | Usuario no autenticado |
-| `403` | Usuario sin autorización |
-| `404` | Documento inexistente |
-| `409` | El documento ya tiene una decisión final |
-| `422` | Error de validación del JSON |
-| `5xx` | Error interno o fallo de dependencia |
-
-Estos códigos representan el comportamiento esperado para las pruebas de integración. El formato JSON exacto de las respuestas debe verificarse con la implementación de Drazen.
-
-## 8. Correspondencia entre contratos
-
-| Solicitud HTTP | Registro OCI |
-|---|---|
-| `{id}` en URL | `documento_id` |
-| `decision` | `review_status` |
-| `reviewer_id` | `reviewer_id` |
-| `observacion` | `observacion` |
-| `expected_review_status` | Validación previa; no se almacena como campo del registro |
-| Generado por backend | `review_id` |
-| Generado por backend | `reviewed_at` |
-
-## 9. Alcance del contrato
-
-Este contrato se limita a la revisión humana y **no modifica**:
-
-- La clasificación clínica del documento.
-- La prioridad `Rutina` o `Urgente`.
-- El resultado original de `TriageResponse`.
-- La extracción de datos clínicos.
-- El enrutamiento original del documento.
-
-**Nota de integración:** este documento refleja los dos modelos definidos para `schemas.py` y las propuestas de interfaz y persistencia del Sprint 4. La implementación efectiva de los endpoints y su compatibilidad deben verificarse durante las pruebas de integración.
+1. El frontend pueda enviar una decisión válida utilizando el contrato HTTP definido.
+2. El backend valide correctamente los campos y el estado previo del documento.
+3. El backend genere un registro de exactamente seis campos compatible con OCI.
+4. OCI persista y permita recuperar la decisión final.
+5. Una segunda decisión no sobrescriba la primera.
+6. La consulta de pendientes excluya documentos ya revisados.
+7. Las pruebas de integración estén ejecutadas y sus resultados documentados.
 
 ---
 
-**Fin del contrato JSON — MediFlow Sprint 4.**
+**Conclusión:** este documento define el contrato JSON compartido para el Sprint 4 de MediFlow y refleja las reglas de persistencia OCI implementadas por Brando. La validación final depende de las pruebas de integración entre los componentes del equipo.
