@@ -1,11 +1,9 @@
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
 
-#importaciones agregadas por eliana
 from datetime import datetime
-from typing import Optional
 from enum import Enum
-from pydantic import BaseModel, Field, model_validator
+from pydantic import model_validator
 
 class ClasificacionSchema(BaseModel):
     tipo_documento: str = Field(..., examples=["Pendiente de procesamiento"])
@@ -59,26 +57,44 @@ class TriageResponse(BaseModel):
     almacenamiento_oci: AlmacenamientoOCISchema
 
 
+
 # === CONTRATO DE AUDITORÍA SPRINT 4 ===
 
-# 1. Definimos los estados permitidos para la auditoría
 class ReviewStatus(str, Enum):
     aprobado = "aprobado"
     rechazado = "rechazado"
-    solicitar_nueva_imagen = "solicitar_nueva_imagen"
 
-# 2. El modelo exacto basado en el contrato en concenso con brando y drazen
+
+# Solicitud enviada desde el frontend a la API
 class AuditoriaReviewRequest(BaseModel):
-    documento_id: str = Field(..., description="ID único del documento generado por OCI/Backend")
-    review_id: str = Field(..., description="ID único de esta revisión manual")
-    review_status: ReviewStatus = Field(..., description="Veredicto final de la revisión")
-    reviewer_id: str = Field(..., description="Identificador del auditor (ej. auditor_demo_01)")
-    observacion: Optional[str] = Field(None, description="Comentarios adicionales del auditor")
-    reviewed_at: datetime = Field(..., description="Marca de tiempo en formato ISO 8601 (UTC)")
+    decision: ReviewStatus = Field(..., description="Decisión del auditor")
 
-    # 3. Validación estricta: Si se rechaza, la observación es obligatoria
-    @model_validator(mode='after')
+    reviewer_id: str = Field(..., min_length=1, description="Identificador del auditor")
+    observacion: Optional[str] = Field(default=None, description="Observación del auditor")
+    expected_review_status: Literal["pendiente"] = Field(..., description="Estado esperado antes de registrar la revisión")
+
+    @model_validator(mode="after")
     def validar_observacion_rechazo(self):
-        if self.review_status == ReviewStatus.rechazado and not self.observacion:
+        if (self.decision == ReviewStatus.rechazado and not (self.observacion or "").strip()):
             raise ValueError("La observación es obligatoria cuando se rechaza un documento.")
+        return self
+
+
+# Registro completo generado por el backend y almacenado en OCI
+class AuditoriaReviewRecord(BaseModel):
+    documento_id: str = Field(..., min_length=1)
+    review_id: str = Field(..., min_length=1)
+    review_status: ReviewStatus
+    reviewer_id: str = Field(..., min_length=1)
+    observacion: Optional[str] = None
+    reviewed_at: datetime
+
+    @model_validator(mode="after")
+    def validar_registro(self):
+        if (self.review_status == ReviewStatus.rechazado and not (self.observacion or "").strip()):
+            raise ValueError("La observación es obligatoria cuando se rechaza un documento.")
+
+        if (self.reviewed_at.utcoffset() is None or self.reviewed_at.utcoffset().total_seconds() != 0):
+            raise ValueError("reviewed_at debe incluir una fecha con zona horaria UTC.")
+
         return self
