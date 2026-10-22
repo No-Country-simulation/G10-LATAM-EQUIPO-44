@@ -4,7 +4,7 @@
 * `"recibido"`
 * `"procesado"`
 * `"auditoria_humana"`
-
+* **"cargado_por"** (String, Obligatorio): Profesional que carga la imagen.
 
 * **`documento_id`** (String, Obligatorio): Identificador único del documento clínico ingresado.
 * **`clasificacion`** (Objeto, Obligatorio):

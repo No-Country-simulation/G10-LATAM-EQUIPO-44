@@ -1,11 +1,5 @@
 # CONTRATO JSON DE AUDITORÍA HUMANA — SPRINT 4
 
-**Proyecto:** MediFlow  
-**Sprint:** 4  
-**Responsable del contrato:** Eliana — S4-03 Integración y contratos JSON  
-**Fecha de actualización:** 20 de octubre de 2026  
-**Estado:** Contrato actualizado según la implementación de persistencia OCI de Brando. Integración HTTP pendiente de validación conjunta.
-
 ---
 
 ## 1. Objetivo
@@ -290,21 +284,21 @@ La función `list_pending_reviews` está orientada a construir la cola de audito
 
 Estas son operaciones internas del componente OCI; **no deben confundirse con endpoints HTTP ya verificados**.
 
-## 10. Endpoints HTTP previstos para integración
+## 10. Endpoints HTTP de integración
 
 | Método | Endpoint | Función |
 |---|---|---|
 | `GET` | `/api/reviews/pending` | Consultar documentos pendientes |
 | `POST` | `/api/documents/{documento_id}/review` | Registrar una decisión de auditoría |
-| `GET` | `/api/documents/{documento_id}/review-history` | Consultar historial de revisiones, si se habilita |
+| `GET` | `/api/documents/{documento_id}/review-history` | Consultar historial de revisiones |
 
-La disponibilidad, las respuestas y el comportamiento de estos endpoints deben comprobarse con la implementación de Drazen.
+Los tres endpoints fueron ejecutados mediante FastAPI TestClient contra la implementación HTTP de Drazen, utilizando OCI real para el escenario E2E de aprobación. Se verificaron respuestas HTTP 200 en las consultas y el registro de aprobación, además de HTTP 409 ante un segundo intento de decisión final. El rechazo E2E y la exclusión de documentos revisados de la cola fueron validados posteriormente mediante HTTP y OCI real.
 
 La cola de auditoría debe utilizar la lógica específica de documentos pendientes, no asumir que todos los documentos con estado de triaje `auditoria_humana` siguen sin decisión final.
 
 ## 11. Manejo de errores esperado
 
-La siguiente tabla establece el comportamiento de integración recomendado. Los códigos HTTP deben verificarse contra los endpoints reales.
+La siguiente tabla establece los códigos HTTP esperados. En la prueba E2E de aprobación se verificó HTTP 409 para una segunda decisión final; los demás escenarios de error requieren evidencia específica antes de considerarse validados.
 
 | Situación | HTTP esperado |
 |---|---|
@@ -334,4 +328,138 @@ El contrato se considerará integrado cuando:
 
 ---
 
-**Conclusión:** este documento define el contrato JSON compartido para el Sprint 4 de MediFlow y refleja las reglas de persistencia OCI implementadas por Brando. La validación final depende de las pruebas de integración entre los componentes del equipo.
+**Conclusión:** el contrato JSON compartido del Sprint 4 cuenta con evidencia E2E satisfactoria para el escenario de aprobación, incluyendo endpoints HTTP, persistencia OCI real, historial y prevención de decisiones duplicadas. Las pruebas E2E de rechazo y exclusión de revisados fueron completadas satisfactoriamente. La aceptación integral continúa pendiente de la integración de auditoría humana con frontend y demás validaciones aplicables.
+
+---
+
+## 16. Evidencias de integración E2E — 21 de octubre de 2026
+
+**Responsable:** Eliana — S4-03
+
+**Entorno:** Backend local, FastAPI TestClient y OCI Object Storage real.
+
+**Resultado:** PASS para el escenario de aprobación.
+
+### 16.1 Pruebas ejecutadas
+
+| Verificación | Resultado |
+|---|---|
+| Validación del contrato `TriageResponse` | PASS |
+| Almacenamiento y recuperación del documento en OCI | PASS |
+| `GET /api/reviews/pending` | HTTP 200 |
+| `POST /api/documents/{id}/review` | HTTP 200 |
+| Persistencia de decisión `aprobado` en OCI | PASS |
+| Existencia de `_final.json` y copia por `review_id` | PASS |
+| `GET /api/documents/{id}/review-history` | HTTP 200 |
+| Segunda aprobación del mismo documento | HTTP 409 |
+| Historial sin duplicados | PASS — 1 revisión |
+| Limpieza de objetos sintéticos | PASS — 3/3 eliminados y ausencia confirmada con HTTP 404 |
+
+### 16.2 Identificadores de prueba
+
+- Documento sintético: `DOC-S4-E2E-1796FA11CDE14DCF`
+- Revisión: `REV-20261021T234111Z-ef731fdb`
+- Auditor sintético: `auditor_s4_e2e`
+- Estado final verificado: `aprobado`
+- Bucket OCI: `auditoria_humana`
+
+Los objetos sintéticos fueron eliminados después de las pruebas.
+
+### 16.3 Pruebas automatizadas
+
+- Pruebas HTTP de auditoría: **20 passed**.
+- Suite general: **315 passed, 6 skipped**.
+- Los seis casos omitidos no se consideran aprobados.
+
+### 16.4 Alcance y pendientes
+
+La prueba confirmó el funcionamiento del flujo de aprobación
+entre los endpoints HTTP y la persistencia OCI.
+
+Validaciones E2E completadas posteriormente:
+
+1. Rechazo de documentos mediante HTTP y OCI real: PASS.
+2. Exclusión de documentos revisados de la cola de pendientes: PASS.
+
+**Matriz de evidencias:** `sprint-4/MATRIZ-PRUEBAS-S4-03.md`.
+
+**Conclusión:** escenario E2E de aprobación aprobado. No se declara
+completada la integración integral del Sprint 4.
+
+
+## 17. Actualización de evidencias S4-03
+
+### 17.1 Escenarios E2E adicionales
+
+**Resultado: PASS.**
+
+- Rechazo HTTP con persistencia OCI real: PASS.
+- Exclusión de documentos aprobados de la cola: PASS.
+- Exclusión de documentos rechazados de la cola: PASS.
+- Consulta de historial de revisiones: HTTP 200.
+- Prevención de segunda decisión final: HTTP 409.
+- Limpieza de objetos sintéticos: verificada mediante HTTP 404.
+
+Los identificadores, verificaciones y objetos eliminados están
+documentados en `sprint-4/MATRIZ-PRUEBAS-S4-03.md`.
+
+### 17.2 Pruebas del frontend web
+
+Comando ejecutado:
+
+`node --test ../frontend_web/tests/*.test.js`
+
+**Resultado: 40 PASS, 0 FAIL, 0 SKIP.**
+
+La suite cubre consultas HTTP de documentos, validación JSON,
+detalle individual, manejo de errores e historial general.
+
+Estas pruebas no demuestran una integración E2E de la pantalla
+de auditoría humana con FastAPI y OCI.
+
+### 17.3 Integración frontend — S4-03-17
+
+**Estado: PENDIENTE.**
+
+La inspección del frontend web confirmó que el historial general
+utiliza una API real por defecto, mientras que la pantalla de
+auditoría utiliza documentos de ejemplo y registra decisiones
+en memoria.
+
+Se requiere que las personas encargadas del frontend revisen la conexión y
+validación de:
+
+- `GET /api/reviews/pending`.
+- `POST /api/documents/{documento_id}/review`.
+- `GET /api/documents/{documento_id}/review-history`.
+- Manejo de errores HTTP y conflictos 409.
+- Confirmación visual únicamente después de persistencia exitosa.
+
+**Conclusión actualizada:** los escenarios E2E de aprobación,
+rechazo, historial y exclusión de pendientes están verificados
+con OCI real. La integración integral del Sprint 4 permanece
+pendiente de S4-03-17 y las validaciones restantes.
+
+
+
+
+flowchart TD
+    A["Ingesta de documento<br/>Archivo + cargado_por"] --> B["Procesamiento IA<br/>Extracción y clasificación"]
+    B --> C["Almacenamiento OCI<br/>Resultado JSON"]
+    C --> D{"¿Requiere auditoría humana?"}
+    D -->|No| E["Documento procesado"]
+    D -->|Sí| F["Cola de auditoría<br/>GET /api/reviews/pending"]
+    F --> G["Panel de auditoría frontend"]
+    G --> H["POST /api/documents/{id}/review"]
+    H --> I{"Resultado HTTP"}
+    I -->|200| J["Decisión registrada en OCI"]
+    I -->|409| K["Conflicto: consultar estado actual"]
+    I -->|Otros errores| L["Mostrar error y verificar estado"]
+    J --> M["GET /api/documents/{id}/review-history"]
+    M --> N["Actualizar interfaz e historial"]
+
+    classDef verified fill:#e5f4e9,stroke:#38976c,color:#194f38
+    classDef pending fill:#fff0d6,stroke:#d19a39,color:#765018
+
+    class F,H,J,M verified
+    class A,G,N pending
