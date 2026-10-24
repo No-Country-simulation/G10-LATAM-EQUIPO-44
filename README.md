@@ -4,6 +4,19 @@ Sistema inteligente de triaje médico automatizado, extracción de información 
 
 Pruebas OCI del Sprint 1: ver [configuración, pruebas unitarias y prueba real](docs/sprint-1/manejo_errores_oci.md).
 
+## Presentación local Sprint 4 — Agregado por Edil
+
+`iniciar_presentacion_local.bat` inicia web y API en `127.0.0.1:8787`.
+El acceso HTTPS privado mediante Tailscale, los APK debug y el guion están en
+[la guía de presentación](docs/sprint-4/presentacion-local-tailscale.md).
+El frontend conserva HTML/CSS/JavaScript y Flutter; no requiere otro proyecto web.
+
+Los auditores usan [usuario y contraseña propios de MediFlow](docs/sprint-4/usuarios-mediflow.md).
+Tailscale se utiliza únicamente para el acceso privado al servicio.
+
+Consultar [cierre de Edil](docs/sprint-4/S4-Edil.md) para pruebas, capturas,
+artefactos y bloqueos. Las pruebas sintéticas no representan validación clínica.
+
 ---
 
 ## 📌 Organización Sprint 1 (G10-LATAM-EQUIPO-44)

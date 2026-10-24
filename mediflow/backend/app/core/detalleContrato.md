@@ -4,7 +4,7 @@
 * `"recibido"`
 * `"procesado"`
 * `"auditoria_humana"`
-
+* **`cargado_por`** (String o null, compatible con documentos históricos): Identidad verificada del usuario que carga el archivo, asignada por el servidor. No identifica al médico del documento. No se acepta como texto libre ni se obtiene del LLM. Se devuelve null si la carga no tenía identidad autenticada o si el JSON histórico no contenía el campo.
 
 * **`documento_id`** (String, Obligatorio): Identificador único del documento clínico ingresado.
 * **`clasificacion`** (Objeto, Obligatorio):
@@ -58,3 +58,15 @@ El ejemplo conserva el contenido de Eliana; el bucket se ajustó a `recibidos` p
 Un estado procesado no confirma un traslado de bucket ni una notificación. Esas acciones requieren implementación y comprobación aparte.
 
 Agregado por Edil: aplicada la corrección de Eliana bcefff1; la justificación es obligatoria y coincide con Pydantic y las pruebas de Laura.
+
+### Agregado por Edil: conexión de `cargado_por` (Sprint 4)
+
+La propuesta original decía «profesional que carga la imagen» y lo marcaba obligatorio,
+pero los JSON guardados y Pydantic no lo incluían. Ahora se registra el `login` del
+principal autenticado en la recepción y se conserva al terminar el análisis. El
+proveedor de identidad debe establecer ese principal dentro del servidor; enviar
+un campo multipart con ese nombre no permite suplantarlo. La respuesta de Gemini
+tampoco puede reemplazarlo. POST y GET usan el mismo campo público y el JSON
+persistido conserva su valor. Los documentos anteriores se leen con null sin
+reescribirlos. Un login identifica una cuenta; no certifica que sea profesional
+sanitario ni concede permiso para aprobar documentos.

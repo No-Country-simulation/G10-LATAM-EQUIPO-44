@@ -4,9 +4,25 @@ from __future__ import annotations
 
 import unittest
 import tempfile
+import base64
+import hashlib
+import json
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+from requests.exceptions import ReadTimeout
+
+from app.core.error_handler import (
+    DuplicateReviewError,
+    OCIIncompleteResponseError,
+    OCICredentialsError,
+    OCIPermissionDeniedError,
+    OCIPersistenceError,
+    OCITimeoutError,
+    ReviewNotFoundError,
+    ReviewValidationError,
+)
 from app.core.oci_client import OCISettings, OCIStorageManager
 
 
@@ -16,6 +32,11 @@ class FakeObjectStorage:
 
     def put_object(self, **kwargs: object) -> None:
         self.calls.append(kwargs)
+
+
+class SDKError(Exception):
+    def __init__(self, status: int):
+        self.status = status
 
 
 class OCISettingsTest(unittest.TestCase):
@@ -198,6 +219,523 @@ class OCIStorageManagerTest(unittest.TestCase):
         doc_inexistente = manager.recuperar_resultado_triage("DOC-INEXISTENTE")
         self.assertIsNone(doc_inexistente)
 
+    def test_save_review_record_writes_and_verifies_identical_bytes(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        record = {
+            "documento_id": "DOC-REVIEW",
+            "review_id": "REV-001",
+            "review_status": "aprobado",
+            "reviewer_id": "auditor-1",
+            "observacion": None,
+            "reviewed_at": "2026-10-20T15:30:00Z",
+        }
+        content = json.dumps(record, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        content_md5 = base64.b64encode(hashlib.md5(content).digest()).decode("ascii")
+        storage.put_object.side_effect = [
+            SimpleNamespace(headers={"opc-content-md5": content_md5}),
+            SimpleNamespace(headers={}),
+        ]
+        storage.get_object.side_effect = lambda **kwargs: SimpleNamespace(
+            data=SimpleNamespace(content=content)
+        )
+
+        result = manager.save_review_record(record)
+
+        self.assertEqual(result.to_dict(), record)
+        self.assertEqual(storage.put_object.call_count, 2)
+        final_call, mirror_call = storage.put_object.call_args_list
+        self.assertEqual(final_call.kwargs["object_name"], "reviews/DOC-REVIEW/_final.json")
+        self.assertEqual(mirror_call.kwargs["object_name"], "reviews/DOC-REVIEW/REV-001.json")
+        self.assertEqual(final_call.kwargs["put_object_body"], content)
+        self.assertEqual(mirror_call.kwargs["put_object_body"], content)
+        self.assertEqual(final_call.kwargs["content_md5"], content_md5)
+        self.assertEqual(mirror_call.kwargs["content_md5"], content_md5)
+        self.assertEqual(final_call.kwargs["if_none_match"], "*")
+        self.assertNotIn("if_none_match", mirror_call.kwargs)
+
+    def test_save_review_record_412_does_not_write_mirror(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        storage.put_object.side_effect = SDKError(412)
+
+        with self.assertRaises(DuplicateReviewError):
+            manager.save_review_record(self._valid_review())
+
+        storage.put_object.assert_called_once()
+
+    def test_save_review_record_maps_sdk_errors(self):
+        for error, expected in (
+            (SDKError(401), OCICredentialsError),
+            (SDKError(403), OCIPermissionDeniedError),
+            (ReadTimeout("timeout"), OCITimeoutError),
+            (SDKError(503), OCIPersistenceError),
+        ):
+            storage = MagicMock()
+            manager = OCIStorageManager(
+                OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+                object_storage_client=storage,
+            )
+            storage.put_object.side_effect = error
+
+            with self.subTest(expected=expected):
+                with self.assertRaises(expected):
+                    manager.save_review_record(self._valid_review())
+
+    def test_save_review_record_rejects_incomplete_final_response(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        storage.put_object.return_value = SimpleNamespace(headers={})
+
+        with self.assertRaises(OCIIncompleteResponseError):
+            manager.save_review_record(self._valid_review())
+
+        storage.get_object.assert_not_called()
+
+    def test_save_review_record_rejects_wrong_md5(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        storage.put_object.return_value = SimpleNamespace(
+            headers={"opc-content-md5": "wrong-md5"}
+        )
+
+        with self.assertRaises(OCIIncompleteResponseError):
+            manager.save_review_record(self._valid_review())
+
+        storage.get_object.assert_not_called()
+
+    def test_save_review_record_rejects_mismatched_final_bytes(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        content = json.dumps(
+            self._valid_review(), sort_keys=True, ensure_ascii=False
+        ).encode("utf-8")
+        content_md5 = base64.b64encode(hashlib.md5(content).digest()).decode("ascii")
+        storage.put_object.return_value = SimpleNamespace(
+            headers={"opc-content-md5": content_md5}
+        )
+        storage.get_object.return_value = SimpleNamespace(
+            data=SimpleNamespace(content=b"different")
+        )
+
+        with self.assertRaises(OCIIncompleteResponseError):
+            manager.save_review_record(self._valid_review())
+
+        storage.put_object.assert_called_once()
+
+    def test_save_review_record_keeps_final_when_mirror_fails(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        content = json.dumps(
+            self._valid_review(), sort_keys=True, ensure_ascii=False
+        ).encode("utf-8")
+        content_md5 = base64.b64encode(hashlib.md5(content).digest()).decode("ascii")
+        storage.put_object.side_effect = [
+            SimpleNamespace(headers={"opc-content-md5": content_md5}),
+            SDKError(503),
+        ]
+        storage.get_object.return_value = SimpleNamespace(
+            data=SimpleNamespace(content=content)
+        )
+
+        with self.assertRaises(OCIPersistenceError):
+            manager.save_review_record(self._valid_review())
+
+        self.assertEqual(storage.put_object.call_count, 2)
+        storage.delete_object.assert_not_called()
+        self.assertEqual(
+            storage.put_object.call_args_list[0].kwargs["object_name"],
+            "reviews/DOC-REVIEW/_final.json",
+        )
+
+    def test_save_review_record_never_writes_outside_reviews(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+
+        with self.assertRaises(ReviewValidationError):
+            manager.save_review_record({**self._valid_review(), "documento_id": "../escape"})
+
+        storage.put_object.assert_not_called()
+
+    def test_save_review_record_does_not_modify_urgent_triage_object(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        content = json.dumps(
+            self._valid_review(), sort_keys=True, ensure_ascii=False
+        ).encode("utf-8")
+        content_md5 = base64.b64encode(hashlib.md5(content).digest()).decode("ascii")
+        storage.put_object.side_effect = [
+            SimpleNamespace(headers={"opc-content-md5": content_md5}),
+            SimpleNamespace(headers={}),
+        ]
+        storage.get_object.side_effect = lambda **kwargs: SimpleNamespace(
+            data=SimpleNamespace(content=content)
+        )
+        urgent_key = "DOC-URGENTE.json"
+
+        manager.save_review_record(self._valid_review())
+
+        written_keys = [
+            call.kwargs["object_name"] for call in storage.put_object.call_args_list
+        ]
+        self.assertNotIn(urgent_key, written_keys)
+        storage.delete_object.assert_not_called()
+
+    @staticmethod
+    def _valid_review():
+        return {
+            "documento_id": "DOC-REVIEW",
+            "review_id": "REV-001",
+            "review_status": "aprobado",
+            "reviewer_id": "auditor-1",
+            "observacion": None,
+            "reviewed_at": "2026-10-20T15:30:00Z",
+        }
+
+    def test_get_review_record_reads_and_validates_record(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        record = self._valid_review()
+        storage.get_object.return_value = SimpleNamespace(
+            data=SimpleNamespace(content=json.dumps(record).encode())
+        )
+
+        result = manager.get_review_record("DOC-REVIEW", "REV-001")
+
+        self.assertEqual(result.to_dict(), record)
+        self.assertEqual(
+            storage.get_object.call_args.kwargs["object_name"],
+            "reviews/DOC-REVIEW/REV-001.json",
+        )
+
+    def test_get_review_record_maps_404_to_not_found(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        storage.get_object.side_effect = SDKError(404)
+
+        with self.assertRaises(ReviewNotFoundError):
+            manager.get_review_record("DOC-REVIEW", "REV-001")
+
+    def test_list_reviews_for_document_orders_reviews_and_uses_final_fallback(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        older = {**self._valid_review(), "review_id": "REV-001",
+                 "reviewed_at": "2026-10-20T10:00:00Z"}
+        newer = {**self._valid_review(), "review_id": "REV-002",
+                 "reviewed_at": "2026-10-20T12:00:00Z"}
+        final_content = json.dumps(newer).encode()
+        storage.list_objects.return_value = SimpleNamespace(
+            data=SimpleNamespace(
+                objects=[
+                    SimpleNamespace(name="reviews/DOC-REVIEW/REV-002.json"),
+                    SimpleNamespace(name="reviews/DOC-REVIEW/_final.json"),
+                    SimpleNamespace(name="reviews/DOC-REVIEW/REV-001.json"),
+                ],
+                next_start_with=None,
+            )
+        )
+        contents = {
+            "reviews/DOC-REVIEW/_final.json": final_content,
+            "reviews/DOC-REVIEW/REV-001.json": json.dumps(older).encode(),
+            "reviews/DOC-REVIEW/REV-002.json": final_content,
+        }
+        storage.get_object.side_effect = lambda **kwargs: SimpleNamespace(
+            data=SimpleNamespace(content=contents[kwargs["object_name"]])
+        )
+
+        result = manager.list_reviews_for_document("DOC-REVIEW")
+
+        self.assertEqual([item.review_id for item in result], ["REV-001", "REV-002"])
+        self.assertIn(
+            "reviews/DOC-REVIEW/_final.json",
+            [call.kwargs["object_name"] for call in storage.get_object.call_args_list],
+        )
+
+    def test_list_reviews_for_document_does_not_duplicate_final_and_mirror(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        record = self._valid_review()
+        storage.list_objects.return_value = SimpleNamespace(
+            data=SimpleNamespace(
+                objects=[
+                    SimpleNamespace(name="reviews/DOC-REVIEW/_final.json"),
+                    SimpleNamespace(name="reviews/DOC-REVIEW/REV-001.json"),
+                ],
+                next_start_with=None,
+            )
+        )
+        storage.get_object.return_value = SimpleNamespace(
+            data=SimpleNamespace(content=json.dumps(record).encode())
+        )
+
+        result = manager.list_reviews_for_document("DOC-REVIEW")
+
+        self.assertEqual([item.to_dict() for item in result], [record])
+        self.assertEqual(storage.get_object.call_count, 2)
+
+    def test_list_reviews_for_document_returns_final_when_only_final_is_listed(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        record = self._valid_review()
+        storage.list_objects.return_value = SimpleNamespace(
+            data=SimpleNamespace(
+                objects=[
+                    SimpleNamespace(name="reviews/DOC-REVIEW/_final.json"),
+                ],
+                next_start_with=None,
+            )
+        )
+        storage.get_object.return_value = SimpleNamespace(
+            data=SimpleNamespace(content=json.dumps(record).encode())
+        )
+
+        result = manager.list_reviews_for_document("DOC-REVIEW")
+
+        self.assertEqual([item.to_dict() for item in result], [record])
+
+    def test_list_reviews_for_document_returns_empty_without_final_or_mirrors(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        storage.get_object.side_effect = SDKError(404)
+
+        self.assertEqual(manager.list_reviews_for_document("DOC-REVIEW"), [])
+        storage.list_objects.assert_not_called()
+
+    def test_list_reviews_for_document_uses_final_when_mirror_is_missing(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        record = self._valid_review()
+        storage.list_objects.return_value = SimpleNamespace(
+            data=SimpleNamespace(
+                objects=[SimpleNamespace(name="reviews/DOC-REVIEW/REV-001.json")],
+                next_start_with=None,
+            )
+        )
+        storage.get_object.side_effect = [
+            SimpleNamespace(data=SimpleNamespace(content=json.dumps(record).encode())),
+            SDKError(404),
+        ]
+
+        result = manager.list_reviews_for_document("DOC-REVIEW")
+
+        self.assertEqual(result[0].to_dict(), record)
+        self.assertEqual(storage.get_object.call_count, 2)
+
+    def test_list_reviews_for_document_follows_pagination(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        record = self._valid_review()
+        storage.list_objects.side_effect = [
+            SimpleNamespace(
+                data=SimpleNamespace(
+                    objects=[SimpleNamespace(name="reviews/DOC-REVIEW/REV-001.json")],
+                    next_start_with="NEXT",
+                )
+            ),
+            SimpleNamespace(
+                data=SimpleNamespace(
+                    objects=[SimpleNamespace(name="reviews/DOC-REVIEW/REV-002.json")],
+                    next_start_with=None,
+                )
+            ),
+        ]
+        second = {**record, "review_id": "REV-002"}
+        contents = {
+            "reviews/DOC-REVIEW/_final.json": json.dumps(record).encode(),
+            "reviews/DOC-REVIEW/REV-001.json": json.dumps(record).encode(),
+            "reviews/DOC-REVIEW/REV-002.json": json.dumps(second).encode(),
+        }
+        storage.get_object.side_effect = lambda **kwargs: SimpleNamespace(
+            data=SimpleNamespace(content=contents[kwargs["object_name"]])
+        )
+
+        result = manager.list_reviews_for_document("DOC-REVIEW")
+
+        self.assertEqual(len(result), 2)
+        self.assertEqual(storage.list_objects.call_args_list[1].kwargs["start"], "NEXT")
+
+    def test_get_latest_review_status_returns_three_states(self):
+        for status in ("aprobado", "rechazado"):
+            storage = MagicMock()
+            manager = OCIStorageManager(
+                OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+                object_storage_client=storage,
+            )
+            record = {
+                **self._valid_review(),
+                "review_status": status,
+                "observacion": "Revisado" if status == "rechazado" else None,
+            }
+            storage.head_object.return_value = SimpleNamespace()
+            storage.get_object.return_value = SimpleNamespace(
+                data=SimpleNamespace(content=json.dumps(record).encode())
+            )
+            self.assertEqual(manager.get_latest_review_status("DOC-REVIEW"), status)
+
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        storage.head_object.side_effect = SDKError(404)
+        self.assertEqual(manager.get_latest_review_status("DOC-REVIEW"), "pendiente")
+
+    def test_get_latest_review_status_rejects_invalid_final_json(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        storage.head_object.return_value = SimpleNamespace()
+        storage.get_object.return_value = SimpleNamespace(
+            data=SimpleNamespace(content=b'{"status": "auditoria_humana"}')
+        )
+
+        with self.assertRaises(ReviewValidationError):
+            manager.get_latest_review_status("DOC-REVIEW")
+
+    def test_list_pending_reviews_excludes_decided_and_preserves_triage_json(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        pending = {
+            "documento_id": "DOC-PENDING",
+            "status": "auditoria_humana",
+            "clasificacion": {"nivel_prioridad": "Urgente"},
+            "extra": ["preserve", {"nested": True}],
+        }
+        decided = {**pending, "documento_id": "DOC-DECIDED"}
+        manager.listar_resultados_triage = MagicMock(return_value=[pending, decided])
+        storage.head_object.side_effect = [SDKError(404), SimpleNamespace()]
+
+        result = manager.list_pending_reviews()
+
+        self.assertEqual(result, [pending])
+        self.assertIs(result[0], pending)
+        self.assertEqual(
+            storage.head_object.call_args_list[0].kwargs["object_name"],
+            "reviews/DOC-PENDING/_final.json",
+        )
+
+    def test_list_pending_reviews_maps_head_forbidden_and_timeout(self):
+        document = {"documento_id": "DOC-PENDING", "status": "auditoria_humana"}
+        for error, expected in (
+            (SDKError(403), OCIPermissionDeniedError),
+            (ReadTimeout("timeout"), OCITimeoutError),
+        ):
+            storage = MagicMock()
+            manager = OCIStorageManager(
+                OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+                object_storage_client=storage,
+            )
+            manager.listar_resultados_triage = MagicMock(return_value=[document])
+            storage.head_object.side_effect = error
+
+            with self.subTest(expected=expected):
+                with self.assertRaises(expected):
+                    manager.list_pending_reviews()
+
+    def test_review_reads_map_403_and_timeout(self):
+        for error, expected in (
+            (SDKError(403), OCIPermissionDeniedError),
+            (ReadTimeout("timeout"), OCITimeoutError),
+        ):
+            storage = MagicMock()
+            manager = OCIStorageManager(
+                OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+                object_storage_client=storage,
+            )
+            storage.get_object.side_effect = error
+            with self.subTest(expected=expected):
+                with self.assertRaises(expected):
+                    manager.get_review_record("DOC-REVIEW", "REV-001")
+
+    def test_list_reviews_for_document_reads_multiple_pages(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        first = self._valid_review()
+        second = {**self._valid_review(), "review_id": "REV-002"}
+        storage.list_objects.side_effect = [
+            SimpleNamespace(
+                data=SimpleNamespace(
+                    objects=[SimpleNamespace(name="reviews/DOC-REVIEW/REV-001.json")],
+                    next_start_with="NEXT",
+                )
+            ),
+            SimpleNamespace(
+                data=SimpleNamespace(
+                    objects=[SimpleNamespace(name="reviews/DOC-REVIEW/REV-002.json")],
+                    next_start_with=None,
+                )
+            ),
+        ]
+        contents = {
+            "reviews/DOC-REVIEW/_final.json": json.dumps(first).encode(),
+            "reviews/DOC-REVIEW/REV-001.json": json.dumps(first).encode(),
+            "reviews/DOC-REVIEW/REV-002.json": json.dumps(second).encode(),
+        }
+        storage.get_object.side_effect = lambda **kwargs: SimpleNamespace(
+            data=SimpleNamespace(content=contents[kwargs["object_name"]])
+        )
+
+        result = manager.list_reviews_for_document("DOC-REVIEW")
+
+        self.assertEqual({item.review_id for item in result}, {"REV-001", "REV-002"})
+        self.assertEqual(storage.list_objects.call_args_list[1].kwargs["start"], "NEXT")
+
     def test_listar_resultados_triage(self):
         storage = MagicMock()
         manager = OCIStorageManager(
@@ -234,3 +772,141 @@ class OCIStorageManagerTest(unittest.TestCase):
         ids = [d["documento_id"] for d in docs]
         self.assertIn("DOC-1", ids)
         self.assertIn("DOC-2", ids)
+
+    def test_listar_resultados_triage_preserves_root_json_results(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        storage.list_objects.return_value = SimpleNamespace(
+            data=SimpleNamespace(
+                objects=[
+                    SimpleNamespace(name="DOC-1.json"),
+                    SimpleNamespace(name="DOC-1.pdf"),
+                    SimpleNamespace(name="DOC-2.json"),
+                ],
+                next_start_with=None,
+            )
+        )
+        documents = {
+            "DOC-1.json": {"documento_id": "DOC-1", "status": "procesado"},
+            "DOC-2.json": {"documento_id": "DOC-2", "status": "procesado"},
+        }
+        storage.get_object.side_effect = lambda **kwargs: SimpleNamespace(
+            data=SimpleNamespace(
+                content=json.dumps(documents[kwargs["object_name"]]).encode()
+            )
+        )
+
+        assert manager.listar_resultados_triage() == [
+            documents["DOC-1.json"],
+            documents["DOC-2.json"],
+        ]
+        assert [call.kwargs["object_name"] for call in storage.get_object.call_args_list] == [
+            "DOC-1.json",
+            "DOC-2.json",
+        ]
+
+    def test_listar_resultados_triage_ignores_review_objects_before_reading(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        storage.list_objects.side_effect = [
+            SimpleNamespace(
+                data=SimpleNamespace(
+                    objects=[
+                        SimpleNamespace(name="DOC-1.json"),
+                        SimpleNamespace(name="reviews/REV-1/_final.json"),
+                    ],
+                    next_start_with=None,
+                )
+            ),
+            SimpleNamespace(
+                data=SimpleNamespace(
+                    objects=[
+                        SimpleNamespace(name="DOC-1.json"),
+                        SimpleNamespace(name="reviews/REV-1.json"),
+                        SimpleNamespace(name="DOC-2.json"),
+                    ],
+                    next_start_with=None,
+                )
+            ),
+            SimpleNamespace(
+                data=SimpleNamespace(objects=[], next_start_with=None)
+            ),
+            SimpleNamespace(
+                data=SimpleNamespace(objects=[], next_start_with=None)
+            ),
+        ]
+        documents = {
+            "DOC-1.json": {"documento_id": "DOC-1", "status": "procesado"},
+            "DOC-2.json": {
+                "documento_id": "DOC-2",
+                "status": "auditoria_humana",
+            },
+        }
+        storage.get_object.side_effect = lambda **kwargs: SimpleNamespace(
+            data=SimpleNamespace(
+                content=json.dumps(documents[kwargs["object_name"]]).encode()
+            )
+        )
+
+        result = manager.listar_resultados_triage(status="auditoria_humana")
+
+        assert result == [documents["DOC-2.json"]]
+        assert [call.kwargs["object_name"] for call in storage.get_object.call_args_list] == [
+            "DOC-1.json",
+            "DOC-2.json",
+        ]
+
+    def test_listar_resultados_triage_preserves_pagination(self):
+        storage = MagicMock()
+        manager = OCIStorageManager(
+            OCISettings.from_environment({"OCI_NAMESPACE": "demo"}),
+            object_storage_client=storage,
+        )
+        storage.list_objects.side_effect = [
+            SimpleNamespace(
+                data=SimpleNamespace(
+                    objects=[
+                        SimpleNamespace(name="DOC-1.json"),
+                        SimpleNamespace(name="reviews/REV-1/_final.json"),
+                    ],
+                    next_start_with="NEXT",
+                )
+            ),
+            SimpleNamespace(
+                data=SimpleNamespace(
+                    objects=[SimpleNamespace(name="DOC-2.json")],
+                    next_start_with=None,
+                )
+            ),
+            SimpleNamespace(
+                data=SimpleNamespace(objects=[], next_start_with=None)
+            ),
+            SimpleNamespace(
+                data=SimpleNamespace(objects=[], next_start_with=None)
+            ),
+        ]
+        documents = {
+            "DOC-1.json": {"documento_id": "DOC-1", "status": "procesado"},
+            "DOC-2.json": {"documento_id": "DOC-2", "status": "procesado"},
+        }
+        storage.get_object.side_effect = lambda **kwargs: SimpleNamespace(
+            data=SimpleNamespace(
+                content=json.dumps(documents[kwargs["object_name"]]).encode()
+            )
+        )
+
+        assert manager.listar_resultados_triage() == [
+            documents["DOC-1.json"],
+            documents["DOC-2.json"],
+        ]
+        assert storage.list_objects.call_args_list[1].kwargs["start"] == "NEXT"
+        assert [call.kwargs["object_name"] for call in storage.get_object.call_args_list] == [
+            "DOC-1.json",
+            "DOC-2.json",
+        ]

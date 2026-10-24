@@ -7,12 +7,23 @@ claves privadas nunca se almacenan en el repositorio.
 from __future__ import annotations
 
 import json
+import base64
+import hashlib
 import re
 import os
 import time
+import uuid
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Mapping
+
+from .error_handler import (
+    OCIIncompleteResponseError,
+    ReviewNotFoundError,
+    ReviewValidationError,
+    map_oci_error,
+)
 
 try:
     import oci
@@ -22,6 +33,115 @@ except ImportError:  # Permite probar la configuración sin instalar el SDK.
 
 class OCIConfigurationError(RuntimeError):
     """La configuración necesaria para conectar con OCI no es válida."""
+
+
+_REVIEW_FIELDS = frozenset(
+    {
+        "documento_id",
+        "review_id",
+        "review_status",
+        "reviewer_id",
+        "observacion",
+        "reviewed_at",
+    }
+)
+_REVIEW_ID_PATTERN = re.compile(r"REV-[A-Za-z0-9_-]{1,64}\Z")
+
+
+@dataclass(frozen=True)
+class ReviewRecord:
+    """Registro exacto de una decisión final de auditoría humana."""
+
+    documento_id: str
+    review_id: str
+    review_status: str
+    reviewer_id: str
+    observacion: str | None
+    reviewed_at: str
+
+    @classmethod
+    def from_mapping(cls, record: Mapping[str, Any]) -> "ReviewRecord":
+        """Valida y construye el registro sin aceptar campos de la solicitud HTTP."""
+        if not isinstance(record, Mapping):
+            raise ReviewValidationError("El registro de revisión debe ser un objeto.")
+        extra_fields = set(record) - _REVIEW_FIELDS
+        if extra_fields:
+            raise ReviewValidationError("El registro contiene campos no permitidos.")
+        if set(record) != _REVIEW_FIELDS:
+            raise ReviewValidationError("El registro debe contener exactamente seis campos.")
+
+        documento_id = record["documento_id"]
+        if not isinstance(documento_id, str) or re.fullmatch(
+            r"[A-Za-z0-9_-]{1,128}", documento_id
+        ) is None:
+            raise ReviewValidationError("El identificador de documento no es válido.")
+
+        review_id = record["review_id"]
+        if not isinstance(review_id, str) or (
+            _REVIEW_ID_PATTERN.fullmatch(review_id) is None
+            and not _is_uuid4(review_id)
+        ):
+            raise ReviewValidationError("El identificador de revisión no es válido.")
+
+        review_status = record["review_status"]
+        if review_status not in {"aprobado", "rechazado"}:
+            raise ReviewValidationError("El estado de revisión no es válido.")
+
+        reviewer_id = record["reviewer_id"]
+        if not isinstance(reviewer_id, str) or not reviewer_id.strip():
+            raise ReviewValidationError("El identificador del auditor es obligatorio.")
+
+        observacion = record["observacion"]
+        if observacion is not None and not isinstance(observacion, str):
+            raise ReviewValidationError("La observación debe ser texto o null.")
+        if review_status == "rechazado" and (
+            observacion is None or not observacion.strip()
+        ):
+            raise ReviewValidationError(
+                "Una revisión rechazada requiere una observación."
+            )
+
+        reviewed_at = record["reviewed_at"]
+        if not _is_utc_z_datetime(reviewed_at):
+            raise ReviewValidationError("La fecha de revisión no es un UTC ISO 8601 válido.")
+
+        return cls(
+            documento_id=documento_id,
+            review_id=review_id,
+            review_status=review_status,
+            reviewer_id=reviewer_id,
+            observacion=observacion,
+            reviewed_at=reviewed_at,
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Devuelve únicamente los seis campos persistibles del registro."""
+        return {
+            "documento_id": self.documento_id,
+            "review_id": self.review_id,
+            "review_status": self.review_status,
+            "reviewer_id": self.reviewer_id,
+            "observacion": self.observacion,
+            "reviewed_at": self.reviewed_at,
+        }
+
+
+def _is_uuid4(value: str) -> bool:
+    try:
+        parsed = uuid.UUID(value)
+    except (ValueError, AttributeError):
+        return False
+    return parsed.version == 4
+
+
+def _is_utc_z_datetime(value: Any) -> bool:
+    if not isinstance(value, str) or not value.endswith("Z"):
+        return False
+    try:
+        parsed = datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError:
+        return False
+    return parsed.utcoffset() is not None and parsed.utcoffset().total_seconds() == 0
 
 
 def _value(environment: Mapping[str, str], name: str, default: str = "") -> str:
@@ -128,6 +248,183 @@ class OCIStorageManager:
             put_object_body=contenido_bytes,
         )
         return nombre_destino
+
+    def save_review_record(self, record: Mapping[str, Any]) -> ReviewRecord:
+        """Persiste una revisión final y su espejo verificando los bytes escritos."""
+        review = ReviewRecord.from_mapping(record)
+        final_key = f"reviews/{review.documento_id}/_final.json"
+        mirror_key = f"reviews/{review.documento_id}/{review.review_id}.json"
+        expected_prefix = f"reviews/{review.documento_id}/"
+        if not final_key.startswith(expected_prefix) or not mirror_key.startswith(
+            expected_prefix
+        ):
+            raise ReviewValidationError(
+                "Las claves de revisión deben permanecer bajo reviews/."
+            )
+
+        content = json.dumps(
+            review.to_dict(), sort_keys=True, ensure_ascii=False
+        ).encode("utf-8")
+        content_md5 = base64.b64encode(hashlib.md5(content).digest()).decode("ascii")
+        bucket = self.settings.bucket_auditoria
+
+        try:
+            final_response = self.object_storage.put_object(
+                namespace_name=self.namespace,
+                bucket_name=bucket,
+                object_name=final_key,
+                put_object_body=content,
+                if_none_match="*",
+                content_md5=content_md5,
+            )
+        except Exception as error:
+            raise map_oci_error(error, duplicate_on_precondition=True) from None
+
+        response_md5 = _response_header(final_response, "opc-content-md5")
+        if response_md5 is None or response_md5 != content_md5:
+            raise OCIIncompleteResponseError("OCI no confirmó la revisión final.")
+        try:
+            final_bytes = self.obtener_objeto_bytes(bucket, final_key)
+        except Exception as error:
+            raise map_oci_error(error) from None
+        if final_bytes != content:
+            raise OCIIncompleteResponseError("OCI no confirmó la revisión final.")
+
+        try:
+            self.object_storage.put_object(
+                namespace_name=self.namespace,
+                bucket_name=bucket,
+                object_name=mirror_key,
+                put_object_body=content,
+                content_md5=content_md5,
+            )
+        except Exception as error:
+            raise map_oci_error(error) from None
+        try:
+            mirror_bytes = self.obtener_objeto_bytes(bucket, mirror_key)
+        except Exception as error:
+            raise map_oci_error(error) from None
+        if mirror_bytes != content:
+            raise OCIIncompleteResponseError("OCI no confirmó el espejo de la revisión.")
+        return review
+
+    def get_review_record(self, documento_id: str, review_id: str) -> ReviewRecord:
+        """Recupera una revisión por documento e identificador."""
+        document_id = _validate_document_id(documento_id)
+        validated_review_id = _validate_review_id(review_id)
+        object_name = f"reviews/{document_id}/{validated_review_id}.json"
+        try:
+            content = self.obtener_objeto_bytes(self.settings.bucket_auditoria, object_name)
+        except Exception as error:
+            if _has_status(error, 404):
+                raise ReviewNotFoundError("La revisión no existe.") from None
+            raise map_oci_error(error) from None
+        try:
+            payload = json.loads(content.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            raise OCIIncompleteResponseError("OCI devolvió una revisión inválida.") from None
+        try:
+            return ReviewRecord.from_mapping(payload)
+        except ReviewValidationError:
+            raise
+
+    def list_reviews_for_document(self, documento_id: str) -> list[ReviewRecord]:
+        """Lista las revisiones de un documento ordenadas por fecha de revisión."""
+        document_id = _validate_document_id(documento_id)
+        prefix = f"reviews/{document_id}/"
+        final_key = f"{prefix}_final.json"
+        try:
+            final_content = self.obtener_objeto_bytes(
+                self.settings.bucket_auditoria, final_key
+            )
+        except Exception as error:
+            if _has_status(error, 404):
+                return []
+            raise map_oci_error(error) from None
+        try:
+            final_payload = json.loads(final_content.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            raise OCIIncompleteResponseError(
+                "OCI devolvió una revisión inválida."
+            ) from None
+        final_record = ReviewRecord.from_mapping(final_payload)
+        records_by_review_id = {final_record.review_id: final_record}
+        try:
+            names = self.listar_objetos(self.settings.bucket_auditoria, prefix=prefix)
+        except Exception as error:
+            raise map_oci_error(error) from None
+        for object_name in names:
+            if object_name == final_key or not object_name.endswith(".json"):
+                continue
+            try:
+                content = self.obtener_objeto_bytes(
+                    self.settings.bucket_auditoria, object_name
+                )
+            except Exception as error:
+                if _has_status(error, 404):
+                    continue
+                raise map_oci_error(error) from None
+            try:
+                payload = json.loads(content.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                raise OCIIncompleteResponseError(
+                    "OCI devolvió una revisión inválida."
+                ) from None
+            record = ReviewRecord.from_mapping(payload)
+            records_by_review_id.setdefault(record.review_id, record)
+        return sorted(
+            records_by_review_id.values(),
+            key=lambda item: _parse_review_timestamp(item.reviewed_at),
+        )
+
+    def get_latest_review_status(
+        self, documento_id: str
+    ) -> str:
+        """Devuelve el estado de la decisión final o ``pendiente``."""
+        document_id = _validate_document_id(documento_id)
+        final_key = f"reviews/{document_id}/_final.json"
+        try:
+            self.object_storage.head_object(
+                namespace_name=self.namespace,
+                bucket_name=self.settings.bucket_auditoria,
+                object_name=final_key,
+            )
+        except Exception as error:
+            if _has_status(error, 404):
+                return "pendiente"
+            raise map_oci_error(error) from None
+        try:
+            content = self.obtener_objeto_bytes(self.settings.bucket_auditoria, final_key)
+        except Exception as error:
+            raise map_oci_error(error) from None
+        try:
+            payload = json.loads(content.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            raise OCIIncompleteResponseError("OCI devolvió una revisión inválida.") from None
+        return ReviewRecord.from_mapping(payload).review_status
+
+    def list_pending_reviews(self) -> list[dict]:
+        """Lista triajes de auditoría que aún no tienen revisión final."""
+        pending: list[dict] = []
+        try:
+            documents = self.listar_resultados_triage(status="auditoria_humana")
+        except Exception as error:
+            raise map_oci_error(error) from None
+        for document in documents:
+            document_id = _validate_document_id(document.get("documento_id"))
+            final_key = f"reviews/{document_id}/_final.json"
+            try:
+                self.object_storage.head_object(
+                    namespace_name=self.namespace,
+                    bucket_name=self.settings.bucket_auditoria,
+                    object_name=final_key,
+                )
+            except Exception as error:
+                if _has_status(error, 404):
+                    pending.append(document)
+                    continue
+                raise map_oci_error(error) from None
+        return pending
 
     def subir_a_recibidos(self, contenido_bytes: bytes, nombre_destino: str) -> str:
         """Guarda un documento en el bucket independiente de recibidos."""
@@ -393,7 +690,7 @@ class OCIStorageManager:
             # Agregado por Edil: un fallo de lectura no equivale a una lista vacía.
             nombres = self.listar_objetos(bucket)
             for nombre in nombres:
-                if nombre.endswith(".json"):
+                if "/" not in nombre and nombre.endswith(".json"):
                     doc_id_candidato = nombre[:-5]
                     if doc_id_candidato in vistos:
                         continue
@@ -426,6 +723,33 @@ def _required_name(value: str, label: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"El nombre de {label} es obligatorio.")
     return value.strip()
+
+
+def _response_header(response: Any, header_name: str) -> str | None:
+    headers = getattr(response, "headers", None)
+    if not isinstance(headers, Mapping):
+        return None
+    expected = header_name.lower()
+    for name, value in headers.items():
+        if isinstance(name, str) and name.lower() == expected:
+            return value if isinstance(value, str) else None
+    return None
+
+
+def _has_status(error: BaseException, status: int) -> bool:
+    return getattr(error, "status", None) == status
+
+
+def _validate_review_id(value: Any) -> str:
+    if not isinstance(value, str) or (
+        _REVIEW_ID_PATTERN.fullmatch(value) is None and not _is_uuid4(value)
+    ):
+        raise ReviewValidationError("El identificador de revisión no es válido.")
+    return value
+
+
+def _parse_review_timestamp(value: str) -> datetime:
+    return datetime.fromisoformat(value[:-1] + "+00:00")
 
 
 # Agregado por Edil: nombres seguros para JSON derivados de IDs, sin rutas arbitrarias.

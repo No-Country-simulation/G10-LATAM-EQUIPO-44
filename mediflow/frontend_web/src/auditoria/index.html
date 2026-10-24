@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Auditoría Algorítmica · MediFlow Clinical Portal</title>
-<meta name="description" content="Supervisión humana de triaje MTS: inferencia diagnóstica del modelo MTS-AI, confianza algorítmica y validación facultativa de documentos pausados en el Servicio de Urgencias ED-1.">
+<title>Auditoría humana · MediFlow</title>
+<meta name="description" content="Bandeja de documentos de MediFlow pendientes de revisión humana. Consulta del análisis original mediante la API.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
-<link rel="stylesheet" href="styles.css">
+<!-- Agregado por Edil: renovar la caché del CSS del cierre S4. -->
+<link rel="stylesheet" href="styles.css?v=s4-edil-20261024">
 </head>
 
 <body data-screen="auditoria">
@@ -63,62 +64,15 @@
 <div class="app">
 
   <!-- ================= HEADER ================= -->
+  <!-- Agregado por Edil: sin identidad, firma o conexión HIS simuladas. -->
   <header class="topbar">
-    <div class="topbar__brand">
-      <span class="brand__mark" aria-hidden="true"><svg class="icon"><use href="#i-cross"></use></svg></span>
-      <span class="brand__text">
-        <span class="brand__name">MediFlow Clinical Portal</span>
-        <span class="conn" title="Sincronización activa con el HIS de la unidad ED-1"><span class="conn__dot" aria-hidden="true"></span>HIS Connected</span>
-      </span>
-      <span class="hitl-tag" title="Módulo de supervisión humana de algoritmos clínicos, versión 2.4">
-        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-shield-search"></use></svg>
-        <span class="nowrap">HITL SUPERVISION v2.4</span>
-      </span>
-    </div>
-
-    <div class="topbar__search">
-      <label class="sr-only" for="q">Buscar por DNI, paciente o episodio en la cola de auditoría algorítmica</label>
-      <svg class="icon topbar__search-icon" aria-hidden="true"><use href="#i-search"></use></svg>
-      <input id="q" class="input" type="search" autocomplete="off"
-             placeholder="Buscar DNI, Paciente o Episodio…">
-      <kbd>Ctrl K</kbd>
-    </div>
-
-    <div class="topbar__actions">
-      <button type="button" class="btn btn--danger" data-toast="Escalación de emergencia enviada a la Jefatura de ED-1 (canal rojo).">
-        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-alert"></use></svg>
-        <span class="nowrap">Emergency Escalation</span>
-      </button>
-      <button type="button" class="icon-btn" title="Notificaciones: 3 nuevas" aria-label="Notificaciones, 3 nuevas">
-        <svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg>
-        <span class="dot" aria-hidden="true"></span>
-      </button>
-      <button type="button" class="icon-btn" data-optional title="Estado del concentrador HIS: señal estable" aria-label="Estado de la señal del HIS">
-        <svg class="icon" aria-hidden="true"><use href="#i-signal"></use></svg>
-      </button>
-      <button type="button" class="icon-btn" data-optional title="Centro de ayuda y protocolos ED-1" aria-label="Ayuda">
-        <svg class="icon" aria-hidden="true"><use href="#i-help"></use></svg>
-      </button>
-
-      <div class="menu">
-        <button type="button" class="user" id="userBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
-          <span class="avatar" aria-hidden="true">MV</span>
-          <span class="user__text">
-            <span class="user__name">Dr. M. Vance, MD</span>
-            <span class="user__role">Chief Attending ED-1</span>
-          </span>
-        </button>
-        <div class="menu__panel" id="userMenu" role="menu" hidden>
-          <div class="menu__head">
-            <div class="nowrap" style="font-weight:600">Dr. M. Vance, MD</div>
-            <div class="menu__meta">Matrícula 4482-A · Turno noche 19:00–07:00</div>
-          </div>
-          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-user"></use></svg>Mi perfil clínico</button>
-          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-calendar"></use></svg>Mi turno</button>
-          <div class="menu__sep" role="separator"></div>
-          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-logout"></use></svg>Cerrar sesión</button>
-        </div>
-      </div>
+    <div class="topbar__brand"><span class="brand__mark" aria-hidden="true"><svg class="icon"><use href="#i-cross"></use></svg></span><span class="brand__text"><span class="brand__name">MediFlow</span><span class="conn" id="auditConnection" role="status">Preparando consulta</span></span></div>
+    <div class="topbar__search"><label class="sr-only" for="q">Buscar por ID o tipo documental</label><svg class="icon topbar__search-icon" aria-hidden="true"><use href="#i-search"></use></svg><input id="q" class="input" type="search" autocomplete="off" placeholder="Buscar ID o tipo documental"></div>
+    <div class="audit-session" aria-label="Sesión de MediFlow">
+      <span class="audit-header-note" id="authSessionUser">Sin sesión de MediFlow</span>
+      <a class="btn" id="authLoginLink" href="../login/index.html">Iniciar sesión</a>
+      <button class="btn" id="authLogout" type="button" hidden>Cerrar sesión</button>
+      <span id="authSessionStatus" class="sr-only" role="status" aria-live="polite"></span>
     </div>
   </header>
 
@@ -127,16 +81,16 @@
     <div class="side__unit">
       <span class="side__unit-icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-stethoscope"></use></svg></span>
       <span class="side__unit-text">
-        <span class="side__unit-name">ED-1 Triage</span>
-        <span class="side__unit-sub" title="Sistema de triaje Manchester">Manchester System MTS</span>
+        <span class="side__unit-name">MediFlow</span>
+        <span class="side__unit-sub" title="Revisión de documentos">Documentos MediFlow</span>
       </span>
     </div>
 
     <div class="side__primary">
-      <button type="button" class="btn btn--primary btn--block" data-nav="ingesta" title="Nuevo Ingreso">
+      <a class="btn btn--primary btn--block" href="../historial/index.html" title="Ver historial">
         <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
-        <span class="btn__label">Nuevo Ingreso</span>
-      </button>
+        <span class="btn__label">Ver historial</span>
+      </a>
     </div>
 
     <nav class="side__nav" aria-label="Navegación principal">
@@ -151,12 +105,11 @@
       <a class="nav__item" data-nav="colas" href="../colas/index.html" title="Colas">
         <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>
         <span class="nav__label">Colas</span>
-        <span class="nav__badge" id="navQueueTotal" title="Pacientes en cola de triaje">0</span>
       </a>
       <a class="nav__item is-active" data-nav="auditoria" href="./index.html" title="Auditoría" aria-current="page">
         <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
         <span class="nav__label">Auditoría</span>
-        <span class="nav__badge nav__badge--alerta" id="navAuditTotal" title="Documentos pendientes de validación facultativa">5</span>
+        <span class="nav__badge nav__badge--alerta" id="navAuditTotal" title="Documentos en la bandeja recibida">—</span>
       </a>
       <a class="nav__item" data-nav="historial" href="../historial/index.html" title="Historial">
         <svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg>
@@ -164,19 +117,21 @@
       </a>
     </nav>
 
-    <div class="side__foot">
-      <a class="nav__item" href="#" title="Configuración">
-        <svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg>
-        <span class="nav__label">Configuración</span>
-      </a>
-      <a class="nav__item" href="#" title="Soporte HIS">
-        <svg class="icon" aria-hidden="true"><use href="#i-support"></use></svg>
-        <span class="nav__label">Soporte HIS</span>
-      </a>
-    </div>
+    <div class="side__foot"><p class="audit-muted">Sin firma ni sesión clínica simuladas.</p></div>
   </aside>
 
   <!-- ================= MAIN ================= -->
+  <!-- Agregado por Edil: bandeja conectada; la maqueta original queda inerte. -->
+  <main class="main" id="main">
+    <div class="page-head"><div class="page-head__text"><p class="page-head__eyebrow">Revisión documental</p><h1>Auditoría humana</h1><p class="audit-muted" id="auditContract">Preparando conexión de lectura…</p></div><button type="button" class="btn btn--primary" id="refreshAudit">Actualizar bandeja</button></div>
+    <p id="auditLoadStatus" class="audit-notice" role="status" aria-live="polite">Preparando consulta…</p>
+    <div class="audit-toolbar"><label class="audit-filter" for="auditPriority">Prioridad<select class="select" id="auditPriority"><option value="all">Todas</option><option value="Urgente">Urgente</option><option value="Rutina">Rutina</option></select></label><span id="auditCount" class="audit-muted"></span></div>
+    <div class="audit-list" id="auditList" aria-busy="true"></div><p class="empty" id="auditEmpty" hidden></p>
+    <p class="audit-muted">La prioridad y el estado del análisis provienen del backend. La confianza mostrada corresponde a clasificación, no a exactitud ni seguridad clínica.</p>
+    <noscript><p class="audit-notice">Activa JavaScript para consultar la bandeja. No se cargan datos de demostración.</p></noscript>
+  </main>
+  <template id="auditLegacyMain">
+  <!-- Agregado por Edil: referencia original inerte, sin montar ni ejecutar. -->
   <main class="main" id="main">
 
     <!-- ---------- 1. BANNER DE ALERTA ---------- -->
@@ -248,8 +203,11 @@
       </div>
     </footer>
   </main>
+  </template>
 </div>
 
+<!-- Agregado por Edil: modales anteriores preservados como referencia inerte. -->
+<template id="auditLegacyDialogs">
 <!-- ================= MODAL: APROBAR ================= -->
 <div class="modal" id="modalAprobar" role="dialog" aria-modal="true" aria-labelledby="mAprobarTitulo" aria-describedby="mAprobarDesc" hidden>
   <div class="modal__dialog modal__dialog--wide">
@@ -390,8 +348,47 @@
   </div>
 </div>
 
+</template>
+<dialog id="auditDetail" class="audit-dialog" aria-labelledby="auditDetailTitle">
+  <div class="modal__head"><h2 class="modal__title" id="auditDetailTitle">Detalle del documento</h2><button type="button" class="btn audit-close" id="auditClose">Cerrar</button></div>
+  <div class="modal__body">
+    <p id="auditDetailStatus" class="audit-notice" role="status"></p><button type="button" class="btn" id="auditRetryDetail">Consultar detalle de nuevo</button>
+    <section id="auditDetailContent" hidden>
+      <p id="auditUrgent" class="audit-notice is-urgent" hidden><strong>Prioridad Urgente</strong> indicada por el backend. La revisión humana no reduce esta prioridad.</p>
+      <h3>Análisis recibido</h3><dl id="auditSummary" class="audit-facts"></dl>
+      <h3>Motivo de auditoría</h3><p id="auditReason" class="audit-preserve"></p>
+      <h3>Datos disponibles</h3><dl id="auditExtracted" class="audit-facts"></dl><p id="auditMedicines" class="audit-preserve"></p>
+      <details><summary>Ver JSON original del análisis</summary><pre id="auditRawJson" class="audit-json"></pre></details>
+      <hr><h3>Decisión humana</h3>
+      <!-- Agregado por Edil: identificación exigida por el contrato de revisión. -->
+      <label class="field" id="reviewerField" for="reviewerId"><span class="field__label">Auditor autenticado</span><input class="input" id="reviewerId" autocomplete="off" readonly disabled aria-readonly="true" aria-describedby="reviewerHelp"><span class="field__help" id="reviewerHelp">Identidad recibida del servidor. El backend comprueba los permisos antes de registrar la decisión.</span></label>
+      <label class="field" for="reviewObservation"><span class="field__label">Observaciones</span><textarea class="input audit-observation" id="reviewObservation" rows="4" aria-describedby="reviewAvailability" placeholder="Anota observaciones para la revisión"></textarea></label>
+      <p id="reviewAvailability" class="audit-muted"></p>
+      <div class="audit-actions"><button type="button" class="btn btn--primary" id="approveReview" disabled>Aprobar</button><button type="button" class="btn btn--danger" id="rejectReview" disabled>Rechazar</button></div>
+      <p id="reviewResult" class="audit-notice" role="status" aria-live="polite"></p>
+      <h3>Historial persistido de revisión</h3><p id="reviewHistoryStatus" class="audit-muted" role="status"></p><button type="button" class="btn" id="refreshReviewHistory" hidden>Consultar historial</button><ol id="reviewHistory"></ol>
+    </section>
+  </div>
+</dialog>
+<dialog id="reviewConfirmation" class="audit-dialog audit-dialog--confirmation" aria-labelledby="reviewConfirmationTitle" aria-describedby="reviewConfirmationText">
+  <div class="modal__head"><h2 class="modal__title" id="reviewConfirmationTitle">Confirmar decisión</h2></div>
+  <div class="modal__body"><p id="reviewConfirmationText"></p><h3>Observación que se enviará</h3><p id="reviewConfirmationObservation" class="audit-preserve"></p><p id="reviewConfirmProgress" role="status"></p></div>
+  <div class="modal__foot"><button type="button" class="btn" id="reviewCancelSend">Cancelar</button><button type="button" class="btn btn--primary" id="reviewConfirmSend">Confirmar y enviar</button></div>
+</dialog>
 <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
+<!-- Agregado por Edil: la sesión pertenece a MediFlow; Tailscale solo transporta HTTPS. -->
+<dialog id="logoutConfirmation" class="audit-dialog audit-dialog--confirmation" aria-labelledby="logoutTitle">
+  <div class="modal__head"><h2 class="modal__title" id="logoutTitle">Cerrar sesión</h2></div>
+  <div class="modal__body"><p>Se cerrará tu sesión de MediFlow. Las observaciones sin enviar se perderán. Los envíos sin confirmación seguirán protegidos contra reenvíos.</p><p id="logoutStatus" role="status" aria-live="polite"></p></div>
+  <div class="modal__foot"><button class="btn" id="logoutCancel" type="button">Cancelar</button><button class="btn btn--primary" id="logoutConfirm" type="button">Cerrar sesión</button></div>
+</dialog>
+<script src="../assets/js/auth-api.js?v=s4-login-20261024"></script>
+<script src="../assets/js/documents-api.js"></script>
+<script src="../assets/js/reviews-api.js"></script>
+<script src="../assets/js/review-http-adapter.js?v=s4-identidad-20261024"></script>
+<script src="../assets/js/audit-controller.js?v=s4-identidad-20261024"></script>
+<script src="audit-panel.js?v=s4-login-20261024"></script>
 <script src="app.js"></script>
 </body>
 </html>

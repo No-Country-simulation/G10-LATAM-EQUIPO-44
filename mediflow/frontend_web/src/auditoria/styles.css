@@ -3,6 +3,61 @@
    Supervisión humana (HITL) de la inferencia MTS-AI.
    ========================================================================== */
 
+/* Agregado por Edil: capa conectada S4 sobre los tokens, botones, tarjetas y
+   shell existentes. La prioridad de la API se distingue del estado de revisión. */
+body[data-screen="auditoria"] .app { height: 100dvh; }
+/* Agregado por Edil: .empty y .btn fijan display en los estilos compartidos;
+   respetar hidden evita mostrar mensajes vacíos o acciones aún no disponibles. */
+body[data-screen="auditoria"] [hidden] { display: none !important; }
+.audit-header-note { margin-left: auto; color: white; font-weight: 600; }
+.audit-muted { color: var(--muted, #597187); line-height: 1.6; }
+.audit-notice { padding: 12px 16px; border-radius: var(--radius, 12px); background: #edf6fa; color: #15324c; line-height: 1.6; overflow-wrap: anywhere; }
+.audit-notice:empty { display: none; }
+.audit-notice[data-state="error"] { background: #fff0f2; color: #9d2438; }
+.audit-filter { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+.audit-live-card { padding: 20px; border: 1px solid var(--line, #d6e1e8); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); min-width: 0; }
+.audit-live-card__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.audit-live-card h2 { font-size: 17px; color: #15324c; margin: 12px 0; }
+.audit-id { font-size: 12px; color: #597187; overflow-wrap: anywhere; }
+.audit-priority { display: inline-flex; padding: 4px 10px; border-radius: 12px; background: #edf6fa; font-weight: 700; }
+.audit-priority.is-urgent, .audit-notice.is-urgent { background: #fff0f2; color: #9d2438; border: 1px solid #efc1c8; }
+.audit-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin: 16px 0; }
+.audit-facts div { min-width: 0; }
+.audit-facts dt { color: #597187; font-size: 12px; }
+.audit-facts dd { margin: 4px 0 0; overflow-wrap: anywhere; font-weight: 500; }
+.audit-dialog { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0 0 16px; border: 1px solid #d6e1e8; border-radius: 16px; color: #15324c; background: white; overflow-y: auto; }
+.audit-dialog::backdrop { background: rgb(21 50 76 / 58%); }
+.audit-dialog--confirmation { width: min(520px, calc(100vw - 32px)); }
+.audit-dialog .modal__head { align-items: center; }
+.audit-dialog .modal__title { font-size: 18px; overflow-wrap: anywhere; }
+.audit-dialog h3 { font-size: 15px; margin: 24px 0 8px; }
+.audit-dialog summary { cursor: pointer; padding: 12px 0; }
+.audit-close { margin-left: auto; flex-shrink: 0; }
+.audit-json { max-height: 320px; padding: 12px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; background: #f5f9fc; border-radius: 12px; font-size: 12px; }
+.audit-preserve { white-space: pre-wrap; overflow-wrap: anywhere; }
+.audit-observation { display: block; width: 100%; resize: vertical; height: auto; min-height: 104px; margin-top: 8px; }
+.audit-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.audit-dialog button, .audit-live-card button { min-height: 44px; }
+.audit-dialog button:disabled, .audit-live-card button:disabled { opacity: .6; cursor: not-allowed; }
+.audit-dialog :focus-visible, .main :focus-visible { outline: 3px solid #087e8b; outline-offset: 3px; }
+#reviewHistory { padding-left: 20px; }
+#reviewHistory li { border-bottom: 1px solid #d6e1e8; }
+@media (max-width: 680px) {
+  .audit-header-note { display: none; }
+  .audit-facts { grid-template-columns: minmax(0, 1fr); }
+  .audit-live-card { padding: 16px; }
+  .audit-filter { width: 100%; justify-content: space-between; }
+  .audit-filter select { max-width: 65%; }
+  .audit-dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
+  .audit-dialog .modal__head { flex-wrap: wrap; }
+  .audit-dialog .modal__title { flex: 1 1 200px; }
+  .audit-dialog .modal__foot { flex-wrap: wrap; }
+  .audit-dialog .modal__foot .btn { flex: 1 1 130px; }
+}
+@media (max-width: 1024px) {
+  body[data-screen="auditoria"] .side__foot p { display: none; }
+}
+
 /* --------------------------------------------------------------------------
    1. BADGE "HITL SUPERVISION v2.4" junto al logo
    -------------------------------------------------------------------------- */
@@ -961,5 +1016,11 @@ body.is-locked { overflow: hidden; }
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: none; }
 }
+
+/* Agregado por Edil: acceso de MediFlow independiente del transporte de red. */
+.audit-session { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.audit-session .audit-header-note { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audit-session .btn { min-height: 36px; flex-shrink: 0; }
+@media (max-width: 680px) { .audit-session { gap: 4px; } .audit-session .audit-header-note { display: none; } .audit-session .btn { padding: 8px; font-size: 12px; } }
 
 .audit-list > .audit-card { animation: cardIn .28s ease-out backwards; }

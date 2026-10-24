@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-24",
+  "branch": "integration/sprint-4-2026-10-23",
+  "head": "b2777d30dd3c7315675b8d449f13a3f2ac2c9f4e",
+  "scope": "Edil local technical completion; not physical acceptance or cloud E2E",
+  "tests": {
+    "javascript": {
+      "passed": 144,
+      "failed": 0,
+      "skipped": 0
+    },
+    "python": {
+      "passed": 478,
+      "subtests_passed": 29,
+      "external_deselected": 6,
+      "includes_presentation_tests": 5,
+      "final_log": "C:\\Users\\leno\\AppData\\Local\\Temp\\MediFlow-S4-Edil-final-python-24oct-5v26k_x_\\tests.log"
+    },
+    "flutter": {
+      "passed": 178,
+      "external_skipped": 2,
+      "analyze": "no issues"
+    }
+  },
+  "apks": [
+    {
+      "path": "mediflow/frontend_mobile/mediflow_app/build/edil-s4/mediflow-s4-emulator.apk",
+      "bytes": 196500054,
+      "sha256": "e6baf07c455632c62af797046a450a67d7507e37dfa789d5017ba2e5da403fc5",
+      "variant": "debug",
+      "api_base_url": "http://10.0.2.2:8000",
+      "apksigner_v2_verified": true,
+      "private_asset_names_found": [],
+      "physical_device_tested": false,
+      "ignored_by_git": true
+    },
+    {
+      "path": "mediflow/frontend_mobile/mediflow_app/build/edil-s4/mediflow-s4-usb.apk",
+      "bytes": 196504987,
+      "sha256": "77ce5d06b4ef1f2c2ceceb53e7882a6d9e9636057a69760b088ec85e2736f989",
+      "variant": "debug",
+      "api_base_url": "http://127.0.0.1:8000",
+      "apksigner_v2_verified": true,
+      "private_asset_names_found": [],
+      "physical_device_tested": false,
+      "ignored_by_git": true
+    },
+    {
+      "path": "mediflow/frontend_mobile/mediflow_app/build/edil-s4/mediflow-s4-tailnet.apk",
+      "bytes": 196505032,
+      "sha256": "b3b966dc3b468872fcb70f26436b9d4bc11c22253c45c0acd44e20c3ba48de79",
+      "variant": "debug",
+      "api_base_url": "https://desktop-2amsjb6.tailf48a22.ts.net",
+      "apksigner_v2_verified": true,
+      "private_asset_names_found": [],
+      "physical_device_tested": false,
+      "ignored_by_git": true
+    }
+  ],
+  "browser_evidence": "edil-s4-browser-24-octubre.json",
+  "tailscale_evidence": "edil-s4-tailscale-24-octubre.json",
+  "real_oci_or_gemini_test_executed": false,
+  "physical_devices_connected": 0,
+  "physical_acceptance_deferred_by_user": true,
+  "production_review_decisions_enabled": false,
+  "backup_directory": "C:\\Users\\leno\\AppData\\Local\\Temp\\MediFlow-S4-Edil-cierre-24oct-pz3yw69r",
+  "commits_created": 0,
+  "push_executed": false,
+  "known_pending": [
+    "Team approval of review contract before real POST",
+    "cargado_por definition and end-to-end propagation by contract/backend team",
+    "Backend reviewer authentication and authorization",
+    "Final cloud E2E with Eliana/Drazen/Brando",
+    "Physical camera, APK and connectivity test to be performed later by user"
+  ],
+  "active_local_presentation_url": "http://127.0.0.1:8787/web/auditoria/index.html",
+  "active_private_presentation_url": "https://desktop-2amsjb6.tailf48a22.ts.net/web/auditoria/index.html",
+  "final_security_review": {
+    "no_secrets_detected": true,
+    "no_conflicts": true,
+    "main_head_unchanged": true,
+    "existing_index_unchanged": true,
+    "other_contributors_backend_data_ai_unchanged": true,
+    "backup_files_verified": 36
+  },
+  "presentation_gateway_blocks_review_post_by_default": true
+}

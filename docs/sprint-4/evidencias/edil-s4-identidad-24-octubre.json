@@ -1,0 +1,64 @@
+{
+  "date": "2026-10-24",
+  "branch": "integration/sprint-4-2026-10-23",
+  "head": "b2777d30dd3c7315675b8d449f13a3f2ac2c9f4e",
+  "contract_enablement_authorized_by_user": true,
+  "authenticated_auditor_allowlist_empty": true,
+  "real_decisions_available": false,
+  "uploader_source": "server Principal.login; null for anonymous or historical documents",
+  "reviewer_source": "server Principal.login; request reviewer_id must match",
+  "authorization": "explicit external allowlist; no default auditor",
+  "identity_transport": "Tailscale Serve identity headers only in loopback presentation wrapper",
+  "origin_check": "exact configured HTTPS Origin required for review POST",
+  "tests": {
+    "python_passed": 507,
+    "python_subtests_passed": 29,
+    "external_tests_deselected": 6,
+    "dependency_warnings": 2,
+    "python_log": "C:/Users/leno/AppData/Local/Temp/MediFlow-S4-auth-final-4qq5w1yi/tests.log",
+    "javascript_passed": 149,
+    "javascript_failed": 0,
+    "javascript_skipped": 0,
+    "flutter_repeated": false,
+    "flutter_source_modified_this_update": false,
+    "cloud_calls_in_tests": false
+  },
+  "private_https_verification": {
+    "origin": "https://desktop-2amsjb6.tailf48a22.ts.net",
+    "health_http": 200,
+    "panel_html_http": 200,
+    "openapi_http": 200,
+    "contract_flag": true,
+    "authenticated_identity_present": true,
+    "can_review": false,
+    "review_guard_http": 403,
+    "tls_verification_disabled": false,
+    "document_gets_performed": false,
+    "oci_writes_performed": false,
+    "gemini_calls_performed": false
+  },
+  "visual_verification": {
+    "environment": "isolated localhost fixture, SDK in memory",
+    "identity": "test-auditor",
+    "identity_read_only": true,
+    "historical_uploader_display": "No disponible",
+    "priority_preserved": "Urgente",
+    "review_post_from_browser_performed": false,
+    "screenshot": "edil-s4-identidad-sintetica.jpg",
+    "temporary_server_stopped": true
+  },
+  "git": {
+    "main_unchanged": true,
+    "index_semantically_unchanged": true,
+    "unresolved_conflicts": false,
+    "local_env_ignored_and_untracked": true,
+    "secret_scan_findings": [],
+    "commit_created": false,
+    "push_performed": false
+  },
+  "pending": [
+    "User must identify accounts permitted to act as auditors",
+    "Authorize and execute concrete synthetic acceptance against real OCI",
+    "Physical Android acceptance remains deferred by the user"
+  ]
+}

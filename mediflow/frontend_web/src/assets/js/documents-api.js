@@ -17,7 +17,14 @@
     } catch (_) { throw new DocumentsApiError("La direccion de la API no es valida."); }
     const endpoint = new URL(base.toString().replace(/\/$/, "") + "/api/documents");
     if (individual) endpoint.pathname += "/" + encodeURIComponent(id);
-    else endpoint.searchParams.set("limit", "500");
+    else {
+      endpoint.searchParams.set("limit", "500");
+      // Agregado por Edil: reutilizar el filtro que ya admite GET /api/documents.
+      if (options.status !== undefined) {
+        if (!["recibido", "procesado", "auditoria_humana"].includes(options.status)) throw new DocumentsApiError("El estado solicitado no es valido.");
+        endpoint.searchParams.set("status", options.status);
+      }
+    }
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), options.timeoutMs || 20000);
     try {
@@ -61,7 +68,7 @@
   }
   const getDocuments = (options = {}) => requestDocuments(options);
   const getDocument = (id, options = {}) => requestDocuments(options, id === undefined ? null : id);
-  const api = { getDocuments, getDocument, DocumentsApiError };
+  const api = { getDocuments, getDocument, DocumentsApiError, isValidDocument: validDocument };
   root.MediFlowDocumentsApi = api;
   if (typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -84,3 +84,9 @@ $RECYCLE.BIN/
 *.swo
 *~
 *.log
+
+# Agregado por Edil: usuarios y sesiones locales de MediFlow, nunca en Git.
+mediflow/.local/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm

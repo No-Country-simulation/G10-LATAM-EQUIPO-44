@@ -1,0 +1,20 @@
+/* Agregado por Edil: acceso propio con el lenguaje visual existente. */
+body[data-screen="login"] { margin: 0; height: auto; min-height: 100dvh; overflow: auto; background: var(--bg, #f5f9fc); color: var(--text, #15324c); font-family: Inter, system-ui, sans-serif; }
+.login-shell { min-height: 100dvh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
+.login-card { width: min(100%, 440px); padding: 32px; box-sizing: border-box; border: 1px solid #dce6ee; border-radius: 16px; background: #fff; box-shadow: 0 12px 36px #15324c0a; }
+.login-brand { display: inline-flex; align-items: center; gap: 8px; color: #15324c; font-weight: 750; font-size: 22px; text-decoration: none; }
+.login-brand span { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px; background: #e4f5f4; color: #087e8b; }
+.login-eyebrow { margin: 32px 0 8px; color: #597187; font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+.login-card h1 { margin: 0 0 12px; font-size: 28px; line-height: 1.2; }
+.login-description, .login-help { color: #597187; line-height: 1.6; }
+.login-description { margin: 0 0 24px; }
+.login-field { display: grid; gap: 8px; margin-bottom: 16px; }
+.login-field label { font-size: 14px; font-weight: 600; }
+.login-field .input { width: 100%; box-sizing: border-box; min-height: 44px; padding: 12px; border: 1px solid #b8cad7; border-radius: 12px; font: inherit; background: #fff; color: #15324c; }
+.login-field .input:focus-visible, .login-card a:focus-visible, .login-card button:focus-visible { outline: 3px solid #087e8b; outline-offset: 3px; }
+.login-status { min-height: 24px; margin: 8px 0 16px; line-height: 1.5; color: #597187; overflow-wrap: anywhere; }
+.login-status[data-state="error"] { color: #a12c39; }
+.login-card .btn { min-height: 44px; }
+.login-help { margin-top: 24px; font-size: 13px; }
+.login-back { color: #087e8b; display: inline-block; padding: 8px 0; font-size: 14px; }
+@media (max-width: 480px) { .login-shell { padding: 16px; } .login-card { padding: 24px; } }

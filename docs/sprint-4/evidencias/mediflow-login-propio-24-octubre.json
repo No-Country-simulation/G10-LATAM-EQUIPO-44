@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-24",
+  "branch": "integration/sprint-4-2026-10-23",
+  "head": "b2777d30dd3c7315675b8d449f13a3f2ac2c9f4e",
+  "architecture": {
+    "tailscale": "private network transport and HTTPS only",
+    "identity": "MediFlow username and password",
+    "session": "opaque random token in HttpOnly SameSite Strict cookie; Secure under HTTPS",
+    "password_storage": "scrypt with random salt in private local SQLite",
+    "token_storage": "SHA-256 digest in private local SQLite",
+    "tailscale_identity_headers_authenticate": false,
+    "real_account_created": false,
+    "default_password_created": false,
+    "first_account_location": "deployment team computer, using interactive CLI"
+  },
+  "endpoints": [
+    "POST /api/auth/login",
+    "GET /api/auth/session",
+    "POST /api/auth/logout"
+  ],
+  "regression": {
+    "python_passed": 532,
+    "python_subtests_passed": 29,
+    "external_tests_deselected": 6,
+    "dependency_warnings": 2,
+    "python_log": "C:/Users/leno/AppData/Local/Temp/MediFlow-S4-login-final-9rgeai2e/tests.log",
+    "javascript_passed": 185,
+    "javascript_failed": 0,
+    "javascript_skipped": 0,
+    "javascript_log": "C:/Users/leno/AppData/Local/Temp/MediFlow-S4-login-web-flczb6wj/tests.log",
+    "flutter_modified": false,
+    "oci_calls": false,
+    "gemini_calls": false
+  },
+  "visual_verification": {
+    "environment": "isolated localhost fixture; temporary SQLite users and documents in memory",
+    "identity": "auditor-sintetico",
+    "login_to_panel": true,
+    "own_user_shown": true,
+    "logout_confirmation": true,
+    "logout_returns_to_login": true,
+    "review_post_from_browser": false,
+    "temporary_server_stopped": true,
+    "screenshots": [
+      "mediflow-login-propio-sintetico.jpg",
+      "mediflow-sesion-propia-sintetica.jpg"
+    ]
+  },
+  "private_https_verification": {
+    "origin": "https://desktop-2amsjb6.tailf48a22.ts.net",
+    "health_http": 200,
+    "login_html_http": 200,
+    "session_http": 200,
+    "session_authenticated": false,
+    "identity_headers_cannot_create_session": true,
+    "unauthenticated_review_http": 401,
+    "tls_verification_disabled": false,
+    "document_gets_performed": false,
+    "oci_writes_performed": false,
+    "gemini_calls_performed": false
+  },
+  "scope": {
+    "review_decisions_require_session_and_auditor_permission": true,
+    "review_contract_preserved": true,
+    "existing_document_and_upload_access_preserved": true,
+    "uploader_is_mediflow_user_or_null": true,
+    "production_account_database_created": false,
+    "private_env_and_database_ignored_by_git": true,
+    "main_unchanged": true,
+    "commit_created": false,
+    "push_performed": false
+  },
+  "supersedes": "Tailscale-based user identity in edil-s4-identidad-24-octubre.json is historical and inactive",
+  "pending": [
+    "Create the first real MediFlow auditor account interactively on the deployment computer",
+    "Configure that computer's HTTPS origin and provider credentials locally",
+    "Perform real deployment acceptance separately; no current OCI/Gemini acceptance claimed"
+  ]
+}

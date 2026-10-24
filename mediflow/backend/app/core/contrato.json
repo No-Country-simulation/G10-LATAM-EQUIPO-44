@@ -1,5 +1,6 @@
 {
     "status": "procesado",
+    "cargado_por": null,
     "documento_id": "DOC-CLIN-2026-8942",
     "clasificacion": {
         "tipo_documento": "Informe de Estudio por Imagenes",

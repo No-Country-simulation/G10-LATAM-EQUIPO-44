@@ -1,5 +1,27 @@
 # mediflow_app
 
+## Preparación de presentación Sprint 4 — Agregado por Edil, 24/10/2026
+
+Se generaron APK debug de emulador, USB y Tailscale en `build/edil-s4/`.
+Están ignorados por Git. Compilación y firma verificadas; las pruebas en teléfono
+físico y cámara quedan pendientes y no se presentan como realizadas.
+
+```powershell
+.\tool\build_edil_apk.ps1 -Target Emulator
+.\tool\build_edil_apk.ps1 -Target Usb
+# Para Tailscale, proporcionar la URL HTTPS real de la PC:
+.\tool\build_edil_apk.ps1 -Target Tailnet -ApiBaseUrl 'https://TU_PC.TU_TAILNET.ts.net'
+```
+
+USB usa `http://127.0.0.1:8000` con `adb reverse`; emulador conserva
+`http://10.0.2.2:8000`. Tailscale usa la URL HTTPS indicada al compilar.
+No se incluyeron claves OCI/Gemini ni se debilitó la configuración release.
+El helper rechaza Release sin HTTPS o mientras la configuración use firma debug.
+
+Ver [presentación local y Tailscale](../../../docs/sprint-4/presentacion-local-tailscale.md)
+y [cierre de Edil](../../../docs/sprint-4/S4-Edil.md) para estado, evidencias,
+instalación posterior y dependencias.
+
 Aplicación Android y Windows de MediFlow, desarrollada con Flutter, Dart y Material 3.
 Conserva la navegación y selección local de PDF, JPG, JPEG, PNG y TXT del Sprint 1.
 En Sprint 2 incorpora envío multipart a `POST /api/triage`, progreso, resultado

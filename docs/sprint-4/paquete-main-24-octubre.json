@@ -1,0 +1,412 @@
+{
+  "date": "2026-10-24",
+  "branch": "integration/sprint-4-2026-10-23",
+  "base": "b2777d30dd3c7315675b8d449f13a3f2ac2c9f4e",
+  "status": "prepared; commit and publication require user authorization",
+  "file_count": 79,
+  "module_counts": {
+    "root-and-configuration": 4,
+    "documentation": 28,
+    "backend": 24,
+    "flutter-documentation-and-tools": 2,
+    "web": 21
+  },
+  "self_reference_note": "The manifest itself has a null checksum to avoid recursive hashing. Hashes describe working-tree bytes before Git line-ending normalization.",
+  "files": [
+    {
+      "path": ".gitignore",
+      "module": "root-and-configuration",
+      "working_tree_sha256": "28e01afd0d46e7536bdab68f0736479d9df0847edc3c4c3c4165a65cf0e63317"
+    },
+    {
+      "path": "README.md",
+      "module": "root-and-configuration",
+      "working_tree_sha256": "7b14e858cd810cd49928977810b1116f937cdee0f64c0cf3193f4549ecb9472c"
+    },
+    {
+      "path": "docs/S4-Eliana.md",
+      "module": "documentation",
+      "working_tree_sha256": "bd8e9b465325a0da0f26beb4dfe6abf51037d8209c644723c81c7c559a294211"
+    },
+    {
+      "path": "docs/sprint-4/MATRIZ-PRUEBAS-S4-03.md",
+      "module": "documentation",
+      "working_tree_sha256": "3d27484211274825ad28c00bf81fbb835caf21ac6cd09e3167cff90a462148b8"
+    },
+    {
+      "path": "docs/sprint-4/S4-Brando.md",
+      "module": "documentation",
+      "working_tree_sha256": "0235d1b1ea4a144f90999d66b1d415d3a076b2f1fb4e3f3bc8510e94d9fb1e3a"
+    },
+    {
+      "path": "docs/sprint-4/S4-Drazen.md",
+      "module": "documentation",
+      "working_tree_sha256": "539c6867aaac27b4c28b38b6f03e7d52402d87ddb0d7da93ee3ee9f2c1a65ef1"
+    },
+    {
+      "path": "docs/sprint-4/S4-Edil.md",
+      "module": "documentation",
+      "working_tree_sha256": "2cdf6d60fc6682f2657bc44f0860131bd4de454e91195b55182f91ace69f4cfd"
+    },
+    {
+      "path": "docs/sprint-4/S4-Laura.md",
+      "module": "documentation",
+      "working_tree_sha256": "713f9576e08340b56fc50f45f86c6c70f835a3b403f81d850fd0455a43187abd"
+    },
+    {
+      "path": "docs/sprint-4/aceptacion-revision-real.md",
+      "module": "documentation",
+      "working_tree_sha256": "f9e0ffc3b8d66ca48e2ec3049323ad110f753321851d9486cc8a365a29f76bef"
+    },
+    {
+      "path": "docs/sprint-4/contrato-revision-identidad.md",
+      "module": "documentation",
+      "working_tree_sha256": "a0d65e51ad5df667a78c19f5bc2704241c2afceb0781c32370c587fa52b334f3"
+    },
+    {
+      "path": "docs/sprint-4/edil-panel-auditoria.md",
+      "module": "documentation",
+      "working_tree_sha256": "7d09362b11e5bb2cb851d49cb149580a95d4ca50e1eb962f37c689c9eccdd569"
+    },
+    {
+      "path": "docs/sprint-4/entrega-main-24-octubre.md",
+      "module": "documentation",
+      "working_tree_sha256": "9716ecc02f77f269b26c64a8b36099b1cec5ad8e6528396f79ec0b04ef888b3b"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/edil-s4-browser-24-octubre.json",
+      "module": "documentation",
+      "working_tree_sha256": "53096d2e4895ea2aac3dafd2a1324f7a14fec1f6fc4f4352f5a5396e1af640ee"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/edil-s4-cierre-24-octubre.json",
+      "module": "documentation",
+      "working_tree_sha256": "5f775eea08aef6bc1927e44214ca379dde595419509ebfdb5b2901584c1a864d"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/edil-s4-desktop.jpg",
+      "module": "documentation",
+      "working_tree_sha256": "1fcb76cd01bdc531214fc57606d3c89cac4aee825e5c457a5d6398aef83a195f"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/edil-s4-error-conserva-bandeja.jpg",
+      "module": "documentation",
+      "working_tree_sha256": "261c4435eda4b44eb13c43b6bb36e4cd112383fd3715a9de57b1a698f3da887e"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/edil-s4-identidad-24-octubre.json",
+      "module": "documentation",
+      "working_tree_sha256": "3968e2d2f30827a767b37c84f34acb46d2e9b03a38f1a6d0f51089626acc45c2"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/edil-s4-identidad-sintetica.jpg",
+      "module": "documentation",
+      "working_tree_sha256": "d0e60fbe0220894e9640ded2093adf0fad7a15dea881969892d37ea1c9f7f5b3"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/edil-s4-mobile-historial.jpg",
+      "module": "documentation",
+      "working_tree_sha256": "2e4b898dfbcf4d1402c83bf2d8a22b5dda261c939f8b204a4daa566846a74f8c"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/edil-s4-mobile.jpg",
+      "module": "documentation",
+      "working_tree_sha256": "a81ee49a34c3bf0f20af61cffee41d1089e4128e1139dc225202d2587e3bd7ce"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/edil-s4-tailscale-24-octubre.json",
+      "module": "documentation",
+      "working_tree_sha256": "3641e5a1641a350d4a3098006e5e6f8ebfb19daa7f7af51f27a1522182f3ac43"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/mediflow-login-propio-24-octubre.json",
+      "module": "documentation",
+      "working_tree_sha256": "7e4c05c1e67932a0a083f5d7890f96baa9919711c8d42e6e6e49003174f2f471"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/mediflow-login-propio-sintetico.jpg",
+      "module": "documentation",
+      "working_tree_sha256": "9af4ec67745cc2f254fd225408db555b05582a57cf0b811d50c2b541449fe10c"
+    },
+    {
+      "path": "docs/sprint-4/evidencias/mediflow-sesion-propia-sintetica.jpg",
+      "module": "documentation",
+      "working_tree_sha256": "bba7ecdc2b05b9eefcf0523290b51b2a3dd8c15e5db5bdb0ff8fea6ef0231564"
+    },
+    {
+      "path": "docs/sprint-4/integracion-23-octubre.json",
+      "module": "documentation",
+      "working_tree_sha256": "a74f76b9f1b54f75edd43f4bd073276a3d89d2ab00b0732f9979135cb5da3869"
+    },
+    {
+      "path": "docs/sprint-4/integracion-23-octubre.md",
+      "module": "documentation",
+      "working_tree_sha256": "17b55f0c311514b3bd3e0264862dd4cdd90b79ab0a5e01d8c01e817834703ad2"
+    },
+    {
+      "path": "docs/sprint-4/paquete-main-24-octubre.json",
+      "module": "documentation",
+      "working_tree_sha256": null
+    },
+    {
+      "path": "docs/sprint-4/preparacion-base.md",
+      "module": "documentation",
+      "working_tree_sha256": "2c47ad60c6d33e8bfe9ad91ab7a80bab06858ce81f659c647be584a0eb1e2b9c"
+    },
+    {
+      "path": "docs/sprint-4/presentacion-local-tailscale.md",
+      "module": "documentation",
+      "working_tree_sha256": "987e426f7f35c059dadc46bb0138d656528c5bfda85c973aceba771239465bab"
+    },
+    {
+      "path": "docs/sprint-4/usuarios-mediflow.md",
+      "module": "documentation",
+      "working_tree_sha256": "aeb499b601b069ea90ccd6aef7994a180606b592aacb7573375278cb71a7ef3c"
+    },
+    {
+      "path": "iniciar_presentacion_local.bat",
+      "module": "root-and-configuration",
+      "working_tree_sha256": "3b1f499731cadbfed9e43b22b829b385f023c0f569755b4254a54f96036e775c"
+    },
+    {
+      "path": "mediflow/.env.example",
+      "module": "root-and-configuration",
+      "working_tree_sha256": "f8040d84567f107f4a1ebbe3c2c62c01e6b9960f624687ed541e44b48b6ddf1a"
+    },
+    {
+      "path": "mediflow/backend/app/api/routes.py",
+      "module": "backend",
+      "working_tree_sha256": "ec89c8e84e2b125d2dca3da9f18e7b5f75a19ac70b4eb51953dec80235f1416f"
+    },
+    {
+      "path": "mediflow/backend/app/auth/__init__.py",
+      "module": "backend",
+      "working_tree_sha256": "989e590caf36683eb79286de0a8fbc64cbc8d528a83295a1e38b9abdbd7ed19e"
+    },
+    {
+      "path": "mediflow/backend/app/auth/manage.py",
+      "module": "backend",
+      "working_tree_sha256": "e728682173166d6a1d95e66d2d0b696ae92ad80b6ba67e59c6b24da673182014"
+    },
+    {
+      "path": "mediflow/backend/app/auth/middleware.py",
+      "module": "backend",
+      "working_tree_sha256": "04a5aea5adff17a603898b1e23bed03a8a5f349df8c37fa75c303476ae8fed7f"
+    },
+    {
+      "path": "mediflow/backend/app/auth/origin.py",
+      "module": "backend",
+      "working_tree_sha256": "dbeb762e71bf1a378dba8a900cd13c64e3367a7eb40af706e7b9dabe1eed2387"
+    },
+    {
+      "path": "mediflow/backend/app/auth/routes.py",
+      "module": "backend",
+      "working_tree_sha256": "2f7a1cb9fad008ba4278739c10445bc3630cc6c063734fb3014de7509ee2aca3"
+    },
+    {
+      "path": "mediflow/backend/app/auth/store.py",
+      "module": "backend",
+      "working_tree_sha256": "5e2c74e04e35d9f37ff1a2230b09ec53a4ba153463a440a4cd7e43a913038a61"
+    },
+    {
+      "path": "mediflow/backend/app/core/contrato.json",
+      "module": "backend",
+      "working_tree_sha256": "d432d4addd64e527af327b69ad462a2def65d4e9f534c3e79aea46aaeb2eed6d"
+    },
+    {
+      "path": "mediflow/backend/app/core/detalleContrato.md",
+      "module": "backend",
+      "working_tree_sha256": "0ccfb8a23ae7e395e4e61a17ed52d5f2d8ace829eb8ac76671193f598f499f39"
+    },
+    {
+      "path": "mediflow/backend/app/core/error_handler.py",
+      "module": "backend",
+      "working_tree_sha256": "7088e068ec7c3026262427fd1740799fbaf0354ad10fdca66400177ee724798c"
+    },
+    {
+      "path": "mediflow/backend/app/core/oci_client.py",
+      "module": "backend",
+      "working_tree_sha256": "d3baf0aa2f33eec9333df0cbc906ddc1342bea91daef06b73f14163215bebbb5"
+    },
+    {
+      "path": "mediflow/backend/app/core/review_auth.py",
+      "module": "backend",
+      "working_tree_sha256": "c8130903cba038b2a9359f82325f26fef49798e97a80d64f79e11343a1f96b2d"
+    },
+    {
+      "path": "mediflow/backend/app/main.py",
+      "module": "backend",
+      "working_tree_sha256": "cb2f23d75e376b01706cea48e7e9ee04249e5d40b4ffac1393d34e6114e6b553"
+    },
+    {
+      "path": "mediflow/backend/app/models/schemas.py",
+      "module": "backend",
+      "working_tree_sha256": "18bc20a1c176f6b3297e0202660686c509653e26184754dde377be55d8585b4f"
+    },
+    {
+      "path": "mediflow/backend/tests/test_auth_local.py",
+      "module": "backend",
+      "working_tree_sha256": "e51652facbee7ea8dc6c81e2a4a8fbad6425f4c7b720bb637f4e40e99ddab683"
+    },
+    {
+      "path": "mediflow/backend/tests/test_cargado_por.py",
+      "module": "backend",
+      "working_tree_sha256": "9d6ed1b666c31c7448d74a65114f2e1e6847c133beb416325bacbeb4d9b72102"
+    },
+    {
+      "path": "mediflow/backend/tests/test_error_handler.py",
+      "module": "backend",
+      "working_tree_sha256": "54375250494c4312a16c45559e6cbc1a1b1c89049b78493f8b088e76fd1e2a61"
+    },
+    {
+      "path": "mediflow/backend/tests/test_oci_client.py",
+      "module": "backend",
+      "working_tree_sha256": "82cad62feb13f6c183c96e78a7e49a46dbcbfced06c43ff440a73189350e2ef8"
+    },
+    {
+      "path": "mediflow/backend/tests/test_oci_transfer.py",
+      "module": "backend",
+      "working_tree_sha256": "4202326e1959e60749f58df808fb112d57072c5b791b40eb17353699554e2aaa"
+    },
+    {
+      "path": "mediflow/backend/tests/test_oci_transfer_integration.py",
+      "module": "backend",
+      "working_tree_sha256": "fd88b40646deefe2ba7c1255020b4496ca8cbd8e32b05098460568ebb7a1f4a3"
+    },
+    {
+      "path": "mediflow/backend/tests/test_review_api.py",
+      "module": "backend",
+      "working_tree_sha256": "2cbf164a6f204c4f5e2cb4cc9482271513c1912479e0126f9f733e3cd8912f70"
+    },
+    {
+      "path": "mediflow/backend/tests/test_review_auth.py",
+      "module": "backend",
+      "working_tree_sha256": "65eb4e49a99ca6f62b963117f0ae76554a7083c6ba8d3c54d33b66864862271e"
+    },
+    {
+      "path": "mediflow/backend/tests/test_s4_contract_integration.py",
+      "module": "backend",
+      "working_tree_sha256": "6f23e134b1b1b918653409e6993e677c159df7de4cbbd1b567b355a615b17b5e"
+    },
+    {
+      "path": "mediflow/backend/tests/test_s4_laura_confianza.py",
+      "module": "backend",
+      "working_tree_sha256": "43b79110d7ffb5ea9ef2fa9939ca27d0597a44b163b802f502202ee35587e67c"
+    },
+    {
+      "path": "mediflow/frontend_mobile/mediflow_app/README.md",
+      "module": "flutter-documentation-and-tools",
+      "working_tree_sha256": "2699a02a29fbab2a4364a285a106122e722f344772434bc70fa3096697a4e58e"
+    },
+    {
+      "path": "mediflow/frontend_mobile/mediflow_app/tool/build_edil_apk.ps1",
+      "module": "flutter-documentation-and-tools",
+      "working_tree_sha256": "4df9dd5c149905e48ce7513bc6b90c6cbd997f60369ca77feb5963303852dc81"
+    },
+    {
+      "path": "mediflow/frontend_web/src/assets/js/audit-controller.js",
+      "module": "web",
+      "working_tree_sha256": "7d6dca722303d1ea2b9c6f1b0aa581379a69cefa85034dac04dfe042316a7858"
+    },
+    {
+      "path": "mediflow/frontend_web/src/assets/js/auth-api.js",
+      "module": "web",
+      "working_tree_sha256": "650812d263eeb3cf42ace6b4a184d92e0eea1572f7e2ed3b9732055ffc382629"
+    },
+    {
+      "path": "mediflow/frontend_web/src/assets/js/documents-api.js",
+      "module": "web",
+      "working_tree_sha256": "7d8bebf476fe77600d452ebd42d7a4d08ab14c4dc75e94aae24b61edddbaa76e"
+    },
+    {
+      "path": "mediflow/frontend_web/src/assets/js/review-http-adapter.js",
+      "module": "web",
+      "working_tree_sha256": "b440dd43af85a551e2cb2de045ddeb5cb01f08cb92e599d8126a33214d500818"
+    },
+    {
+      "path": "mediflow/frontend_web/src/assets/js/reviews-api.js",
+      "module": "web",
+      "working_tree_sha256": "a2d6fc17b306368ad024f44e02dd1811429b9ea914c3bd3cec1e9e173f3bc0f5"
+    },
+    {
+      "path": "mediflow/frontend_web/src/auditoria/app.js",
+      "module": "web",
+      "working_tree_sha256": "1fcb3eb55081e0524a92e21dc1141793f8ea15d93314df0a7a32f17efb63ab4d"
+    },
+    {
+      "path": "mediflow/frontend_web/src/auditoria/audit-panel.js",
+      "module": "web",
+      "working_tree_sha256": "563d0208965fb9f05c65e504c85b5a993b3e2175f1a00106000583aedc6bd133"
+    },
+    {
+      "path": "mediflow/frontend_web/src/auditoria/index.html",
+      "module": "web",
+      "working_tree_sha256": "26227f37442a14743acc975222e14b2dc7cc5fbf98e700d4508636495659db98"
+    },
+    {
+      "path": "mediflow/frontend_web/src/auditoria/styles.css",
+      "module": "web",
+      "working_tree_sha256": "0819e3f765582029ff347755abd6cf9166d18ea11c7faad8684b2b102a7ccb45"
+    },
+    {
+      "path": "mediflow/frontend_web/src/login/app.js",
+      "module": "web",
+      "working_tree_sha256": "ae3983a8628416d98b432b7cdb4ede55991093fcec4385f3aa73469212560b49"
+    },
+    {
+      "path": "mediflow/frontend_web/src/login/index.html",
+      "module": "web",
+      "working_tree_sha256": "ea14f0e7c147a0dc83be601b7c7251174ec7d0065a3a806a29066f38c53c38b2"
+    },
+    {
+      "path": "mediflow/frontend_web/src/login/styles.css",
+      "module": "web",
+      "working_tree_sha256": "aa0a8a0a0dd292db146e9b2b38a4a45e897eba50a9b960ff9f53555f44d7f8fd"
+    },
+    {
+      "path": "mediflow/frontend_web/tests/audit-controller.test.js",
+      "module": "web",
+      "working_tree_sha256": "09269cb970069f4ac665adc3caed4350f444127c1ce0d7d953bbfb5feb73a8af"
+    },
+    {
+      "path": "mediflow/frontend_web/tests/audit-panel.test.js",
+      "module": "web",
+      "working_tree_sha256": "a1c21fcd2136605f0a6e0ef274354fd782186e7e4fc7d48ecd972b985359ece7"
+    },
+    {
+      "path": "mediflow/frontend_web/tests/auth-api.test.js",
+      "module": "web",
+      "working_tree_sha256": "65ffeda85a5733154d11e4dfdaa43ec22f2f574ac1abe5648d48deb2c31d2a91"
+    },
+    {
+      "path": "mediflow/frontend_web/tests/login.test.js",
+      "module": "web",
+      "working_tree_sha256": "6c087f3f9038877ea06d604a83752b63bfeb752ae1c4327d503587c5c5083d7e"
+    },
+    {
+      "path": "mediflow/frontend_web/tests/review-http-adapter.test.js",
+      "module": "web",
+      "working_tree_sha256": "87c69572bcfe9f7453ba29b96739cbbb93172200f9fb88dff5d7cd16d3c36c28"
+    },
+    {
+      "path": "mediflow/frontend_web/tests/reviews-api.test.js",
+      "module": "web",
+      "working_tree_sha256": "cfcd4f5b0e8e6fbded619d1b77a29e380c8c4f958de8a3906263e8e4c9246097"
+    },
+    {
+      "path": "mediflow/frontend_web/tests/support/review-api-server.py",
+      "module": "web",
+      "working_tree_sha256": "5e7aa3bff5a2d95c6ad074bd28fd8d0d155171da151f8bedeb6fa4ca5d167065"
+    },
+    {
+      "path": "mediflow/frontend_web/tests/test_presentation_server.py",
+      "module": "web",
+      "working_tree_sha256": "7c6ca610a843283e9e615ce73e2f59492d6d8f57d765385d0835cf09ae9bf3ef"
+    },
+    {
+      "path": "mediflow/frontend_web/tool/presentation_server.py",
+      "module": "web",
+      "working_tree_sha256": "3aae90fce6fcf05b1c187cca9c48540ce2c525537a22d1b03ebb5fa6a3d5e2cb"
+    }
+  ]
+}

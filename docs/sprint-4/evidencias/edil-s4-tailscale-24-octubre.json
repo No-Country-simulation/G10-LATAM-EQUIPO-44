@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-24",
+  "tailscale_serve_enabled": true,
+  "private_tailnet_only": true,
+  "proxy": "http://127.0.0.1:8787",
+  "base_url": "https://desktop-2amsjb6.tailf48a22.ts.net",
+  "tls_verification_disabled": false,
+  "checks": [
+    {
+      "path": "/",
+      "http_status": 200,
+      "health_app": "MediFlow Backend"
+    },
+    {
+      "path": "/web/auditoria/index.html",
+      "http_status": 200,
+      "same_origin_config": true,
+      "review_decisions_disabled": true
+    },
+    {
+      "path": "/openapi.json",
+      "http_status": 200
+    }
+  ],
+  "real_document_requests": false,
+  "real_oci_or_gemini_tests": false,
+  "presentation_review_post_blocked_by_default": true,
+  "write_gate_verified_in_isolated_tests": true
+}

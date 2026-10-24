@@ -1,0 +1,175 @@
+{
+  "date": "2026-10-23",
+  "branch": "integration/sprint-4-2026-10-23",
+  "base_main": "b2777d30dd3c7315675b8d449f13a3f2ac2c9f4e",
+  "state": "PREPARED_WITHOUT_COMMIT",
+  "preparation_method": "Drazen squash without commit (contains Brando), Eliana and Laura three-way patch; conflicts resolved; local Edil files preserved and adapted. Not an ancestry merge or published commit.",
+  "backup_directory": "C:\\Users\\leno\\AppData\\Local\\Temp\\MediFlow-S4-integracion-23oct-hsu1ebze",
+  "original_local_files_backed_up": 12,
+  "incoming_branches": [
+    {
+      "branch": "feature/s4-brando-oci-review",
+      "head": "5e8f5039841f5ed249a3737be310563c6983d738",
+      "incoming_files": [
+        "docs/sprint-4/S4-Brando.md",
+        "mediflow/backend/app/core/error_handler.py",
+        "mediflow/backend/app/core/oci_client.py",
+        "mediflow/backend/tests/test_error_handler.py",
+        "mediflow/backend/tests/test_oci_client.py",
+        "mediflow/backend/tests/test_oci_transfer.py",
+        "mediflow/backend/tests/test_oci_transfer_integration.py"
+      ]
+    },
+    {
+      "branch": "feature/s4-drazen-review-api",
+      "head": "d286de4005690ca603eba3bd1d52e7cc75afbe29",
+      "incoming_files": [
+        "docs/sprint-4/S4-Brando.md",
+        "docs/sprint-4/S4-Drazen.md",
+        "mediflow/backend/app/api/routes.py",
+        "mediflow/backend/app/core/error_handler.py",
+        "mediflow/backend/app/core/oci_client.py",
+        "mediflow/backend/app/main.py",
+        "mediflow/backend/app/models/schemas.py",
+        "mediflow/backend/tests/test_error_handler.py",
+        "mediflow/backend/tests/test_oci_client.py",
+        "mediflow/backend/tests/test_oci_transfer.py",
+        "mediflow/backend/tests/test_oci_transfer_integration.py",
+        "mediflow/backend/tests/test_review_api.py"
+      ]
+    },
+    {
+      "branch": "feature/s4-eliana-integracion",
+      "head": "247058767145beed47892207b13f01413da865f6",
+      "incoming_files": [
+        "docs/S4-Eliana.md",
+        "docs/sprint-4/MATRIZ-PRUEBAS-S4-03.md",
+        "mediflow/backend/app/api/routes.py",
+        "mediflow/backend/app/core/contrato.json",
+        "mediflow/backend/app/core/detalleContrato.md",
+        "mediflow/backend/app/models/schemas.py"
+      ]
+    },
+    {
+      "branch": "feature/s4-laura-confianza",
+      "head": "820a7dac3d3a5285d642e2b04c29c28e90c152e9",
+      "incoming_files": [
+        "docs/sprint-4/S4-Laura.md",
+        "mediflow/backend/tests/test_s4_laura_confianza.py"
+      ]
+    }
+  ],
+  "files": [
+    "docs/S4-Eliana.md",
+    "docs/sprint-4/MATRIZ-PRUEBAS-S4-03.md",
+    "docs/sprint-4/S4-Brando.md",
+    "docs/sprint-4/S4-Drazen.md",
+    "docs/sprint-4/S4-Laura.md",
+    "docs/sprint-4/edil-panel-auditoria.md",
+    "docs/sprint-4/integracion-23-octubre.json",
+    "docs/sprint-4/integracion-23-octubre.md",
+    "docs/sprint-4/preparacion-base.md",
+    "mediflow/backend/app/api/routes.py",
+    "mediflow/backend/app/core/contrato.json",
+    "mediflow/backend/app/core/detalleContrato.md",
+    "mediflow/backend/app/core/error_handler.py",
+    "mediflow/backend/app/core/oci_client.py",
+    "mediflow/backend/app/main.py",
+    "mediflow/backend/app/models/schemas.py",
+    "mediflow/backend/tests/test_error_handler.py",
+    "mediflow/backend/tests/test_oci_client.py",
+    "mediflow/backend/tests/test_oci_transfer.py",
+    "mediflow/backend/tests/test_oci_transfer_integration.py",
+    "mediflow/backend/tests/test_review_api.py",
+    "mediflow/backend/tests/test_s4_contract_integration.py",
+    "mediflow/backend/tests/test_s4_laura_confianza.py",
+    "mediflow/frontend_web/src/assets/js/audit-controller.js",
+    "mediflow/frontend_web/src/assets/js/documents-api.js",
+    "mediflow/frontend_web/src/assets/js/review-http-adapter.js",
+    "mediflow/frontend_web/src/assets/js/reviews-api.js",
+    "mediflow/frontend_web/src/auditoria/app.js",
+    "mediflow/frontend_web/src/auditoria/audit-panel.js",
+    "mediflow/frontend_web/src/auditoria/index.html",
+    "mediflow/frontend_web/src/auditoria/styles.css",
+    "mediflow/frontend_web/tests/audit-controller.test.js",
+    "mediflow/frontend_web/tests/audit-panel.test.js",
+    "mediflow/frontend_web/tests/review-http-adapter.test.js",
+    "mediflow/frontend_web/tests/reviews-api.test.js",
+    "mediflow/frontend_web/tests/support/review-api-server.py"
+  ],
+  "input_sha256": {
+    "docs/S4-Eliana.md": "08d3cd1fbef61c9445e06ae0afc64d6d1d688cd7a4351787fad7d492d9fa1efa",
+    "docs/sprint-4/MATRIZ-PRUEBAS-S4-03.md": "3d27484211274825ad28c00bf81fbb835caf21ac6cd09e3167cff90a462148b8",
+    "docs/sprint-4/S4-Brando.md": "0235d1b1ea4a144f90999d66b1d415d3a076b2f1fb4e3f3bc8510e94d9fb1e3a",
+    "docs/sprint-4/S4-Drazen.md": "539c6867aaac27b4c28b38b6f03e7d52402d87ddb0d7da93ee3ee9f2c1a65ef1",
+    "docs/sprint-4/S4-Laura.md": "713f9576e08340b56fc50f45f86c6c70f835a3b403f81d850fd0455a43187abd",
+    "docs/sprint-4/edil-panel-auditoria.md": "7d09362b11e5bb2cb851d49cb149580a95d4ca50e1eb962f37c689c9eccdd569",
+    "docs/sprint-4/integracion-23-octubre.md": "17b55f0c311514b3bd3e0264862dd4cdd90b79ab0a5e01d8c01e817834703ad2",
+    "docs/sprint-4/preparacion-base.md": "2c47ad60c6d33e8bfe9ad91ab7a80bab06858ce81f659c647be584a0eb1e2b9c",
+    "mediflow/backend/app/api/routes.py": "a4155fe617312ed0173fa844ebe728ab066b6bd3519b5fbe801421814b5a6a6c",
+    "mediflow/backend/app/core/contrato.json": "a52e899e4d96449849ebf1b43134ef3b1bd488581c175ac8b54ff35db1057677",
+    "mediflow/backend/app/core/detalleContrato.md": "21dfc970da52cd18ea11611b57120332b623cd6c2bb406516dc0238749c0fe43",
+    "mediflow/backend/app/core/error_handler.py": "7088e068ec7c3026262427fd1740799fbaf0354ad10fdca66400177ee724798c",
+    "mediflow/backend/app/core/oci_client.py": "d3baf0aa2f33eec9333df0cbc906ddc1342bea91daef06b73f14163215bebbb5",
+    "mediflow/backend/app/main.py": "642009350ee13143053275d68247e837a1eae1273e1eab4e5f5335c8043bac82",
+    "mediflow/backend/app/models/schemas.py": "658300786a4dafcaa4da9d1ab893b2f50ae799ed786d077e0bbb1b205895cc3b",
+    "mediflow/backend/tests/test_error_handler.py": "54375250494c4312a16c45559e6cbc1a1b1c89049b78493f8b088e76fd1e2a61",
+    "mediflow/backend/tests/test_oci_client.py": "82cad62feb13f6c183c96e78a7e49a46dbcbfced06c43ff440a73189350e2ef8",
+    "mediflow/backend/tests/test_oci_transfer.py": "4202326e1959e60749f58df808fb112d57072c5b791b40eb17353699554e2aaa",
+    "mediflow/backend/tests/test_oci_transfer_integration.py": "fd88b40646deefe2ba7c1255020b4496ca8cbd8e32b05098460568ebb7a1f4a3",
+    "mediflow/backend/tests/test_review_api.py": "6bcf3474f63026c4e6fe15f8d4d79c5560c643005b7458e404c893154b3f29b0",
+    "mediflow/backend/tests/test_s4_contract_integration.py": "6f23e134b1b1b918653409e6993e677c159df7de4cbbd1b567b355a615b17b5e",
+    "mediflow/backend/tests/test_s4_laura_confianza.py": "43b79110d7ffb5ea9ef2fa9939ca27d0597a44b163b802f502202ee35587e67c",
+    "mediflow/frontend_web/src/assets/js/audit-controller.js": "9fc6effcdaf5b73856f735c0e214336b5faebe50412189c75c6d5abeeda42e24",
+    "mediflow/frontend_web/src/assets/js/documents-api.js": "7d8bebf476fe77600d452ebd42d7a4d08ab14c4dc75e94aae24b61edddbaa76e",
+    "mediflow/frontend_web/src/assets/js/review-http-adapter.js": "4434776dae13e09dd61f3d1e479b6306cfba5291ae3d2da75caf73508f1485dd",
+    "mediflow/frontend_web/src/assets/js/reviews-api.js": "a2d6fc17b306368ad024f44e02dd1811429b9ea914c3bd3cec1e9e173f3bc0f5",
+    "mediflow/frontend_web/src/auditoria/app.js": "1fcb3eb55081e0524a92e21dc1141793f8ea15d93314df0a7a32f17efb63ab4d",
+    "mediflow/frontend_web/src/auditoria/audit-panel.js": "6ef8da2a632d7f9398d979d8408d42edd953f0b28b6abd93befd4cada17a56c9",
+    "mediflow/frontend_web/src/auditoria/index.html": "75fe4c98c3deaac91c2790866334c1a15058c903d27664bd7722394db1cf2f9d",
+    "mediflow/frontend_web/src/auditoria/styles.css": "9c17221b60b6b3dca7b42444b4d7f6860d764d12056bc2544f494b4131078ae8",
+    "mediflow/frontend_web/tests/audit-controller.test.js": "d63eff1d7c6e2d6775602f5931da42093faa0d7e65eb31298ac27083348f035c",
+    "mediflow/frontend_web/tests/audit-panel.test.js": "0e0ac9dd2f6dd5f6c28a7f254d0c15a60ff5a362d3456ad4d85a94a053eac0eb",
+    "mediflow/frontend_web/tests/review-http-adapter.test.js": "68fe147881b1538ed2bab1159b1a89afb3d091f447ed9ccfdb6e9f2c455e86c8",
+    "mediflow/frontend_web/tests/reviews-api.test.js": "cfcd4f5b0e8e6fbded619d1b77a29e380c8c4f958de8a3906263e8e4c9246097",
+    "mediflow/frontend_web/tests/support/review-api-server.py": "3a36feeba584fc579e55f5ffc98d3404dd5e071d2e99cc309f558dc0105b2ba3"
+  },
+  "self_hash_excluded": true,
+  "tests": {
+    "backend_data_ai": {
+      "passed": 473,
+      "subtests": 29,
+      "external_deselected": 6
+    },
+    "web": {
+      "passed": 141,
+      "skipped": 0,
+      "includes_local_HTTP_in_memory_SDK": true
+    },
+    "flutter": {
+      "passed": 178,
+      "external_skipped": 2,
+      "analyze": "no issues"
+    },
+    "javascript_syntax_checks": 6
+  },
+  "external_services_executed": false,
+  "decision_write_enabled_by_default": false,
+  "known_pending": [
+    "cargado_por documented/example only, not wired end-to-end",
+    "Explicit approval of review contract before enabling POST",
+    "Backend authentication and reviewer authorization",
+    "Real OCI/Gemini verification not rerun",
+    "Desktop/mobile visual verification, APK/physical device",
+    "Partial persistence final/mirror recovery"
+  ],
+  "operations_not_performed": [
+    "commit",
+    "push",
+    "main update",
+    "branch deletion",
+    "stash deletion",
+    "reset --hard",
+    "clean"
+  ]
+}

@@ -10,11 +10,74 @@ from app.core.oci_transfer import (
     SourceObjectNotFoundError,
     TransferVerificationError,
 )
+from app.core.oci_client import ReviewRecord
+from app.core.error_handler import ReviewValidationError
 
 
 class OCIError(Exception):
     def __init__(self, status: int):
         self.status = status
+
+
+VALID_REVIEW = {
+    "documento_id": "DOC-CLIN-ABC123",
+    "review_id": "REV-001",
+    "review_status": "aprobado",
+    "reviewer_id": "auditor_demo_01",
+    "observacion": None,
+    "reviewed_at": "2026-10-20T15:30:00Z",
+}
+
+
+def test_review_record_validates_the_six_field_contract():
+    record = ReviewRecord.from_mapping(VALID_REVIEW)
+
+    assert record.to_dict() == VALID_REVIEW
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("documento_id", "DOC/invalid"),
+        ("review_id", "REV invalid"),
+        ("review_status", "pendiente"),
+        ("reviewed_at", "2026-10-20T15:30:00+00:00"),
+    ],
+)
+def test_review_record_rejects_invalid_values(field, value):
+    invalid = {**VALID_REVIEW, field: value}
+
+    with pytest.raises(ReviewValidationError):
+        ReviewRecord.from_mapping(invalid)
+
+
+@pytest.mark.parametrize("field", ["decision", "expected_review_status", "estado_anterior", "version_revision"])
+def test_review_record_rejects_request_or_legacy_fields(field):
+    invalid = {**VALID_REVIEW, field: "synthetic"}
+
+    with pytest.raises(ReviewValidationError):
+        ReviewRecord.from_mapping(invalid)
+
+
+def test_rejected_review_requires_observation():
+    invalid = {**VALID_REVIEW, "review_status": "rechazado", "observacion": " "}
+
+    with pytest.raises(ReviewValidationError):
+        ReviewRecord.from_mapping(invalid)
+
+
+def test_review_record_accepts_document_hash_id_and_uuid4_review_id():
+    record = ReviewRecord.from_mapping(
+        {
+            **VALID_REVIEW,
+            "documento_id": "DOC-CLIN-" + "a" * 32,
+            "review_id": "550e8400-e29b-41d4-a716-446655440000",
+            "review_status": "rechazado",
+            "observacion": "Documento sintético revisado",
+        }
+    )
+
+    assert record.review_id.startswith("550e8400")
 
 
 def response(size: int, content: bytes):

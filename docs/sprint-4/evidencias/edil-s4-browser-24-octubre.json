@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-24",
+  "synthetic": true,
+  "production_contract_enabled": false,
+  "real_oci_used": false,
+  "real_gemini_used": false,
+  "tested_widths": [
+    1280,
+    390,
+    360
+  ],
+  "storage": "in-memory SDK test double",
+  "backend": "FastAPI and OCIStorageManager implementation under test",
+  "manual_browser_checks": {
+    "list_and_detail": true,
+    "search_empty_and_priority_filter": true,
+    "http_503_retains_list": true,
+    "restore_and_retry": true,
+    "approval_and_history": true,
+    "rejection_and_history": true,
+    "urgent_priority_preserved": true,
+    "final_decision_buttons_disabled_after_refresh": true,
+    "horizontal_page_overflow_absent": true
+  },
+  "synthetic_document_ids": [
+    "DOC-SYNTHETIC-APPROVE",
+    "DOC-SYNTHETIC-REJECT"
+  ],
+  "screenshots": [
+    "edil-s4-desktop.jpg",
+    "edil-s4-mobile.jpg",
+    "edil-s4-error-conserva-bandeja.jpg",
+    "edil-s4-mobile-historial.jpg"
+  ],
+  "physical_device_tested": false,
+  "limitations": [
+    "No OCI/Gemini E2E",
+    "No physical APK/device/camera validation; builds/signatures verified separately",
+    "Not a clinical validation"
+  ]
+}

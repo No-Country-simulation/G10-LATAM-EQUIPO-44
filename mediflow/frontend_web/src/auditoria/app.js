@@ -5,6 +5,12 @@
 (function () {
   "use strict";
 
+  // Agregado por Edil: el panel conectado reutiliza el shell y estilos existentes.
+  // La maqueta anterior se conserva debajo como referencia, pero NO se ejecuta:
+  // sus datos MTS, firma simulada y cambios en memoria no son revisiones reales.
+  if (window.MediFlowAuditPanel) window.MediFlowAuditPanel.mount(document);
+  return;
+
   /* --------------------------------------------------------------------
      UTILIDADES
      -------------------------------------------------------------------- */
