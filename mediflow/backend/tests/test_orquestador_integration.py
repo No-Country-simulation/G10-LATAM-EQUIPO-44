@@ -21,6 +21,9 @@ def document(*, review=False, priority="Rutina", score=0.95):
         "datos_extraidos": {
             "paciente": {"nombre": "Persona Ficticia", "edad": 30},
             "medico_solicitante": {"nombre": "Profesional Ficticio", "matricula": "TEST-000"},
+            # Agregado por Edil: emisor explícito en este fixture sintético;
+            # el código productivo nunca lo deduce del solicitante.
+            "profesional_emisor": {"nombre": "Emisor Ficticio", "matricula": "TEST-EMISOR"},
             "estudio_realizado": "Evaluación sintética de prueba",
             "diagnostico_principal": None, "cie10_sugerido": None,
             "medicamentos_recetados": [{"medicamento": "Ejemplo ficticio", "dosis": "dosis ficticia"}],

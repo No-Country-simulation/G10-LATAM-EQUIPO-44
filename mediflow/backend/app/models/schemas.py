@@ -28,6 +28,26 @@ class MedicamentoSchema(BaseModel):
     dosis: Optional[str] = None
 
 
+# Agregado por Edil: representación literal de resultados, sin interpretar
+# valores, convertir unidades ni completar rangos que no constan en la fuente.
+class ResultadoLaboratorioSchema(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    examen: str = Field(..., min_length=1)
+    valor: str = Field(..., min_length=1)
+    unidad: Optional[str] = None
+    rango_referencia: Optional[str] = None
+
+
+# Agregado por Edil: estas propiedades son aditivas. Un JSON histórico puede
+# omitirlas, pero esa omisión no constituye evidencia de completitud documental.
+DOCUMENTARY_EXTENSION_FIELDS = frozenset({
+    "profesional_emisor", "resultados_laboratorio", "hallazgos", "conclusion",
+    "procedimiento_solicitado", "indicacion_solicitud", "resumen_evolucion",
+    "indicacion_alta", "destino_alta", "seguimiento", "contenido_certificacion",
+    "periodo_certificado",
+})
+
+
 class DatosExtraidosSchema(BaseModel):
     paciente: PacienteSchema = Field(default_factory=PacienteSchema)
     medico_solicitante: MedicoSchema = Field(default_factory=MedicoSchema)
@@ -35,6 +55,21 @@ class DatosExtraidosSchema(BaseModel):
     diagnostico_principal: Optional[str] = None
     cie10_sugerido: Optional[str] = None
     medicamentos_recetados: list[MedicamentoSchema] = Field(default_factory=list)
+    # Agregado por Edil: emisor y solicitante son roles distintos. No se copia
+    # de uno al otro; null conserva la lectura de documentos anteriores.
+    profesional_emisor: Optional[MedicoSchema] = None
+    resultados_laboratorio: list[ResultadoLaboratorioSchema] = Field(default_factory=list)
+    hallazgos: Optional[str] = None
+    conclusion: Optional[str] = None
+    procedimiento_solicitado: Optional[str] = None
+    indicacion_solicitud: Optional[str] = None
+    resumen_evolucion: Optional[str] = None
+    indicacion_alta: Optional[str] = None
+    destino_alta: Optional[str] = None
+    seguimiento: Optional[str] = None
+    contenido_certificacion: Optional[str] = None
+    # El período se conserva como texto de la fuente; no se infieren fechas.
+    periodo_certificado: Optional[str] = None
 
 class DecisionEnrutamientoSchema(BaseModel):
     destino_principal: str = Field(default="Cola_Procesamiento_Inicial")

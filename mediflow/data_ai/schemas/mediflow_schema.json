@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "MediFlow GeminiAnalysis v1.2",
+  "title": "MediFlow GeminiAnalysis v1.3",
   "description": "Salida parcial de IA para documentos sintéticos; backend completa documento_id, notificaciones y OCI. Estados alineados con matriz_estados.md.",
   "type": "object",
   "additionalProperties": false,
@@ -147,6 +147,126 @@
               }
             }
           }
+        },
+        "profesional_emisor": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "nombre",
+            "matricula"
+          ],
+          "properties": {
+            "nombre": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "matricula": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "resultados_laboratorio": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "examen",
+              "valor",
+              "unidad",
+              "rango_referencia"
+            ],
+            "properties": {
+              "examen": {
+                "type": "string",
+                "minLength": 1
+              },
+              "valor": {
+                "type": "string",
+                "minLength": 1
+              },
+              "unidad": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rango_referencia": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "hallazgos": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "conclusion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "procedimiento_solicitado": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "indicacion_solicitud": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resumen_evolucion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "indicacion_alta": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "destino_alta": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "seguimiento": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contenido_certificacion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "periodo_certificado": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
@@ -176,5 +296,6 @@
         }
       }
     }
-  }
+  },
+  "$comment": "Agregado por Edil: extension documental aditiva; las nuevas propiedades pueden faltar en respuestas historicas."
 }

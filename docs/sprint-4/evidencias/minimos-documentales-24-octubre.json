@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-24",
+  "branch": "docs/readme-campos-minimos-s4",
+  "base": "1754017a5903559ff053342db0955477128e5006",
+  "authorized_scope": "Implement additive documentary fields and minimums from proposal route B",
+  "general_profile_version": "s4-minimos-documentales-v1",
+  "exchange_schema_version": "1.3",
+  "public_version_field_added": false,
+  "formula_changed": false,
+  "threshold": 0.7,
+  "new_clinical_urgency_rules": false,
+  "existing_urgency_catalog_used_for_new_documentary_text": true,
+  "legacy_demo_snapshot": "mediflow/data_ai/rules/confidence_profiles_legacy_demo_v1.json",
+  "historical_documents_rewritten": false,
+  "real_oci_calls": false,
+  "real_gemini_calls": false,
+  "new_endpoints": false,
+  "tests": {
+    "python_passed": 711,
+    "python_subtests_passed": 29,
+    "python_external_deselected": 6,
+    "python_dependency_warnings": 2,
+    "python_log": "C:/Users/leno/AppData/Local/Temp/MediFlow-minimos-final-backend-hhntbnal/tests.log",
+    "javascript_passed": 195,
+    "javascript_failed": 0,
+    "javascript_log": "C:/Users/leno/AppData/Local/Temp/MediFlow-minimos-final-web-cwh2vott/tests.log",
+    "flutter_passed": 187,
+    "flutter_opt_in_skipped": 2,
+    "flutter_analyze_exit": 0,
+    "flutter_log_directory": "C:/Users/leno/AppData/Local/Temp/MediFlow-minimos-final-flutter-78d9143f381f46adba4a4ee1ecff50e5"
+  },
+  "verified_cases": [
+    "Six complete documentary types can process under general minimums",
+    "Missing or illegible essential data requires human review",
+    "Every laboratory result needs its own exam and literal value",
+    "Issuer is not inferred from requester",
+    "Diagnosis does not replace image findings or conclusion",
+    "Performed study does not replace requested procedure",
+    "Unknown type and placeholder values cannot pass on high classification alone",
+    "Urgency, low confidence and prior review are preserved",
+    "POST through real local pipeline persists new fields in memory and GET recovers them",
+    "Legacy JSON remains readable without rewriting storage",
+    "Web and Flutter retain additive fields in raw JSON without application logic changes"
+  ],
+  "consumer_logic_changed": false,
+  "dataset_labels_changed": false,
+  "local_env_changed": false,
+  "git": {
+    "main_unchanged": true,
+    "commit_created": false,
+    "push_performed": false
+  },
+  "limitations": [
+    "Structural documentary completeness does not certify clinical accuracy or signature authenticity",
+    "New values are exposed in API and original JSON; existing summary views are not extended",
+    "Real provider and deployment acceptance remains for the other computer",
+    "Restart backend after applying the coordinated model, prompt and profile changes"
+  ]
+}

@@ -48,6 +48,9 @@ def clinical(*, review=False, priority="Rutina", score=0.9):
                           "nivel_prioridad": priority, "score_confianza_clasificacion": score},
         "datos_extraidos": {"paciente": {"nombre": "Persona Ficticia", "edad": None},
                             "medico_solicitante": {"nombre": "Profesional Ficticio", "matricula": None},
+                            # Agregado por Edil: muestra del nuevo mínimo documental.
+                            # El emisor ficticio es explícito y no se infiere del solicitante.
+                            "profesional_emisor": {"nombre": "Emisor Sintético de Receta", "matricula": None},
                             "estudio_realizado": None, "diagnostico_principal": None, "cie10_sugerido": None,
                             "medicamentos_recetados": [{"medicamento": "Dato de prueba", "dosis": None}]},
         "decision_enrutamiento": {"destino_principal": "Cola_Revision_Humana" if review else "Cola_Farmacia",

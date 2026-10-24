@@ -99,6 +99,9 @@ def fixture(received, *, review=False):
     doc["clasificacion"].update(tipo_documento="Receta Médica", score_confianza_clasificacion=0.99)
     doc["datos_extraidos"]["paciente"]["nombre"] = "SYNTHETIC_SOFTWARE_TEST"
     doc["datos_extraidos"]["medico_solicitante"]["nombre"] = "SYNTHETIC_SOFTWARE_TEST"
+    # Agregado por Edil: actualizar solo esta muestra sintética al nuevo mínimo.
+    # El emisor explícito de prueba no se obtiene del solicitante ni del usuario.
+    doc["datos_extraidos"]["profesional_emisor"] = {"nombre": "SYNTHETIC_RECIPE_ISSUER", "matricula": None}
     doc["datos_extraidos"]["medicamentos_recetados"] = [{"medicamento": "TEST_ONLY_NO_CLINICAL_USE", "dosis": None}]
     doc["decision_enrutamiento"].update(destino_principal="Cola_Farmacia",
         requiere_auditoria_humana=False, justificacion_enrutamiento="Synthetic software fixture.")

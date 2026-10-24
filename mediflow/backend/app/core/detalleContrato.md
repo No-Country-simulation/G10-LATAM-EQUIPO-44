@@ -70,3 +70,43 @@ tampoco puede reemplazarlo. POST y GET usan el mismo campo público y el JSON
 persistido conserva su valor. Los documentos anteriores se leen con null sin
 reescribirlos. Un login identifica una cuenta; no certifica que sea profesional
 sanitario ni concede permiso para aprobar documentos.
+
+### Agregado por Edil: ampliación documental autorizada, 24/10/2026
+
+Se implementa la extensión aditiva descrita en
+[`docs/sprint-4/minimos-documentales-implementados.md`](../../../../docs/sprint-4/minimos-documentales-implementados.md).
+El esquema de intercambio `data_ai/schemas/mediflow_schema.json` pasa a v1.3 y
+el perfil general se identifica como `s4-minimos-documentales-v1`. No se añadió
+un endpoint ni una propiedad pública de versión, ni se renombraron campos.
+
+En `datos_extraidos` se agregan:
+
+| Campo | Tipo | Valor cuando no está disponible |
+| --- | --- | --- |
+| `profesional_emisor` | Objeto nombre/matricula o null, separado de `medico_solicitante` | null |
+| `resultados_laboratorio` | Lista de objetos con examen y valor textuales, unidad y rango_referencia opcionales | [] |
+| `hallazgos`, `conclusion` | Texto literal del informe | null |
+| `procedimiento_solicitado`, `indicacion_solicitud` | Texto explícito de la solicitud y su motivo | null |
+| `resumen_evolucion`, `indicacion_alta` | Contenido explícito de evolución y cierre/alta | null |
+| `destino_alta`, `seguimiento` | Texto opcional documentado | null |
+| `contenido_certificacion`, `periodo_certificado` | Contenido de la certificación y período literal | null |
+
+El valor de laboratorio es texto incluso cuando contiene un número: se conserva
+el formato de la fuente, sin convertir unidades ni inventar rangos. Un valor
+`"0"` o un resultado cualitativo como `"Negativo"` son valores estructurales útiles.
+Una unidad o rango ausentes permanecen null; no se consideran comprobados.
+
+Los JSON anteriores siguen siendo legibles con defaults null/[] y no se
+reescriben. Si se vuelve a analizar un documento con el perfil general, la falta
+de un nuevo esencial sí exige revisión. Gemini recibe el esquema completo para
+generaciones nuevas; la validación permite omitir únicamente las propiedades
+aditivas en respuestas anteriores y sigue rechazando claves originales ausentes.
+
+Los ejemplos de los seis tipos están en
+[`contrato.campos-minimos-v1.example.json`](contrato.campos-minimos-v1.example.json).
+Son datos ficticios que ilustran el contrato, no evidencia de escrituras OCI ni
+extracciones reales. El ejemplo original `contrato.json` se conserva.
+
+Corrección terminológica: `score_confianza_clasificacion` mide confianza en el
+tipo documental. El score operativo interno combina esa confianza y completitud;
+ninguno certifica exactitud clínica, firma o habilitación profesional.

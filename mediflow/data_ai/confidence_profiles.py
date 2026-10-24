@@ -1,12 +1,26 @@
-"""Perfiles internos provisionales del MVP; no amplían el contrato público."""
+"""Agregado por Edil: mínimos documentales versionados del MVP.
+
+La fórmula de confianza y el detector de urgencia se conservan separados.
+El snapshot previo se utiliza únicamente para la demo sintética existente.
+"""
 from __future__ import annotations
 
 import json
+import re
 import unicodedata
 from enum import Enum
 from pathlib import Path
 
 from .score_confianza import evaluar_confianza_con_dosis
+
+RULES_ROOT = Path(__file__).parent / "rules"
+LEGACY_DEMO_PROFILES = RULES_ROOT / "confidence_profiles_legacy_demo_v1.json"
+
+
+def _valid_path(value):
+    return isinstance(value, str) and bool(re.fullmatch(
+        r"[A-Za-z_][A-Za-z0-9_]*(?:\[\])?(?:\.[A-Za-z_][A-Za-z0-9_]*(?:\[\])?)*", value
+    )) and not value.endswith("[]")
 
 
 class EstadoCriterio(str, Enum):
@@ -24,7 +38,7 @@ def normalizar_tipo(value):
 
 
 def cargar_perfiles(path=None):
-    config = json.loads(Path(path or Path(__file__).parent / "rules/confidence_profiles_mvp.json").read_text(encoding="utf-8"))
+    config = json.loads(Path(path or RULES_ROOT / "confidence_profiles_mvp.json").read_text(encoding="utf-8"))
     index = {}
     if not config.get("version") or not config.get("profiles"):
         raise ValueError("Configuración de confianza vacía")
@@ -37,8 +51,16 @@ def cargar_perfiles(path=None):
             for flag in ("required", "applicable", "verifiable"):
                 if not isinstance(rule[flag], bool):
                     raise ValueError("Indicador de criterio inválido")
-            if rule["applicable"] and rule["verifiable"] and not rule.get("path"):
-                raise ValueError("Criterio verificable sin ruta")
+            # Agregado por Edil: una alternativa OR es configuración explícita,
+            # no una sustitución de diagnóstico por hallazgos en el código.
+            alternatives = rule.get("any_of_paths")
+            if alternatives is not None:
+                if (rule.get("path") is not None or not isinstance(alternatives, list)
+                        or len(alternatives) < 2 or any(not _valid_path(p) for p in alternatives)
+                        or len(set(alternatives)) != len(alternatives)):
+                    raise ValueError("Alternativas de criterio inválidas")
+            elif rule["applicable"] and rule["verifiable"] and not _valid_path(rule.get("path")):
+                raise ValueError("Criterio verificable sin ruta válida")
         for alias in [profile["name"], *profile["aliases"]]:
             key = normalizar_tipo(alias)
             if not key or key in index:
@@ -48,11 +70,45 @@ def cargar_perfiles(path=None):
 
 
 def _presence(value):
-    if value == "ILLEGIBLE":
-        return EstadoCriterio.NO_VERIFICABLE
-    if isinstance(value, str) and value.strip():
+    if isinstance(value, str):
+        normalized = normalizar_tipo(value)
+        if normalized == "illegible":
+            return EstadoCriterio.NO_VERIFICABLE
+        # Agregado por Edil: un marcador textual de ausencia no demuestra un
+        # dato extraído. Comparar el valor completo evita confundir resultados
+        # válidos como "Negativo", "No reactivo", "0" o el examen "Na".
+        if normalized in {"", "null", "none", "n/a", "n.a.", "no aplica",
+                          "no disponible", "no consta", "sin datos", "sin informacion"}:
+            return EstadoCriterio.AUSENTE
         return EstadoCriterio.PRESENTE
     return EstadoCriterio.AUSENTE
+
+
+def _all_states(states):
+    if EstadoCriterio.NO_VERIFICABLE in states:
+        return EstadoCriterio.NO_VERIFICABLE
+    return (EstadoCriterio.PRESENTE if states and all(s == EstadoCriterio.PRESENTE for s in states)
+            else EstadoCriterio.AUSENTE)
+
+
+def _path_presence(datos, path):
+    parts = path.split(".")
+
+    def visit(value, position):
+        if position == len(parts):
+            return _presence(value)
+        if not isinstance(value, dict):
+            return EstadoCriterio.AUSENTE
+        part = parts[position]
+        if part.endswith("[]"):
+            values = value.get(part[:-2])
+            if not isinstance(values, list) or not values:
+                return EstadoCriterio.AUSENTE
+            # Cada resultado necesita su examen y su valor; nunca all([]).
+            return _all_states([visit(item, position + 1) for item in values])
+        return visit(value.get(part), position + 1)
+
+    return visit(datos, 0)
 
 
 def evaluar_criterio(datos, rule):
@@ -60,21 +116,14 @@ def evaluar_criterio(datos, rule):
         return EstadoCriterio.NO_APLICABLE
     if not rule["verifiable"]:
         return EstadoCriterio.NO_VERIFICABLE
-    path = rule["path"]
-    if "[]." in path:
-        field, leaf = path.split("[].")
-        values = datos.get(field)
-        if not isinstance(values, list) or not values:
-            return EstadoCriterio.AUSENTE
-        states = [_presence(item.get(leaf)) if isinstance(item, dict) else EstadoCriterio.AUSENTE for item in values]
-        # Cada elemento debe ser usable; all([]) nunca aprueba una receta vacía.
+    if rule.get("any_of_paths") is not None:
+        states = [_path_presence(datos, path) for path in rule["any_of_paths"]]
+        # Agregado por Edil: un texto legible no elimina otro esencial marcado
+        # ilegible. La regla OR solo resuelve ausencias, nunca borra esa señal.
         if EstadoCriterio.NO_VERIFICABLE in states:
             return EstadoCriterio.NO_VERIFICABLE
-        return EstadoCriterio.PRESENTE if all(s == EstadoCriterio.PRESENTE for s in states) else EstadoCriterio.AUSENTE
-    value = datos
-    for part in path.split("."):
-        value = value.get(part) if isinstance(value, dict) else None
-    return _presence(value)
+        return EstadoCriterio.PRESENTE if EstadoCriterio.PRESENTE in states else EstadoCriterio.AUSENTE
+    return _path_presence(datos, rule["path"])
 
 
 def evaluar_documento(documento, *, configuracion=None):

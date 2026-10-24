@@ -14,7 +14,9 @@ for path in (str(PROJECT_ROOT), str(DATA_AI_ROOT)):
         sys.path.insert(0, path)
 
 from data_ai.score_confianza import UMBRAL_CONFIANZA_MVP, evaluar_confianza_con_dosis
-from data_ai.confidence_profiles import cargar_perfiles, evaluar_documento, normalizar_tipo
+from data_ai.confidence_profiles import (
+    LEGACY_DEMO_PROFILES, cargar_perfiles, evaluar_documento, normalizar_tipo,
+)
 from data_ai.urgency_json_adapter import evaluate_analysis
 from data_ai.synthetic_demo_rules import evaluate_synthetic_demo, rules_profile
 
@@ -69,8 +71,12 @@ def _confidence_is_ambiguous(documento: dict[str, Any]) -> bool:
     )
     # Agregado por Edil: tres criterios de cuatro dan 0.75 y podrían aprobar un
     # tipo desconocido. Esa identificación incompleta necesita revisión humana.
-    profile_result = evaluar_documento(documento)
-    profile = cargar_perfiles()[1].get(normalizar_tipo(clasificacion.get("tipo_documento")))
+    # Agregado por Edil: la demo conserva su perfil anterior explícito. Los
+    # nuevos esenciales se aplican al flujo general; no se inventan campos en
+    # el dataset ya existente ni se activan reglas por nombre de archivo.
+    demo_config = cargar_perfiles(LEGACY_DEMO_PROFILES)
+    profile_result = evaluar_documento(documento, configuracion=demo_config)
+    profile = demo_config[1].get(normalizar_tipo(clasificacion.get("tipo_documento")))
     unrepresented = {
         rule["id"] for rule in profile["criteria"] if not rule["verifiable"]
     } if profile else set()

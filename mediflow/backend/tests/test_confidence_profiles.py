@@ -40,11 +40,13 @@ def test_essential_missing_blocks_even_high_score(monkeypatch, profile, missing)
     "Informe de Laboratorio", "Informe de Estudio por Imágenes",
     "Orden / Solicitud de Procedimiento", "Epicrisis / Informe de Alta", "Certificado Médico",
 ])
-def test_unrepresented_essential_is_never_counted_as_fulfilled(kind):
+def test_newly_represented_but_missing_essential_is_never_counted_as_fulfilled(kind):
     doc = document()
     doc["clasificacion"]["tipo_documento"] = kind
     result = evaluar_documento(doc)
-    assert E.NO_VERIFICABLE in result["estados"].values()
+    # Agregado por Edil: el contrato ya representa estos esenciales, pero el
+    # fixture histórico no aporta su valor. Ausente nunca equivale a cumplido.
+    assert E.AUSENTE in result["estados"].values()
     assert result["completitud"] < 1
     assert result["es_ambiguo"]
     assert procesar_con_orquestador(doc)["status"] == "auditoria_humana"
@@ -57,7 +59,7 @@ def test_certificate_without_diagnosis_is_not_penalized_for_diagnosis():
     result = evaluar_documento(doc)
     assert result["estados"]["diagnostico"] == E.NO_APLICABLE
     assert result["completitud"] == 3 / 4
-    assert result["bloqueos"] == ["motivo_periodo_firma"]
+    assert result["bloqueos"] == ["contenido_certificacion"]
     doc["datos_extraidos"]["diagnostico_principal"] = "Texto sintético"
     assert evaluar_documento(doc) == result
 

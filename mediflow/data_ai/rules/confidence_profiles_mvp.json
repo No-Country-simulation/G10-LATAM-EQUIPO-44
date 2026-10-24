@@ -1,5 +1,5 @@
 {
-  "version": "s3-laura-mvp-provisional-1",
+  "version": "s4-minimos-documentales-v1",
   "profiles": [
     {
       "name": "Receta Médica",
@@ -21,7 +21,7 @@
         },
         {
           "id": "profesional",
-          "path": "medico_solicitante.nombre",
+          "path": "profesional_emisor.nombre",
           "required": true,
           "applicable": true,
           "verifiable": true
@@ -54,18 +54,25 @@
           "verifiable": true
         },
         {
+          "id": "resultados_examen",
+          "path": "resultados_laboratorio[].examen",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "resultados_valores",
+          "path": "resultados_laboratorio[].valor",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
           "id": "diagnostico",
           "path": "diagnostico_principal",
           "required": true,
           "applicable": false,
           "verifiable": true
-        },
-        {
-          "id": "resultados_unidades_rangos_fecha",
-          "path": null,
-          "required": true,
-          "applicable": true,
-          "verifiable": false
         }
       ]
     },
@@ -90,18 +97,22 @@
           "verifiable": true
         },
         {
+          "id": "hallazgos_conclusion",
+          "path": null,
+          "required": true,
+          "applicable": true,
+          "verifiable": true,
+          "any_of_paths": [
+            "hallazgos",
+            "conclusion"
+          ]
+        },
+        {
           "id": "diagnostico",
           "path": "diagnostico_principal",
           "required": true,
           "applicable": false,
           "verifiable": true
-        },
-        {
-          "id": "hallazgos_conclusion",
-          "path": null,
-          "required": true,
-          "applicable": true,
-          "verifiable": false
         }
       ]
     },
@@ -119,18 +130,18 @@
           "verifiable": true
         },
         {
+          "id": "procedimiento_solicitado",
+          "path": "procedimiento_solicitado",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
           "id": "diagnostico",
           "path": "diagnostico_principal",
           "required": true,
           "applicable": false,
           "verifiable": true
-        },
-        {
-          "id": "procedimiento_solicitado_indicacion",
-          "path": null,
-          "required": true,
-          "applicable": true,
-          "verifiable": false
         }
       ]
     },
@@ -146,18 +157,25 @@
           "verifiable": true
         },
         {
+          "id": "evolucion",
+          "path": "resumen_evolucion",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "alta",
+          "path": "indicacion_alta",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
           "id": "diagnostico",
           "path": "diagnostico_principal",
           "required": true,
           "applicable": false,
           "verifiable": true
-        },
-        {
-          "id": "evolucion_alta_seguimiento",
-          "path": null,
-          "required": true,
-          "applicable": true,
-          "verifiable": false
         }
       ]
     },
@@ -174,7 +192,14 @@
         },
         {
           "id": "profesional",
-          "path": "medico_solicitante.nombre",
+          "path": "profesional_emisor.nombre",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "contenido_certificacion",
+          "path": "contenido_certificacion",
           "required": true,
           "applicable": true,
           "verifiable": true
@@ -185,13 +210,6 @@
           "required": true,
           "applicable": false,
           "verifiable": true
-        },
-        {
-          "id": "motivo_periodo_firma",
-          "path": null,
-          "required": true,
-          "applicable": true,
-          "verifiable": false
         }
       ]
     }

@@ -1,0 +1,308 @@
+[
+  {
+    "cargado_por": null,
+    "status": "procesado",
+    "documento_id": "DOC-SYNTHETIC-MINIMUM-1",
+    "clasificacion": {
+      "tipo_documento": "Receta Médica",
+      "especialidad": null,
+      "nivel_prioridad": "Rutina",
+      "score_confianza_clasificacion": 0.95
+    },
+    "datos_extraidos": {
+      "paciente": {
+        "nombre": "Persona ficticia",
+        "edad": null
+      },
+      "medico_solicitante": {
+        "nombre": null,
+        "matricula": null
+      },
+      "estudio_realizado": null,
+      "diagnostico_principal": null,
+      "cie10_sugerido": null,
+      "medicamentos_recetados": [
+        {
+          "medicamento": "Producto sintetico de prueba",
+          "dosis": null
+        }
+      ],
+      "profesional_emisor": {
+        "nombre": "Emisor ficticio",
+        "matricula": null
+      },
+      "resultados_laboratorio": [],
+      "hallazgos": null,
+      "conclusion": null,
+      "procedimiento_solicitado": null,
+      "indicacion_solicitud": null,
+      "resumen_evolucion": null,
+      "indicacion_alta": null,
+      "destino_alta": null,
+      "seguimiento": null,
+      "contenido_certificacion": null,
+      "periodo_certificado": null
+    },
+    "decision_enrutamiento": {
+      "destino_principal": "Cola_Farmacia",
+      "requiere_auditoria_humana": false,
+      "justificacion_enrutamiento": "Ejemplo documental ficticio; no corresponde a una operacion OCI real."
+    },
+    "notificacion_generada": null,
+    "almacenamiento_oci": {
+      "bucket": "procesados",
+      "ruta_objeto": "DOC-SYNTHETIC-MINIMUM-1.txt",
+      "status_backup": "exito"
+    }
+  },
+  {
+    "cargado_por": null,
+    "status": "procesado",
+    "documento_id": "DOC-SYNTHETIC-MINIMUM-2",
+    "clasificacion": {
+      "tipo_documento": "Informe de Laboratorio",
+      "especialidad": null,
+      "nivel_prioridad": "Rutina",
+      "score_confianza_clasificacion": 0.95
+    },
+    "datos_extraidos": {
+      "paciente": {
+        "nombre": "Persona ficticia",
+        "edad": null
+      },
+      "medico_solicitante": {
+        "nombre": null,
+        "matricula": null
+      },
+      "estudio_realizado": "Panel sintetico",
+      "diagnostico_principal": null,
+      "cie10_sugerido": null,
+      "medicamentos_recetados": [],
+      "profesional_emisor": null,
+      "resultados_laboratorio": [
+        {
+          "examen": "Prueba documental",
+          "valor": "Negativo",
+          "unidad": null,
+          "rango_referencia": null
+        }
+      ],
+      "hallazgos": null,
+      "conclusion": null,
+      "procedimiento_solicitado": null,
+      "indicacion_solicitud": null,
+      "resumen_evolucion": null,
+      "indicacion_alta": null,
+      "destino_alta": null,
+      "seguimiento": null,
+      "contenido_certificacion": null,
+      "periodo_certificado": null
+    },
+    "decision_enrutamiento": {
+      "destino_principal": "Cola_Historia_Clinica",
+      "requiere_auditoria_humana": false,
+      "justificacion_enrutamiento": "Ejemplo documental ficticio; no corresponde a una operacion OCI real."
+    },
+    "notificacion_generada": null,
+    "almacenamiento_oci": {
+      "bucket": "procesados",
+      "ruta_objeto": "DOC-SYNTHETIC-MINIMUM-2.txt",
+      "status_backup": "exito"
+    }
+  },
+  {
+    "cargado_por": null,
+    "status": "procesado",
+    "documento_id": "DOC-SYNTHETIC-MINIMUM-3",
+    "clasificacion": {
+      "tipo_documento": "Informe de Estudio por Imágenes",
+      "especialidad": null,
+      "nivel_prioridad": "Rutina",
+      "score_confianza_clasificacion": 0.95
+    },
+    "datos_extraidos": {
+      "paciente": {
+        "nombre": "Persona ficticia",
+        "edad": null
+      },
+      "medico_solicitante": {
+        "nombre": null,
+        "matricula": null
+      },
+      "estudio_realizado": "Estudio sintetico",
+      "diagnostico_principal": null,
+      "cie10_sugerido": null,
+      "medicamentos_recetados": [],
+      "profesional_emisor": null,
+      "resultados_laboratorio": [],
+      "hallazgos": null,
+      "conclusion": "Conclusion documental sintetica disponible.",
+      "procedimiento_solicitado": null,
+      "indicacion_solicitud": null,
+      "resumen_evolucion": null,
+      "indicacion_alta": null,
+      "destino_alta": null,
+      "seguimiento": null,
+      "contenido_certificacion": null,
+      "periodo_certificado": null
+    },
+    "decision_enrutamiento": {
+      "destino_principal": "Cola_Historia_Clinica",
+      "requiere_auditoria_humana": false,
+      "justificacion_enrutamiento": "Ejemplo documental ficticio; no corresponde a una operacion OCI real."
+    },
+    "notificacion_generada": null,
+    "almacenamiento_oci": {
+      "bucket": "procesados",
+      "ruta_objeto": "DOC-SYNTHETIC-MINIMUM-3.txt",
+      "status_backup": "exito"
+    }
+  },
+  {
+    "cargado_por": null,
+    "status": "procesado",
+    "documento_id": "DOC-SYNTHETIC-MINIMUM-4",
+    "clasificacion": {
+      "tipo_documento": "Orden / Solicitud de Procedimiento",
+      "especialidad": null,
+      "nivel_prioridad": "Rutina",
+      "score_confianza_clasificacion": 0.95
+    },
+    "datos_extraidos": {
+      "paciente": {
+        "nombre": "Persona ficticia",
+        "edad": null
+      },
+      "medico_solicitante": {
+        "nombre": null,
+        "matricula": null
+      },
+      "estudio_realizado": null,
+      "diagnostico_principal": null,
+      "cie10_sugerido": null,
+      "medicamentos_recetados": [],
+      "profesional_emisor": null,
+      "resultados_laboratorio": [],
+      "hallazgos": null,
+      "conclusion": null,
+      "procedimiento_solicitado": "Procedimiento sintetico de prueba",
+      "indicacion_solicitud": null,
+      "resumen_evolucion": null,
+      "indicacion_alta": null,
+      "destino_alta": null,
+      "seguimiento": null,
+      "contenido_certificacion": null,
+      "periodo_certificado": null
+    },
+    "decision_enrutamiento": {
+      "destino_principal": "Cola_Historia_Clinica",
+      "requiere_auditoria_humana": false,
+      "justificacion_enrutamiento": "Ejemplo documental ficticio; no corresponde a una operacion OCI real."
+    },
+    "notificacion_generada": null,
+    "almacenamiento_oci": {
+      "bucket": "procesados",
+      "ruta_objeto": "DOC-SYNTHETIC-MINIMUM-4.txt",
+      "status_backup": "exito"
+    }
+  },
+  {
+    "cargado_por": null,
+    "status": "procesado",
+    "documento_id": "DOC-SYNTHETIC-MINIMUM-5",
+    "clasificacion": {
+      "tipo_documento": "Epicrisis / Informe de Alta",
+      "especialidad": null,
+      "nivel_prioridad": "Rutina",
+      "score_confianza_clasificacion": 0.95
+    },
+    "datos_extraidos": {
+      "paciente": {
+        "nombre": "Persona ficticia",
+        "edad": null
+      },
+      "medico_solicitante": {
+        "nombre": null,
+        "matricula": null
+      },
+      "estudio_realizado": null,
+      "diagnostico_principal": null,
+      "cie10_sugerido": null,
+      "medicamentos_recetados": [],
+      "profesional_emisor": null,
+      "resultados_laboratorio": [],
+      "hallazgos": null,
+      "conclusion": null,
+      "procedimiento_solicitado": null,
+      "indicacion_solicitud": null,
+      "resumen_evolucion": "Resumen documental sintetico del episodio.",
+      "indicacion_alta": "Cierre documental sintetico del episodio.",
+      "destino_alta": null,
+      "seguimiento": null,
+      "contenido_certificacion": null,
+      "periodo_certificado": null
+    },
+    "decision_enrutamiento": {
+      "destino_principal": "Cola_Historia_Clinica",
+      "requiere_auditoria_humana": false,
+      "justificacion_enrutamiento": "Ejemplo documental ficticio; no corresponde a una operacion OCI real."
+    },
+    "notificacion_generada": null,
+    "almacenamiento_oci": {
+      "bucket": "procesados",
+      "ruta_objeto": "DOC-SYNTHETIC-MINIMUM-5.txt",
+      "status_backup": "exito"
+    }
+  },
+  {
+    "cargado_por": null,
+    "status": "procesado",
+    "documento_id": "DOC-SYNTHETIC-MINIMUM-6",
+    "clasificacion": {
+      "tipo_documento": "Certificado Médico",
+      "especialidad": null,
+      "nivel_prioridad": "Rutina",
+      "score_confianza_clasificacion": 0.95
+    },
+    "datos_extraidos": {
+      "paciente": {
+        "nombre": "Persona ficticia",
+        "edad": null
+      },
+      "medico_solicitante": {
+        "nombre": null,
+        "matricula": null
+      },
+      "estudio_realizado": null,
+      "diagnostico_principal": null,
+      "cie10_sugerido": null,
+      "medicamentos_recetados": [],
+      "profesional_emisor": {
+        "nombre": "Emisor ficticio",
+        "matricula": null
+      },
+      "resultados_laboratorio": [],
+      "hallazgos": null,
+      "conclusion": null,
+      "procedimiento_solicitado": null,
+      "indicacion_solicitud": null,
+      "resumen_evolucion": null,
+      "indicacion_alta": null,
+      "destino_alta": null,
+      "seguimiento": null,
+      "contenido_certificacion": "Constancia documental sintetica de asistencia.",
+      "periodo_certificado": null
+    },
+    "decision_enrutamiento": {
+      "destino_principal": "Cola_Historia_Clinica",
+      "requiere_auditoria_humana": false,
+      "justificacion_enrutamiento": "Ejemplo documental ficticio; no corresponde a una operacion OCI real."
+    },
+    "notificacion_generada": null,
+    "almacenamiento_oci": {
+      "bucket": "procesados",
+      "ruta_objeto": "DOC-SYNTHETIC-MINIMUM-6.txt",
+      "status_backup": "exito"
+    }
+  }
+]

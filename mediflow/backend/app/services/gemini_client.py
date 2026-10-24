@@ -21,6 +21,7 @@ from ..models.schemas import (
     DatosExtraidosSchema,
     DecisionEnrutamientoSchema,
     TriageResponse,
+    DOCUMENTARY_EXTENSION_FIELDS,
 )
 from .document_text import MAX_DOCUMENT_BYTES, extract_document_text, validate_document_text
 from .llm_errors import (
@@ -70,7 +71,7 @@ class GeminiSettings:
 
 
 class ClinicalExtraction(BaseModel):
-    """Proyección clínica del contrato existente; no introduce campos nuevos."""
+    """Proyección del contrato; los metadatos de servidor quedan fuera del LLM."""
 
     model_config = ConfigDict(extra="forbid")
     clasificacion: ClasificacionSchema
@@ -86,6 +87,18 @@ def clinical_output_schema() -> dict:
         if "properties" in definition:
             definition["required"] = list(definition["properties"])
             definition["additionalProperties"] = False
+    return schema
+
+
+def clinical_validation_schema() -> dict:
+    # Agregado por Edil: Gemini recibe el esquema completo y debe declarar los
+    # nuevos campos con null/[] si no constan. Al leer respuestas anteriores,
+    # solo esas propiedades aditivas pueden faltar; las claves originales
+    # continúan siendo obligatorias y los objetos nuevos se validan completos.
+    schema = clinical_output_schema()
+    extracted = schema["$defs"]["DatosExtraidosSchema"]
+    extracted["required"] = [name for name in extracted["required"]
+                             if name not in DOCUMENTARY_EXTENSION_FIELDS]
     return schema
 
 
@@ -133,7 +146,7 @@ def validate_clinical_response(text: str) -> ClinicalExtraction:
         )
         if not isinstance(payload, dict):
             raise ValueError()
-        schema = clinical_output_schema()
+        schema = clinical_validation_schema()
         _check_shape(payload, schema, schema.get("$defs", {}))
         clinical = ClinicalExtraction.model_validate(payload, strict=True)
         # Agregado por Edil: reutilizamos la intención de la validación de Nicolás.
