@@ -1,0 +1,199 @@
+{
+  "version": "s3-laura-mvp-provisional-1",
+  "profiles": [
+    {
+      "name": "Receta Médica",
+      "aliases": [],
+      "criteria": [
+        {
+          "id": "paciente",
+          "path": "paciente.nombre",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "medicamentos",
+          "path": "medicamentos_recetados[].medicamento",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "profesional",
+          "path": "medico_solicitante.nombre",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "diagnostico",
+          "path": "diagnostico_principal",
+          "required": true,
+          "applicable": false,
+          "verifiable": true
+        }
+      ]
+    },
+    {
+      "name": "Informe de Laboratorio",
+      "aliases": [],
+      "criteria": [
+        {
+          "id": "paciente",
+          "path": "paciente.nombre",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "estudio",
+          "path": "estudio_realizado",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "diagnostico",
+          "path": "diagnostico_principal",
+          "required": true,
+          "applicable": false,
+          "verifiable": true
+        },
+        {
+          "id": "resultados_unidades_rangos_fecha",
+          "path": null,
+          "required": true,
+          "applicable": true,
+          "verifiable": false
+        }
+      ]
+    },
+    {
+      "name": "Informe de Estudio por Imágenes",
+      "aliases": [
+        "Informe de imagenología"
+      ],
+      "criteria": [
+        {
+          "id": "paciente",
+          "path": "paciente.nombre",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "estudio",
+          "path": "estudio_realizado",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "diagnostico",
+          "path": "diagnostico_principal",
+          "required": true,
+          "applicable": false,
+          "verifiable": true
+        },
+        {
+          "id": "hallazgos_conclusion",
+          "path": null,
+          "required": true,
+          "applicable": true,
+          "verifiable": false
+        }
+      ]
+    },
+    {
+      "name": "Orden / Solicitud de Procedimiento",
+      "aliases": [
+        "Orden / procedimiento"
+      ],
+      "criteria": [
+        {
+          "id": "paciente",
+          "path": "paciente.nombre",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "diagnostico",
+          "path": "diagnostico_principal",
+          "required": true,
+          "applicable": false,
+          "verifiable": true
+        },
+        {
+          "id": "procedimiento_solicitado_indicacion",
+          "path": null,
+          "required": true,
+          "applicable": true,
+          "verifiable": false
+        }
+      ]
+    },
+    {
+      "name": "Epicrisis / Informe de Alta",
+      "aliases": [],
+      "criteria": [
+        {
+          "id": "paciente",
+          "path": "paciente.nombre",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "diagnostico",
+          "path": "diagnostico_principal",
+          "required": true,
+          "applicable": false,
+          "verifiable": true
+        },
+        {
+          "id": "evolucion_alta_seguimiento",
+          "path": null,
+          "required": true,
+          "applicable": true,
+          "verifiable": false
+        }
+      ]
+    },
+    {
+      "name": "Certificado Médico",
+      "aliases": [],
+      "criteria": [
+        {
+          "id": "paciente",
+          "path": "paciente.nombre",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "profesional",
+          "path": "medico_solicitante.nombre",
+          "required": true,
+          "applicable": true,
+          "verifiable": true
+        },
+        {
+          "id": "diagnostico",
+          "path": "diagnostico_principal",
+          "required": true,
+          "applicable": false,
+          "verifiable": true
+        },
+        {
+          "id": "motivo_periodo_firma",
+          "path": null,
+          "required": true,
+          "applicable": true,
+          "verifiable": false
+        }
+      ]
+    }
+  ]
+}

@@ -27,6 +27,9 @@ def clinical_payload(review=False):
             # Antes ambos nombres eran None; ahora eso debe ir a auditoría.
             "paciente": {"nombre": "Persona Ficticia", "edad": None},
             "medico_solicitante": {"nombre": "Profesional Ficticio", "matricula": None},
+            # Agregado por Edil: la muestra completa representa ahora al emisor
+            # de forma explícita, como exige el contrato documental ampliado.
+            "profesional_emisor": {"nombre": "Emisor Sintético de Receta", "matricula": None},
             "estudio_realizado": None, "diagnostico_principal": None, "cie10_sugerido": None,
             "medicamentos_recetados": [{"medicamento": "Medicamento ficticio", "dosis": "dosis de prueba"}],
         },

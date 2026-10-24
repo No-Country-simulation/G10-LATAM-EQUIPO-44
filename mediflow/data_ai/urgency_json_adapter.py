@@ -14,7 +14,8 @@ def evaluate_analysis(analysis: dict[str, Any], *, source_text: str | None = Non
     """Retorna informe independiente; no modifica analysis ni sus rutas.
 
     source_text debe proceder del texto extraído del documento original, no del
-    JSON del LLM. La ausencia de texto limita la detección a diagnóstico/CIE10.
+    JSON del LLM. La ausencia de texto limita la detección a los campos
+    estructurados extraídos; no demuestra cobertura completa del documento.
     """
     if not isinstance(analysis, dict):
         raise TypeError('analysis debe ser dict')
@@ -25,6 +26,20 @@ def evaluate_analysis(analysis: dict[str, Any], *, source_text: str | None = Non
         'diagnostico_principal': extracted.get('diagnostico_principal'),
         'cie10_sugerido': extracted.get('cie10_sugerido'),
     }
+    # Agregado por Edil: los nuevos campos pueden contener señales ya cubiertas
+    # por el catálogo. Evaluarlos evita aceptar un informe completo ignorando
+    # su conclusión, sin añadir reglas clínicas ni serializar metadatos del LLM.
+    fragments = [extracted.get(field) for field in (
+        'hallazgos', 'conclusion', 'procedimiento_solicitado',
+        'indicacion_solicitud', 'resumen_evolucion', 'indicacion_alta',
+        'destino_alta', 'seguimiento', 'contenido_certificacion',
+    )]
+    results = extracted.get('resultados_laboratorio')
+    if isinstance(results, list):
+        for item in results:
+            if isinstance(item, dict):
+                fragments.extend([item.get('examen'), item.get('valor')])
+    payload['observaciones'] = '\n'.join(value for value in fragments if isinstance(value, str) and value.strip())
     if source_text is not None:
         if not isinstance(source_text, str):
             raise TypeError('source_text debe ser str')

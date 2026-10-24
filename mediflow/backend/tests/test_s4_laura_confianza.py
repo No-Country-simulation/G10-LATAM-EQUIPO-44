@@ -72,7 +72,10 @@ def test_s4_demo_receta_dosis_ilegible_es_ambigua(monkeypatch):
                 "paciente": E.PRESENTE,
                 "estudio": E.PRESENTE,
                 "diagnostico": E.NO_APLICABLE,
-                "resultados_unidades_rangos_fecha": E.NO_VERIFICABLE,
+                # Agregado por Edil: los campos nuevos son verificables;
+                # este fixture no trae resultados y por ello siguen bloqueados.
+                "resultados_examen": E.AUSENTE,
+                "resultados_valores": E.AUSENTE,
             },
         ),
         (
@@ -81,7 +84,7 @@ def test_s4_demo_receta_dosis_ilegible_es_ambigua(monkeypatch):
                 "paciente": E.PRESENTE,
                 "estudio": E.PRESENTE,
                 "diagnostico": E.NO_APLICABLE,
-                "hallazgos_conclusion": E.NO_VERIFICABLE,
+                "hallazgos_conclusion": E.AUSENTE,
             },
         ),
         (
@@ -89,7 +92,7 @@ def test_s4_demo_receta_dosis_ilegible_es_ambigua(monkeypatch):
             {
                 "paciente": E.PRESENTE,
                 "diagnostico": E.NO_APLICABLE,
-                "procedimiento_solicitado_indicacion": E.NO_VERIFICABLE,
+                "procedimiento_solicitado": E.AUSENTE,
             },
         ),
         (
@@ -97,7 +100,8 @@ def test_s4_demo_receta_dosis_ilegible_es_ambigua(monkeypatch):
             {
                 "paciente": E.PRESENTE,
                 "diagnostico": E.NO_APLICABLE,
-                "evolucion_alta_seguimiento": E.NO_VERIFICABLE,
+                "evolucion": E.AUSENTE,
+                "alta": E.AUSENTE,
             },
         ),
         (
@@ -106,7 +110,7 @@ def test_s4_demo_receta_dosis_ilegible_es_ambigua(monkeypatch):
                 "paciente": E.PRESENTE,
                 "profesional": E.PRESENTE,
                 "diagnostico": E.NO_APLICABLE,
-                "motivo_periodo_firma": E.NO_VERIFICABLE,
+                "contenido_certificacion": E.AUSENTE,
             },
         ),
     ],
@@ -239,10 +243,10 @@ def test_s4_no_verificable_bloquea_en_todos_los_tipos(tipo):
     "tipo, completitud_esperada",
     [
         ("Receta Médica", 1.0),
-        ("Informe de Laboratorio", 0.75),
+        ("Informe de Laboratorio", 3 / 5),
         ("Informe de Estudio por Imágenes", 0.75),
         ("Orden / Solicitud de Procedimiento", 2 / 3),
-        ("Epicrisis / Informe de Alta", 2 / 3),
+        ("Epicrisis / Informe de Alta", 2 / 4),
         ("Certificado Médico", 0.75),
     ],
 )
