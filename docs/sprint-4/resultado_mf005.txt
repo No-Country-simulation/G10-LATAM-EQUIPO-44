@@ -1,0 +1,33 @@
+MediFlow - Sprint 4 / S4-04
+Caso: MF_005
+Prueba: extraccion multimodal real + orquestacion
+Modelo Gemini: gemini-3.6-flash
+Perfil: synthetic_demo_v1
+Formato: JPG
+Dataset esperado: ROUTINE
+
+RESULTADO GEMINI
+Prioridad inicial: Rutina
+Auditoria humana: False
+Destino: Cola_Historia_Clinica
+Texto de origen disponible: True
+
+RESULTADO ORQUESTADOR
+Prioridad final: Rutina
+Auditoria humana final: False
+Destino final: Cola_Historia_Clinica
+Estado final: procesado
+
+REGRESION
+Concordancia con prioridad esperada: SI
+Resultado: APROBADO
+
+OBSERVACIONES
+- Gemini clasifico el documento como Rutina.
+- El orquestador mantuvo la prioridad Rutina.
+- No se genero una falsa urgencia.
+- No se requirio auditoria humana.
+- Se utilizaron metadatos OCI simulados.
+- No se probo almacenamiento OCI ni el endpoint HTTP.
+- La prueba corresponde a una ejecucion con datos sinteticos.
+- No constituye validacion clinica general.

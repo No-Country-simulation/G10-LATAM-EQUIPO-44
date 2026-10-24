@@ -1,0 +1,22 @@
+MediFlow - Sprint 4 / S4-04
+Caso: MF_001
+Perfil: synthetic_demo_v1
+
+Prueba: enrutamiento controlado con datos estructurados
+preparados manualmente a partir del PDF original.
+
+Completitud: 1.0
+Ambiguo: False
+Bloqueos: []
+Prioridad final: Rutina
+Destino: Cola_Farmacia
+Auditoria humana: False
+Estado: procesado
+
+Resultado: coincide con la prioridad y destino esperados.
+
+Limitaciones:
+- No se utilizo Gemini.
+- No se evaluo extraccion estructurada automatica.
+- Se utilizaron identificadores ficticios.
+- El resultado no representa una validacion clinica.
