@@ -29,7 +29,8 @@
     const timer = setTimeout(() => controller.abort(), options.timeoutMs || 20000);
     try {
       const response = await (options.fetchImpl || root.fetch)(endpoint, {
-        method: "GET", headers: { Accept: "application/json" }, signal: controller.signal, redirect: "error"
+        // Agregado por Edil: conservar la sesión también al recuperar una carga entre puertos HTTPS.
+        method: "GET", credentials: "include", headers: { Accept: "application/json" }, signal: controller.signal, redirect: "error"
       });
       if (!response.ok) {
         if (individual && response.status === 404) throw new DocumentsApiError("El documento no existe o ya no esta disponible.", 404);
@@ -68,7 +69,91 @@
   }
   const getDocuments = (options = {}) => requestDocuments(options);
   const getDocument = (id, options = {}) => requestDocuments(options, id === undefined ? null : id);
-  const api = { getDocuments, getDocument, DocumentsApiError, isValidDocument: validDocument };
+  // Agregado por Edil: navegación al original protegido, sin enlaces OCI ni selección local.
+  function originalUrl(id, options = {}) {
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new DocumentsApiError('Identificador inválido.');
+    try {
+      const base = new URL(options.baseUrl || root.MEDIFLOW_API_BASE_URL);
+      if (!['https:', 'http:'].includes(base.protocol) || base.username || base.password || base.search || base.hash ||
+          !['/', '/api', '/api/'].includes(base.pathname) ||
+          (base.protocol === 'http:' && !['localhost', '127.0.0.1', '[::1]'].includes(base.hostname))) throw Error();
+      return new URL('/api/documents/' + encodeURIComponent(id) + '/original', base.origin).href;
+    } catch (_) { throw new DocumentsApiError('La dirección de la API no es válida.'); }
+  }
+  // Agregado por Edil: leer el original autenticado; no depender del nombre
+  // Content-Disposition, que no está expuesto por CORS ni hace falta al visor.
+  async function getOriginal(id, options = {}) {
+    const url = originalUrl(id, options), abort = new AbortController();
+    const cancel = () => abort.abort();
+    options.signal?.addEventListener('abort', cancel, { once: true });
+    if (options.signal?.aborted) abort.abort();
+    const timer = setTimeout(cancel, options.timeoutMs || 20000);
+    try {
+      const response = await (options.fetchImpl || root.fetch)(url, {
+        method: 'GET', credentials: 'include', cache: 'no-store', redirect: 'error', signal: abort.signal,
+        headers: { Accept: 'image/jpeg, image/png, application/pdf, text/plain' },
+      });
+      if (!response.ok) {
+        const messages = { 401: 'Inicia sesión para ver el original.', 403: 'No tienes permiso para ver este original.', 404: 'El documento original no está disponible.' };
+        throw new DocumentsApiError(messages[response.status] || 'No se pudo recuperar el original de OCI.', response.status);
+      }
+      const mime = (response.headers.get('Content-Type') || '').split(';')[0].trim().toLowerCase();
+      if (response.status !== 200 || !['image/jpeg', 'image/png', 'application/pdf', 'text/plain'].includes(mime)) {
+        throw new DocumentsApiError('El original tiene un formato no permitido para el visor.');
+      }
+      const blob = await response.blob();
+      if (!blob.size || blob.size > 10 * 1024 * 1024) throw new DocumentsApiError('El original está vacío o supera 10 MiB.');
+      return { blob: blob.slice(0, blob.size, mime), mime };
+    } catch (error) {
+      if (error instanceof DocumentsApiError) throw error;
+      throw new DocumentsApiError(abort.signal.aborted ? 'La consulta del original agotó el tiempo de espera o se canceló.' : 'No se pudo conectar para recuperar el original.');
+    } finally { clearTimeout(timer); options.signal?.removeEventListener('abort', cancel); }
+  }
+  // Agregado por Edil: visor efímero compartido. Nunca interpreta HTML ni
+  // persiste bytes. Al cambiar/cerrar revoca URL y descarta respuestas tardías.
+  function createFileViewer(doc, prefix, { onError = () => {} } = {}) {
+    const $ = suffix => doc.querySelector('#' + prefix + suffix);
+    let url = null, version = 0, pending = null;
+    function clear() {
+      version++; if (pending) { pending(false); pending = null; }
+      for (const name of ['Image', 'Pdf', 'Text', 'Link']) {
+        const element = $(name); element.hidden = true;
+        element.onload = element.onerror = null;
+        element.removeAttribute?.(name === 'Link' ? 'href' : 'src');
+      }
+      $('Text').textContent = '';
+      $('Link').onclick = null;
+      if (url) root.URL.revokeObjectURL(url);
+      url = null;
+    }
+    async function show({ blob, mime }) {
+      clear(); const current = version;
+      if (!blob?.size || !['image/jpeg', 'image/png', 'application/pdf', 'text/plain'].includes(mime)) throw new DocumentsApiError('No hay un archivo compatible para visualizar.');
+      url = root.URL.createObjectURL(blob);
+      $('Link').href = url; $('Link').hidden = false;
+      if (mime === 'text/plain') {
+        const text = await blob.slice(0, 65536).text();
+        if (current !== version) return false;
+        $('Text').textContent = text + (blob.size > 65536 ? '\n[Vista limitada a 64 KiB; abre el original para leerlo completo.]' : '');
+        $('Text').hidden = false; return true;
+      }
+      const element = $(mime === 'application/pdf' ? 'Pdf' : 'Image');
+      return new Promise(resolve => {
+        pending = resolve;
+        element.onload = () => { if (current === version) { pending = null; resolve(true); } };
+        // Algunos navegadores no muestran PDF en un frame sandboxed. El
+        // enlace abre los mismos bytes ya autorizados, sin otra petición OCI.
+        if (mime === 'application/pdf') $('Link').onclick = element.onload;
+        element.onerror = () => {
+          if (current !== version) return;
+          clear(); onError(); resolve(false);
+        };
+        element.src = url; element.hidden = false;
+      });
+    }
+    clear(); return { show, clear };
+  }
+  const api = { getDocuments, getDocument, getOriginal, createFileViewer, originalUrl, DocumentsApiError, isValidDocument: validDocument };
   root.MediFlowDocumentsApi = api;
   if (typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);

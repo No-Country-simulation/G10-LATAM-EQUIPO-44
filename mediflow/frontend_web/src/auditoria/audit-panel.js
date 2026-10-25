@@ -13,6 +13,45 @@
     try { storage = root.sessionStorage; } catch (_) { /* Se conserva lectura; no se habilita envío sin protección. */ }
     const client = options.client || root.MediFlowReviewsApi.createClient({ approvedAdapter: root.MediFlowApprovedReviewAdapter });
     const authClient = options.authClient || root.MediFlowAuthApi?.createClient();
+    const originals = options.originalApi || root.MediFlowDocumentsApi;
+    let originalId = null, originalReady = false, originalVersion = 0, originalAbort = null, originalBusy = false;
+    const originalViewer = root.MediFlowDocumentsApi.createFileViewer(doc, 'auditOriginal', {
+      onError: () => {
+        originalReady = false;
+        $('#auditOriginalStatus').textContent = 'No se puede visualizar el original. Las decisiones siguen bloqueadas.';
+        if (controller) render(controller.state);
+      },
+    });
+    function clearOriginal() {
+      originalVersion++; originalAbort?.abort(); originalAbort = null;
+      originalReady = false; originalBusy = false; originalViewer.clear();
+      $('#auditOriginalStatus').textContent = '';
+    }
+    async function loadOriginal(id) {
+      if (!id) return;
+      clearOriginal(); originalId = id; originalBusy = true;
+      const version = originalVersion;
+      originalAbort = new AbortController();
+      if (controller) updateDecisionButtons();
+      $('#auditOriginalStatus').textContent = 'Recuperando original de OCI…';
+      $('#auditOriginalRetry').disabled = true;
+      try {
+        const data = await originals.getOriginal(id, { signal: originalAbort.signal });
+        if (version !== originalVersion) return;
+        originalReady = await originalViewer.show(data);
+        if (version !== originalVersion) return;
+        $('#auditOriginalStatus').textContent = originalReady ? 'Original recibido. Compáralo con el análisis antes de decidir.' : 'No se pudo visualizar el original.';
+      } catch (error) {
+        if (version !== originalVersion) return;
+        originalReady = false; originalViewer.clear();
+        $('#auditOriginalStatus').textContent = (error instanceof root.MediFlowDocumentsApi.DocumentsApiError ? error.message : 'No se pudo recuperar el original.') + ' Las decisiones están bloqueadas.';
+      } finally {
+        if (version === originalVersion) {
+          originalBusy = false; $('#auditOriginalRetry').disabled = false;
+          if (controller) render(controller.state);
+        }
+      }
+    }
     const logoutDialog = $("#logoutConfirmation");
     const message = error => root.MediFlowReviewsApi.errorMessage(error);
     function updateDecisionButtons() {
@@ -21,15 +60,24 @@
     }
     function setText(id, value) { $(id).textContent = value; }
     function render(state) {
+      // Agregado por Edil: cambiar/cerrar detalle descarta bytes y respuestas
+      // anteriores antes de mostrar otro resultado, incluso si su GET falla.
+      if (state.selectedId !== originalId) {
+        clearOriginal(); originalId = state.selectedId;
+        if (originalId) loadOriginal(originalId);
+      }
       const loading = state.listStatus === "loading";
       // Agregado por Edil: sesión de aplicación propia. La conexión de red no
       // convierte a sus integrantes en usuarios ni auditores de MediFlow.
       const user = state.authenticatedUser;
+      // Agregado por Edil: sin permiso verificado no se muestran acciones de decisión.
+      $("#approveReview").hidden = $("#rejectReview").hidden = user?.canReview !== true;
       setText("#authSessionUser", user ? "Sesión: " + user.login : "Sin sesión de MediFlow");
       $("#authLoginLink").hidden = !!user && state.submitError?.status !== 401;
       $("#authLogout").hidden = !user;
       $("#authLogout").disabled = state.submitStatus === "sending" || !!logoutTask || logoutComplete || !authClient;
-      setText("#authSessionStatus", state.submitError?.status === 401 ? "La sesión ya no es válida. Inicia sesión de nuevo; se conserva el resultado y las observaciones." : "");
+      setText("#authSessionStatus", state.submitError?.status === 401 ? "La sesión ya no es válida. Inicia sesión de nuevo; se conserva el resultado y las observaciones."
+        : options.sessionError ? "No se pudo verificar la sesión. Las decisiones están deshabilitadas; vuelve a cargar para consultar de nuevo." : "");
       $("#refreshAudit").disabled = loading || state.submitStatus === "sending";
       $("#auditList").setAttribute("aria-busy", String(loading));
       setText("#auditLoadStatus", loading ? "Consultando pendientes…" : state.listError
@@ -59,6 +107,7 @@
       setText("#auditEmpty", query || priority !== "all" ? "No hay documentos que coincidan con los filtros." : "No hay documentos pendientes en la respuesta recibida.");
       if (!state.selectedId) return;
       const sending = state.submitStatus === "sending";
+      $('#auditOriginalRetry').disabled = originalBusy || sending;
       dialog.setAttribute("aria-busy", String(state.detailStatus === "loading" || sending));
       setText("#auditDetailStatus", state.detailStatus === "loading" ? "Consultando análisis por ID…" : state.detailError
         ? message(state.detailError) + (state.document ? " Se conserva el resultado anterior; vuelve a consultar antes de decidir." : "")
@@ -100,6 +149,7 @@
       setText("#reviewAvailability", !state.capabilities.submit ? "Envío deshabilitado: contrato de aprobación/rechazo pendiente. La observación solo se mantiene mientras esta página esté abierta."
         : !state.authenticatedUser ? "Envío deshabilitado: no hay una identidad autenticada. Inicia sesión con tu cuenta de MediFlow."
         : !state.authenticatedUser.canReview ? "Envío deshabilitado: tu identidad no tiene permiso de auditor."
+        : !originalReady ? "Consulta y visualiza el original antes de aprobar o rechazar."
         : !state.storageAvailable ? "No se pudo proteger el envío contra recargas. Revisa el almacenamiento de sesión antes de decidir."
         : uncertain ? "Hay un envío sin confirmación. No vuelvas a enviarlo; consulta el historial y solicita verificación al equipo."
         : state.reviewAlreadyFinal ? "Ya existe una decisión final confirmada por el backend. El documento queda en consulta; no se permite otra decisión."
@@ -119,10 +169,12 @@
         setText("#reviewConfirmationObservation", state.confirmation.observation || "Sin observación.");
         if (!confirmation.open) confirmation.showModal();
       } else if (confirmation.open) confirmation.close();
-      $("#reviewConfirmSend").disabled = $("#reviewCancelSend").disabled = sending;
+      $("#reviewCancelSend").disabled = sending;
+      $("#reviewConfirmSend").disabled = sending || !originalReady;
       setText("#reviewConfirmProgress", sending ? "Enviando; espera la confirmación del servidor." : "");
     }
     controller = root.MediFlowAuditController.createController({ client, storage: options.storage || storage, onChange: render,
+      canReviewOriginal: id => originalId === id && originalReady,
       authenticatedUser: Object.prototype.hasOwnProperty.call(options, "authenticatedUser")
         ? options.authenticatedUser : root.MEDIFLOW_AUTHENTICATED_USER });
     $("#refreshAudit").addEventListener("click", () => controller.load());
@@ -145,7 +197,11 @@
     }
     $("#auditClose").addEventListener("click", closeDetail);
     dialog.addEventListener("cancel", event => { event.preventDefault(); if (!confirmation.open) closeDetail(); });
-    $("#auditRetryDetail").addEventListener("click", () => controller.open(controller.state.selectedId));
+    $("#auditRetryDetail").addEventListener("click", () => { loadOriginal(controller.state.selectedId); controller.open(controller.state.selectedId); });
+    $('#auditOriginalRetry').addEventListener('click', () => {
+      if (!originalBusy && controller.state.submitStatus !== 'sending') loadOriginal(controller.state.selectedId);
+    });
+    root.addEventListener?.('pagehide', clearOriginal);
     $("#reviewObservation").addEventListener("input", event => { controller.setObservation(event.target.value); updateDecisionButtons(); });
     $("#approveReview").addEventListener("click", () => controller.confirm("approve"));
     $("#rejectReview").addEventListener("click", () => controller.confirm("reject"));
@@ -181,6 +237,33 @@
     controller.load();
     return controller;
   }
-  root.MediFlowAuditPanel = { mount };
-  if (typeof module !== "undefined") module.exports = { mount };
+  // Agregado por Edil: arrancar la web estática con la sesión real, antes de
+  // crear el adaptador que captura la identidad. No sustituir fallos por la
+  // identidad inyectada: la bandera de contrato sigue siendo independiente.
+  async function mountFromSession(doc, options = {}) {
+    const $ = selector => doc.querySelector(selector);
+    $("#approveReview").hidden = $("#rejectReview").hidden = true;
+    $("#approveReview").disabled = $("#rejectReview").disabled = true;
+    $("#authSessionStatus").textContent = "Verificando sesión…";
+    const authClient = options.authClient || root.MediFlowAuthApi?.createClient();
+    let authenticatedUser = null, sessionError = false;
+    try {
+      const session = await authClient.getSession();
+      if (session?.authenticated === true && typeof session.user?.login === "string" && session.user.login.trim()
+          && typeof session.user.canReview === "boolean") {
+        authenticatedUser = { login: session.user.login, canReview: session.user.canReview };
+      } else if (!(session?.authenticated === false && session.user === null)) {
+        throw Error("Invalid session");
+      }
+    } catch (_) { sessionError = true; }
+    const factory = options.adapterFactory || root.MediFlowReviewHttpAdapter?.createAdapter;
+    const adapter = factory ? factory({
+      decisionApproved: root.MEDIFLOW_REVIEW_CONTRACT_APPROVED === true,
+      authenticatedUser,
+    }) : null;
+    const client = options.client || root.MediFlowReviewsApi.createClient({ approvedAdapter: adapter });
+    return mount(doc, { ...options, authClient, client, authenticatedUser, sessionError });
+  }
+  root.MediFlowAuditPanel = { mount, mountFromSession };
+  if (typeof module !== "undefined") module.exports = { mount, mountFromSession };
 })(typeof window !== "undefined" ? window : globalThis);

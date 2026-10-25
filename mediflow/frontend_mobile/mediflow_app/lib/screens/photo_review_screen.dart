@@ -37,7 +37,11 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
       child: FutureBuilder<bool>(
         future: _readable,
         builder: (context, snapshot) => ListView(
-          padding: const EdgeInsets.all(AppSpacing.xl),
+          padding: EdgeInsets.all(
+            MediaQuery.sizeOf(context).width < 400
+                ? AppSpacing.lg
+                : AppSpacing.xl,
+          ),
           children: [
             const AppHeader(
               title: 'Confirma la legibilidad',
@@ -45,22 +49,25 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
                   'Comprueba que se vea el documento completo, con letras claras y sin reflejos. Puedes ampliar la imagen.',
             ),
             const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              height: 320,
-              child: snapshot.data == true
-                  ? InteractiveViewer(
-                      child: Image.memory(
-                        widget.document.bytes!,
-                        fit: BoxFit.contain,
+            AppCard(
+              padding: AppSpacing.sm,
+              child: SizedBox(
+                height: 320,
+                child: snapshot.data == true
+                    ? InteractiveViewer(
+                        child: Image.memory(
+                          widget.document.bytes!,
+                          fit: BoxFit.contain,
+                        ),
+                      )
+                    : Center(
+                        child: snapshot.connectionState != ConnectionState.done
+                            ? const CircularProgressIndicator()
+                            : const Text(
+                                'No se puede visualizar esta foto. Repite la captura.',
+                              ),
                       ),
-                    )
-                  : Center(
-                      child: snapshot.connectionState != ConnectionState.done
-                          ? const CircularProgressIndicator()
-                          : const Text(
-                              'No se puede visualizar esta foto. Repite la captura.',
-                            ),
-                    ),
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             AppButton(
@@ -70,6 +77,7 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
               icon: Icons.check,
               label: 'Usar esta foto',
             ),
+            const SizedBox(height: AppSpacing.sm),
             AppButton(
               variant: AppButtonVariant.secondary,
               onPressed: () =>

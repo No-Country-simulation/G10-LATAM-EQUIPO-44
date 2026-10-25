@@ -10,8 +10,10 @@ abstract final class AppTheme {
       onPrimary: Colors.white,
       primaryContainer: AppColors.primarySoft,
       onPrimaryContainer: AppColors.clinicalBlue,
-      secondary: AppColors.clinicalBlue,
+      secondary: AppColors.secondary,
       onSecondary: Colors.white,
+      secondaryContainer: AppColors.secondarySoft,
+      onSecondaryContainer: AppColors.secondary,
       surface: AppColors.card,
       onSurface: AppColors.clinicalBlue,
       onSurfaceVariant: AppColors.secondaryText,
@@ -73,6 +75,18 @@ abstract final class AppTheme {
           fontFamily: AppTypography.family,
           color: AppColors.clinicalBlue,
           fontWeight: FontWeight.w500,
+        ),
+      ),
+      // Agregado por Edil: coherencia visual de foco, consentimiento e iconos.
+      focusColor: AppColors.primarySoft,
+      iconTheme: const IconThemeData(color: AppColors.primary, size: 24),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.card,
+        contentPadding: const EdgeInsets.all(AppSpacing.lg),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          borderSide: const BorderSide(color: AppColors.outline),
         ),
       ),
       checkboxTheme: CheckboxThemeData(

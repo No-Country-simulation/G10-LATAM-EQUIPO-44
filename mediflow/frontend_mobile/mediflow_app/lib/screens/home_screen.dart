@@ -19,7 +19,21 @@ class HomeScreen extends StatelessWidget {
   final DocumentCameraService? cameraService;
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('MediFlow')),
+    appBar: AppBar(
+      title: Row(
+        children: [
+          // Agregado por Edil: usar el logo aprobado, sin recrearlo.
+          Image.asset(
+            'lib/assets/Icono.png',
+            width: 36,
+            height: 36,
+            excludeFromSemantics: true,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          const Flexible(child: Text('MediFlow')),
+        ],
+      ),
+    ),
     body: SafeArea(
       child: Center(
         child: ConstrainedBox(
@@ -32,27 +46,25 @@ class HomeScreen extends StatelessWidget {
             ),
             children: [
               const SizedBox(height: AppSpacing.lg),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySoft,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+              // Agregado por Edil: portada documental con la marca en la barra superior.
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primarySoft, AppColors.secondarySoft],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  child: const Icon(
-                    Icons.health_and_safety_outlined,
-                    size: 40,
-                    color: AppColors.primary,
-                  ),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  border: Border.all(color: AppColors.outline),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              const AppHeader(
-                eyebrow: 'DOCUMENTOS CLÍNICOS',
-                title: 'Triaje de documentos clínicos',
-                subtitle:
-                    'Organiza el ingreso de tus documentos y consulta la respuesta del servidor.',
+                child: const AppHeader(
+                  eyebrow: 'DOCUMENTOS CLÍNICOS',
+                  title: 'Triaje de documentos clínicos',
+                  subtitle:
+                      'Selecciona un archivo o fotografía tu documento. '
+                      'Consulta su clasificación y los siguientes pasos.',
+                ),
               ),
               const SizedBox(height: AppSpacing.xxl),
               AppCard(

@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nuevo Ingreso · MediFlow Clinical Portal</title>
+<title>Subir documento · MediFlow</title>
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon.png">
 <meta name="description" content="Registro de ingreso en urgencias ED-1 con triaje según el sistema Manchester (MTS).">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=visor-privado-6">
 </head>
 
 <body data-screen="ingesta">
@@ -53,7 +54,7 @@
   <!-- ================= HEADER ================= -->
   <header class="topbar">
     <div class="topbar__brand">
-      <span class="brand__mark" aria-hidden="true"><svg class="icon"><use href="#i-cross"></use></svg></span>
+      <span class="brand__mark" aria-hidden="true"><img src="../assets/img/mediflow-icon.png" width="36" height="36" alt="" style="display:block;width:100%;height:100%;object-fit:contain"></span>
       <span class="brand__text">
         <span class="brand__name">MediFlow Clinical Portal</span>
         <span class="conn" title="Sincronización activa con el HIS de la unidad ED-1"><span class="conn__dot" aria-hidden="true"></span>HIS Connected</span>
@@ -165,8 +166,8 @@
     <div class="page-head">
       <div class="page-head__text">
         <p class="page-head__eyebrow"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-inbox"></use></svg>Urgencias · ED-1</p>
-        <h1 class="page-head__title">Nuevo ingreso y triaje MTS</h1>
-        <p class="page-head__sub">Registra al paciente, asigna el nivel de triaje de Manchester y confirma el ingreso en la unidad.</p>
+        <h1 class="page-head__title">Ingesta de documentos</h1>
+        <p class="page-head__sub">Envía un documento al backend de MediFlow y consulta su resultado real.</p>
       </div>
       <div class="page-head__actions">
         <span class="badge badge--navy"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-calendar"></use></svg>Turno noche · 22:41</span>
@@ -176,6 +177,44 @@
       </div>
     </div>
 
+    <!-- Agregado por Edil: carga multipart real, sin reutilizar datos ficticios del prototipo. -->
+    <section class="card upload-card" aria-labelledby="uploadTitle">
+      <div class="card__head"><h2 class="card__title" id="uploadTitle">Subir y analizar documento</h2></div>
+      <div class="card__body stack">
+        <p>PDF, JPG, PNG o TXT · máximo 10 MiB. Un archivo por envío.</p>
+        <form id="uploadForm" class="stack" aria-busy="false">
+          <label class="label" for="uploadFile">Documento</label>
+          <input class="input" id="uploadFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.txt" required aria-describedby="uploadHelp">
+          <p class="hint" id="uploadHelp">Se enviará al servidor, se almacenará en OCI y se analizará con Gemini. Los documentos ilegibles pueden requerir revisión.</p>
+          <label class="upload-consent"><input id="uploadConsent" type="checkbox" required> Autorizo el envío, almacenamiento y análisis de este documento y confirmo que tengo permiso para compartirlo.</label>
+          <div class="upload-actions">
+            <button class="btn btn--primary" id="uploadSubmit" type="submit">Enviar y analizar</button>
+            <button class="btn" id="uploadRecover" type="button" disabled>Consultar recepción</button>
+            <button class="btn btn--ghost" id="uploadNew" type="button">Nueva carga</button>
+            <a class="linkbtn" href="../historial/index.html">Ver historial</a>
+          </div>
+        </form>
+        <!-- Agregado por Edil: distinguir el archivo local del resultado almacenado. -->
+        <section id="uploadSelected" class="upload-file-row" hidden aria-label="Documento añadido">
+          <span id="uploadFileInfo"></span>
+          <a id="uploadPreviewLink" class="btn upload-eye" target="_blank" rel="noopener noreferrer" title="Ver original guardado en OCI" aria-label="Ver documento en otra pestaña, original de OCI" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></a>
+        </section>
+        <!-- Agregado por Edil: copia local efímera, independiente de la confirmación de OCI. -->
+        <p id="uploadFilePhase" class="hint"></p>
+        <details id="uploadLocalPanel" class="upload-local-preview" open hidden>
+          <summary>Vista previa local</summary>
+          <img id="uploadLocalImage" alt="Documento seleccionado" hidden>
+          <iframe id="uploadLocalPdf" title="PDF seleccionado" sandbox referrerpolicy="no-referrer" hidden></iframe>
+          <pre id="uploadLocalText" hidden></pre>
+          <a id="uploadLocalLink" target="_blank" rel="noopener noreferrer" hidden>Abrir copia local en otra pestaña</a>
+        </details>
+        <p id="uploadStatus" role="status" aria-live="polite"></p>
+        <div id="uploadResult" class="upload-result" hidden></div>
+      </div>
+    </section>
+    <details class="upload-prototype">
+      <summary>Formulario MTS de demostración (sin conexión al backend)</summary>
+      <p class="notice">Los controles de este prototipo no cargan archivos ni guardan ingresos reales. Usa la tarjeta superior para enviar documentos.</p>
     <div class="grid grid--2">
 
       <!-- ---------- Columna de formulario ---------- -->
@@ -393,6 +432,7 @@
         <svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg>Confirmar ingreso MTS
       </button>
     </div>
+    </details>
   </main>
 </div>
 
@@ -415,6 +455,10 @@
 
 <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
+<script src="../assets/js/api-config.js?v=ingesta-real-1"></script>
+<script src="../assets/js/documents-api.js?v=visor-privado-6"></script>
+<script src="../assets/js/triage-api.js?v=ingesta-real-1"></script>
+<script src="upload.js?v=visor-privado-6"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -19,16 +19,24 @@ class SelectedFileCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-            ),
-            child: Icon(icon, size: 32, color: AppColors.primary),
+          // Agregado por Edil: el archivo es el foco; metadatos y ruta se conservan.
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Icon(icon, size: 28, color: AppColors.primary),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(document.name, style: theme.textTheme.titleMedium),
+              ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(document.name, style: theme.textTheme.titleLarge),
           const SizedBox(height: AppSpacing.lg),
           Text('Tipo: ${document.type.label}'),
           const SizedBox(height: AppSpacing.xs),
@@ -40,9 +48,16 @@ class SelectedFileCard extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
               child: Divider(),
             ),
-            Text('Ruta disponible', style: theme.textTheme.labelLarge),
-            const SizedBox(height: AppSpacing.xs),
-            SelectableText(path, style: theme.textTheme.bodySmall),
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              title: Text('Ruta disponible', style: theme.textTheme.labelLarge),
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SelectableText(path, style: theme.textTheme.bodySmall),
+                ),
+              ],
+            ),
           ],
         ],
       ),

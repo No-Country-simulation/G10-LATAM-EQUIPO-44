@@ -10,6 +10,7 @@ import '../widgets/selected_file_card.dart';
 import '../widgets/triage_result_card.dart';
 import '../widgets/app_components.dart';
 import '../design_system/app_spacing.dart';
+import '../design_system/app_colors.dart';
 
 enum _TriageState { idle, processing, success, error }
 
@@ -290,7 +291,12 @@ class _DocumentSelectionScreenState extends State<DocumentSelectionScreen> {
                   const AppCard(
                     child: Column(
                       children: [
-                        Icon(Icons.file_open_outlined, size: 48),
+                        // Agregado por Edil: icono de acción, no sustituto del logo.
+                        Icon(
+                          Icons.upload_file_outlined,
+                          size: 48,
+                          color: AppColors.primary,
+                        ),
                         SizedBox(height: AppSpacing.lg),
                         AppHeader(
                           title: 'Ningún archivo seleccionado',

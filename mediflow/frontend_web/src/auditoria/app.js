@@ -8,7 +8,10 @@
   // Agregado por Edil: el panel conectado reutiliza el shell y estilos existentes.
   // La maqueta anterior se conserva debajo como referencia, pero NO se ejecuta:
   // sus datos MTS, firma simulada y cambios en memoria no son revisiones reales.
-  if (window.MediFlowAuditPanel) window.MediFlowAuditPanel.mount(document);
+  // Agregado por Edil: verificar la cookie antes de capturar identidad/permisos.
+  if (window.MediFlowAuditPanel) window.MediFlowAuditPanel.mountFromSession(document).catch(() => {
+    document.querySelector("#authSessionStatus").textContent = "No se pudo iniciar el panel. Las decisiones permanecen deshabilitadas.";
+  });
   return;
 
   /* --------------------------------------------------------------------

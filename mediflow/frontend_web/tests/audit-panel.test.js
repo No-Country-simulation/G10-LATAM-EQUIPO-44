@@ -1,10 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const vm = require("node:vm");
 const documentsApi = require("../src/assets/js/documents-api.js");
 const { createClient, ReviewApiError } = require("../src/assets/js/reviews-api.js");
 require("../src/assets/js/audit-controller.js");
-const { mount } = require("../src/auditoria/audit-panel.js");
+const { mount, mountFromSession } = require("../src/auditoria/audit-panel.js");
+const { createAdapter } = require("../src/assets/js/review-http-adapter.js");
 const { documents } = require("../src/assets/js/documents-mock.js");
 
 // Agregado por Edil: DOM mínimo de prueba para ejercitar handlers/renderizado.
@@ -28,6 +30,11 @@ function view(overrides = {}) {
   const sample = structuredClone(documents[3]); sample.clasificacion.nivel_prioridad = "Urgente";
   let calls = { list: 0, detail: 0, submit: 0, history: 0 };
   const api = { ...documentsApi,
+    getOriginal: async id => {
+      if (overrides.getOriginal) return overrides.getOriginal(id);
+      if (overrides.originalError) throw overrides.originalError;
+      return { mime: 'text/plain', blob: new Blob(['Original sintético']) };
+    },
     getDocuments: async () => { calls.list++; if (overrides.listError) throw overrides.listError; return overrides.rows || [sample]; },
     getDocument: async id => { calls.detail++; if (overrides.detailError) throw overrides.detailError; return { ...sample, documento_id: id }; } };
   const adapter = overrides.approved ? { approved: true, contractReference: "TEST-ONLY-NOT-PRODUCTION",
@@ -41,10 +48,11 @@ function view(overrides = {}) {
   // Identidad exclusiva de pruebas; producción la recibe del servidor privado.
   const authenticatedUser = Object.prototype.hasOwnProperty.call(overrides, "authenticatedUser")
     ? overrides.authenticatedUser : { login: "synthetic-auditor", canReview: true };
-  const controller = mount(doc, { client, storage, authenticatedUser, authClient: overrides.authClient, onLoggedOut: overrides.onLoggedOut });
+  const controller = mount(doc, { client, storage, originalApi: api, authenticatedUser, authClient: overrides.authClient, onLoggedOut: overrides.onLoggedOut });
   async function open() {
     const button = { disabled: false, dataset: { openDocument: sample.documento_id }, isConnected: false, closest() { return this; } };
     $("#auditList").fire("click", { target: button }); await controller.open(sample.documento_id);
+    await new Promise(resolve => setImmediate(resolve));
   }
   return { $, controller, calls, sample, overrides, open };
 }
@@ -213,4 +221,219 @@ test("HTML mantiene shell, prototipo inerte, semántica y CSS de anchura móvil"
   const css = fs.readFileSync(require.resolve("../src/auditoria/styles.css"), "utf8");
   assert.match(css, /body\[data-screen="auditoria"\] \[hidden\]\s*\{\s*display: none !important/);
   assert.match(css, /@media \(max-width: 680px\)/); assert.match(css, /width: calc\(100vw - 16px\)/);
+});
+
+// Agregado por Edil: arranque estático con respuestas de sesión simuladas,
+// sin servidor, cookies reales ni escrituras externas.
+function sessionView(getSession) {
+  const elements = new Map(), values = new Map(), adapters = [];
+  const doc = { querySelector(selector) {
+    if (!elements.has(selector)) elements.set(selector, new Element());
+    return elements.get(selector);
+  } };
+  const $ = selector => doc.querySelector(selector);
+  $('#auditPriority').value = 'all';
+  let sessionCalls = 0, requests = 0;
+  const ready = mountFromSession(doc, {
+    authClient: { getSession: async () => { sessionCalls++; return getSession(); }, logout: async () => {} },
+    storage: { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value) },
+    adapterFactory: options => {
+      const adapter = createAdapter({ ...options, fetchImpl: async (_, request) => {
+        requests++; assert.equal(request.credentials, 'include');
+        assert.equal(request.method, 'GET'); // No ejecutar decisiones en esta fixture.
+        return { ok: true, status: 200, json: async () => [] };
+      } });
+      adapters.push({ options, adapter }); return adapter;
+    },
+  });
+  return { $, ready, adapters, sessionCalls: () => sessionCalls, requests: () => requests };
+}
+async function configuredContract(flag, callback) {
+  const present = Object.prototype.hasOwnProperty.call(globalThis, 'MEDIFLOW_REVIEW_CONTRACT_APPROVED');
+  const previous = globalThis.MEDIFLOW_REVIEW_CONTRACT_APPROVED;
+  if (flag === undefined) delete globalThis.MEDIFLOW_REVIEW_CONTRACT_APPROVED;
+  else globalThis.MEDIFLOW_REVIEW_CONTRACT_APPROVED = flag;
+  try { await callback(); }
+  finally {
+    if (present) globalThis.MEDIFLOW_REVIEW_CONTRACT_APPROVED = previous;
+    else delete globalThis.MEDIFLOW_REVIEW_CONTRACT_APPROVED;
+  }
+}
+test('arranque espera sesión y crea adaptador con la identidad real antes de permitir acciones', async () => {
+  await configuredContract(true, async () => {
+    let finish;
+    const v = sessionView(() => new Promise(resolve => { finish = resolve; }));
+    assert.equal(v.$('#approveReview').hidden, true);
+    assert.equal(v.$('#rejectReview').disabled, true);
+    assert.equal(v.adapters.length, 0); assert.equal(v.requests(), 0);
+    const user = { login: 'session-auditor', canReview: true };
+    finish({ authenticated: true, user });
+    const controller = await v.ready; await controller.load();
+    assert.equal(v.sessionCalls(), 1);
+    assert.deepEqual(controller.state.authenticatedUser, user);
+    assert.deepEqual(v.adapters[0].options.authenticatedUser, user);
+    assert.equal(v.$('#approveReview').hidden, false);
+    assert.equal(v.$('#authLoginLink').hidden, true);
+    assert.equal(controller.state.capabilities.submit, true);
+    assert.equal(controller.canSubmit('approve'), false); // Falta detalle fresco, no se salta ese control.
+  });
+});
+test('sesión ausente no reutiliza identidad inyectada y muestra acceso sin decisiones', async () => {
+  const previous = globalThis.MEDIFLOW_AUTHENTICATED_USER;
+  globalThis.MEDIFLOW_AUTHENTICATED_USER = { login: 'stale-injected-user', canReview: true };
+  try {
+    await configuredContract(true, async () => {
+      const v = sessionView(async () => ({ authenticated: false, user: null }));
+      const controller = await v.ready; await controller.load();
+      assert.equal(controller.state.authenticatedUser, null);
+      assert.equal(v.adapters[0].options.authenticatedUser, null);
+      assert.equal(v.$('#approveReview').hidden, true);
+      assert.equal(v.$('#authLoginLink').hidden, false);
+      assert.equal(controller.canSubmit('reject'), false);
+      await assert.rejects(v.adapters[0].adapter.submitReview({}), error => error.status === 401);
+    });
+  } finally { globalThis.MEDIFLOW_AUTHENTICATED_USER = previous; }
+});
+test('usuario autenticado sin canReview no ve aprobar/rechazar ni obtiene permiso del contrato', async () => {
+  await configuredContract(true, async () => {
+    const v = sessionView(async () => ({ authenticated: true, user: { login: 'reader', canReview: false } }));
+    const controller = await v.ready; await controller.load();
+    assert.equal(controller.state.authenticatedUser.canReview, false);
+    assert.equal(v.$('#approveReview').hidden, true); assert.equal(v.$('#rejectReview').hidden, true);
+    assert.equal(v.$('#authLoginLink').hidden, true);
+    assert.equal(controller.canSubmit('approve'), false);
+    await assert.rejects(v.adapters[0].adapter.submitReview({}), error => error.status === 403);
+  });
+});
+for (const flag of [undefined, false]) {
+  test('sesión válida no habilita contrato pendiente: ' + String(flag), async () => {
+    await configuredContract(flag, async () => {
+      const v = sessionView(async () => ({ authenticated: true, user: { login: 'auditor', canReview: true } }));
+      const controller = await v.ready; await controller.load();
+      assert.equal(controller.state.capabilities.submit, false);
+      assert.equal(v.adapters[0].options.decisionApproved, false);
+      assert.equal(globalThis.MEDIFLOW_REVIEW_CONTRACT_APPROVED, flag);
+      await assert.rejects(v.adapters[0].adapter.submitReview({}), error => error.status === 403);
+    });
+  });
+}
+test('error de sesión permite solo consulta y muestra aviso seguro aunque hubiera identidad inyectada', async () => {
+  await configuredContract(true, async () => {
+    const v = sessionView(async () => { throw Error('PRIVATE-SESSION-TOKEN'); });
+    const controller = await v.ready; await controller.load();
+    assert.equal(controller.state.authenticatedUser, null);
+    assert.equal(v.$('#approveReview').hidden, true);
+    assert.match(v.$('#authSessionStatus').textContent, /No se pudo verificar/);
+    assert.ok(!v.$('#authSessionStatus').textContent.includes('PRIVATE'));
+    assert.equal(v.$('#authLoginLink').hidden, false);
+  });
+});
+for (const session of [
+  { authenticated: false, user: { login: 'forged', canReview: true } },
+  { authenticated: true, user: { login: 'forged', canReview: 'true' } },
+  { authenticated: true, user: null },
+]) {
+  test('sesión malformada no concede identidad: ' + JSON.stringify(session), async () => {
+    const v = sessionView(async () => session);
+    const controller = await v.ready; await controller.load();
+    assert.equal(controller.state.authenticatedUser, null);
+    assert.equal(v.$('#approveReview').hidden, true);
+    assert.match(v.$('#authSessionStatus').textContent, /No se pudo verificar/);
+  });
+}
+test('página real usa arranque de sesión y conserva bandera externa de contrato', () => {
+  const source = fs.readFileSync(require.resolve('../src/auditoria/app.js'), 'utf8');
+  assert.match(source, /mountFromSession\(document\)/);
+  const panel = fs.readFileSync(require.resolve('../src/auditoria/audit-panel.js'), 'utf8');
+  assert.doesNotMatch(panel, /MEDIFLOW_REVIEW_CONTRACT_APPROVED\s*=\s*true/);
+});
+
+// Agregado por Edil: ejecutar la declaración real del HTML, no una copia en tests.
+function applyHtmlContract(target = globalThis) {
+  const html = fs.readFileSync(require.resolve('../src/auditoria/index.html'), 'utf8');
+  const script = html.match(/<script id="review-contract-config">([\s\S]*?)<\/script>/);
+  assert.ok(script, 'La declaración explícita del contrato debe existir');
+  vm.runInNewContext(script[1], { window: target });
+}
+for (const injected of [undefined, true, false]) {
+  test('HTML estático habilita solo ausencia y respeta presentación: ' + String(injected), async () => {
+    await configuredContract(injected, async () => {
+      applyHtmlContract();
+      const expected = injected !== false;
+      assert.equal(globalThis.MEDIFLOW_REVIEW_CONTRACT_APPROVED, expected);
+      const v = sessionView(async () => ({ authenticated: true, user: { login: 'auditor', canReview: true } }));
+      const controller = await v.ready; await controller.load();
+      assert.equal(v.adapters[0].options.decisionApproved, expected);
+      assert.equal(controller.state.capabilities.submit, expected);
+      assert.equal(controller.state.listStatus, 'ready');
+      assert.ok(v.requests() > 0, 'Las lecturas deben funcionar también con contrato deshabilitado');
+      if (!expected) {
+        await assert.rejects(v.adapters[0].adapter.submitReview({}), error => error.status === 403);
+      }
+    });
+  });
+}
+for (const session of [
+  { authenticated: false, user: null },
+  { authenticated: true, user: { login: 'reader', canReview: false } },
+]) {
+  test('contrato estático aprobado no concede identidad ni permiso: ' + String(session.authenticated), async () => {
+    await configuredContract(undefined, async () => {
+      applyHtmlContract();
+      const v = sessionView(async () => session);
+      const controller = await v.ready; await controller.load();
+      assert.equal(globalThis.MEDIFLOW_REVIEW_CONTRACT_APPROVED, true);
+      assert.equal(v.$('#approveReview').hidden, true);
+      assert.equal(v.$('#rejectReview').hidden, true);
+      assert.equal(controller.canSubmit('approve'), false);
+      assert.equal(controller.canSubmit('reject'), false);
+      await assert.rejects(v.adapters[0].adapter.submitReview({}), error => error.status === (session.authenticated ? 403 : 401));
+    });
+  });
+}
+test('contrato explícito se ejecuta antes del adaptador y panel, sin depender de identidad o almacenamiento', () => {
+  const html = fs.readFileSync(require.resolve('../src/auditoria/index.html'), 'utf8');
+  const start = html.indexOf('<script id="review-contract-config">');
+  const end = html.indexOf('</script>', start);
+  assert.ok(start >= 0 && end < html.indexOf('src="../assets/js/review-http-adapter.js'));
+  assert.ok(end < html.indexOf('src="audit-panel.js'));
+  assert.ok(end < html.indexOf('src="app.js'));
+  const source = html.slice(start, end);
+  assert.doesNotMatch(source, /canReview|authenticated|localStorage|sessionStorage|location|URLSearchParams/);
+  for (const value of ['true', null]) {
+    const target = { MEDIFLOW_REVIEW_CONTRACT_APPROVED: value };
+    applyHtmlContract(target);
+    assert.equal(target.MEDIFLOW_REVIEW_CONTRACT_APPROVED, value);
+  }
+});
+
+for (const status of [401, 403, 404]) {
+  test('original no disponible HTTP ' + status + ' bloquea decisiones sin ocultar análisis', async () => {
+    const error = new documentsApi.DocumentsApiError('Original no disponible', status);
+    const v = view({ approved: true, originalError: error });
+    await v.controller.load(); await v.open();
+    assert.equal(v.controller.state.detailStatus, 'ready');
+    assert.equal(v.controller.canSubmit('approve'), false);
+    assert.equal(v.controller.confirm('reject'), false);
+    assert.equal(v.$('#approveReview').disabled, true);
+    assert.equal(v.$('#auditOriginalLink').hidden, true);
+    assert.match(v.$('#auditOriginalStatus').textContent, /Original no disponible/);
+    assert.equal(v.calls.submit, 0);
+  });
+}
+test('cambiar ID y cerrar descarta original anterior y respuestas tardías', async () => {
+  let completeOld;
+  const v = view({ approved: true, getOriginal: id => id === documents[3].documento_id
+    ? new Promise(resolve => { completeOld = resolve; })
+    : Promise.resolve({ mime: 'text/plain', blob: new Blob(['Original B']) }) });
+  await v.controller.load(); await v.open();
+  assert.equal(v.controller.canSubmit('approve'), false);
+  await v.controller.open('DOC-OTHER'); await new Promise(resolve => setImmediate(resolve));
+  assert.equal(v.$('#auditOriginalText').textContent, 'Original B');
+  completeOld({ mime: 'text/plain', blob: new Blob(['OLD-PRIVATE']) });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(v.$('#auditOriginalText').textContent, 'Original B');
+  v.controller.close();
+  assert.equal(v.$('#auditOriginalText').textContent, '');
+  assert.equal(v.$('#auditOriginalLink').hidden, true);
 });

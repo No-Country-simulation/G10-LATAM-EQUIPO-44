@@ -38,7 +38,8 @@
       const timer = setTimeout(abort, timeoutMs);
       try {
         const response = await (fetchImpl || root.fetch)(base.toString().replace(/\/$/, "") + path, {
-          method, headers: { Accept: "application/json", ...(body ? { "Content-Type": "application/json" } : {}) },
+          // Agregado por Edil: conservar la cookie de sesión en las consultas y decisiones entre puertos.
+          method, credentials: "include", headers: { Accept: "application/json", ...(body ? { "Content-Type": "application/json" } : {}) },
           ...(body ? { body: JSON.stringify(body) } : {}), signal: controller.signal, redirect: "error"
         });
         if (!response.ok) throw new ErrorType("La API no pudo completar la operación de revisión.", response.status);

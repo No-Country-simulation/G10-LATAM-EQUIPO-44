@@ -3,7 +3,7 @@
 (function (root) {
   "use strict";
   const ledgerKey = "mediflow.review.uncertain.v1";
-  function createController({ client, onChange = () => {}, storage = null, authenticatedUser = null }) {
+  function createController({ client, onChange = () => {}, storage = null, authenticatedUser = null, canReviewOriginal = () => true }) {
     // Agregado por Edil: conservar una copia de la identidad suministrada por
     // el servidor. El formulario no puede cambiar el responsable de la decisión.
     const principal = typeof authenticatedUser?.login === "string" && authenticatedUser.login.trim()
@@ -72,6 +72,7 @@
     function setReviewerId() { return false; }
     function canSubmit(decision) {
       return !!(principal?.canReview && state.capabilities.submit && state.storageAvailable && state.detailStatus === "ready" &&
+        canReviewOriginal(state.selectedId) &&
         (!state.capabilities.requiresReviewerId || state.reviewerId.trim()) &&
         (!state.capabilities.requiresRejectionObservation || decision !== "reject" || state.observation.trim()) &&
         state.document?.status === "auditoria_humana" && state.document.documento_id === state.selectedId &&
