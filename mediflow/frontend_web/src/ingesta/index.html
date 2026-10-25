@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Subir documento · MediFlow</title>
 <link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon.png">
-<meta name="description" content="Registro de ingreso en urgencias ED-1 con triaje según el sistema Manchester (MTS).">
+<meta name="description" content="Carga y análisis de documentos clínicos en MediFlow.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/styles.css">
-<link rel="stylesheet" href="styles.css?v=visor-privado-6">
+<link rel="stylesheet" href="../assets/css/styles.css?v=pitch-1">
+<link rel="stylesheet" href="styles.css?v=pitch-1">
 </head>
 
 <body data-screen="ingesta">
@@ -52,139 +52,41 @@
 <div class="app">
 
   <!-- ================= HEADER ================= -->
-  <header class="topbar">
-    <div class="topbar__brand">
-      <span class="brand__mark" aria-hidden="true"><img src="../assets/img/mediflow-icon.png" width="36" height="36" alt="" style="display:block;width:100%;height:100%;object-fit:contain"></span>
-      <span class="brand__text">
-        <span class="brand__name">MediFlow Clinical Portal</span>
-        <span class="conn" title="Sincronización activa con el HIS de la unidad ED-1"><span class="conn__dot" aria-hidden="true"></span>HIS Connected</span>
-      </span>
-    </div>
-
-    <div class="topbar__search">
-      <label class="sr-only" for="q">Buscar paciente por cédula, nombre o número de ingreso</label>
-      <svg class="icon topbar__search-icon" aria-hidden="true"><use href="#i-search"></use></svg>
-      <input id="q" class="input" type="search" autocomplete="off"
-             placeholder="Buscar cédula, nombre o N.º de ingreso…">
-      <kbd>Ctrl K</kbd>
-    </div>
-
-    <div class="topbar__actions">
-      <button type="button" class="btn btn--danger" data-toast="Escalación de emergencia enviada a la Jefatura de ED-1 (canal rojo).">
-        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-alert"></use></svg>
-        <span class="nowrap">Emergency Escalation</span>
-      </button>
-      <button type="button" class="icon-btn" title="Notificaciones: 3 nuevas" aria-label="Notificaciones, 3 nuevas">
-        <svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg>
-        <span class="dot" aria-hidden="true"></span>
-      </button>
-      <button type="button" class="icon-btn" data-optional title="Estado del concentrador HIS: señal estable al 98 %" aria-label="Estado de la señal del HIS">
-        <svg class="icon" aria-hidden="true"><use href="#i-signal"></use></svg>
-      </button>
-      <button type="button" class="icon-btn" data-optional title="Centro de ayuda y protocols ED-1" aria-label="Ayuda">
-        <svg class="icon" aria-hidden="true"><use href="#i-help"></use></svg>
-      </button>
-
-      <div class="menu">
-        <button type="button" class="user" id="userBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
-          <span class="avatar" aria-hidden="true">MV</span>
-          <span class="user__text">
-            <span class="user__name">Dr. M. Vance, MD</span>
-            <span class="user__role">Chief Attending ED-1</span>
-          </span>
-        </button>
-        <div class="menu__panel" id="userMenu" role="menu" hidden>
-          <div class="menu__head">
-            <div class="nowrap" style="font-weight:600">Dr. M. Vance, MD</div>
-            <div class="menu__meta">Matrícula 4482-A · Turno noche 19:00–07:00</div>
-          </div>
-          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-user"></use></svg>Mi perfil clínico</button>
-          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-calendar"></use></svg>Mi turno</button>
-          <div class="menu__sep" role="separator"></div>
-          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-logout"></use></svg>Cerrar sesión</button>
-        </div>
-      </div>
-    </div>
-  </header>
+  <header class="topbar"><a class="topbar__brand portal-brand" href="../index.html" aria-label="MediFlow, inicio"><span class="brand__mark" aria-hidden="true"><img src="../assets/img/mediflow-icon.png" width="36" height="36" alt="" style="display:block;width:100%;height:100%;object-fit:contain"></span><span class="brand__text"><span class="brand__name">MediFlow</span><span class="conn">Documentos clínicos</span></span></a><a class="btn portal-access" href="../login/index.html">Acceso a mi cuenta</a></header>
 
   <!-- ================= SIDEBAR ================= -->
-  <aside class="sidebar">
-    <div class="side__unit">
-      <span class="side__unit-icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-stethoscope"></use></svg></span>
-      <span class="side__unit-text">
-        <span class="side__unit-name">ED-1 Triage</span>
-        <span class="side__unit-sub" title="Sistema de triaje Manchester">Manchester System MTS</span>
-      </span>
-    </div>
-
-    <div class="side__primary">
-      <button type="button" class="btn btn--primary btn--block" data-nav="ingesta" title="Nuevo Ingreso">
-        <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
-        <span class="btn__label">Nuevo Ingreso</span>
-      </button>
-    </div>
-
-    <nav class="side__nav" aria-label="Navegación principal">
-      <a class="nav__item is-active" data-nav="ingesta" href="./index.html" title="Ingesta" aria-current="page">
-        <svg class="icon" aria-hidden="true"><use href="#i-inbox"></use></svg>
-        <span class="nav__label">Ingesta</span>
-      </a>
-      <a class="nav__item" data-nav="resultado" href="../resultado/index.html" title="Resultado">
-        <svg class="icon" aria-hidden="true"><use href="#i-file-check"></use></svg>
-        <span class="nav__label">Resultado</span>
-      </a>
-      <a class="nav__item" data-nav="colas" href="../colas/index.html" title="Colas">
-        <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>
-        <span class="nav__label">Colas</span>
-        <span class="nav__badge" id="navQueueTotal" title="Pacientes en cola de triaje">0</span>
-      </a>
-      <a class="nav__item" data-nav="auditoria" href="../auditoria/index.html" title="Auditoría">
-        <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
-        <span class="nav__label">Auditoría</span>
-        <span class="nav__badge nav__badge--alerta" id="navAuditTotal" title="Revisiones pendientes">4</span>
-      </a>
-      <a class="nav__item" data-nav="historial" href="../historial/index.html" title="Historial">
-        <svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg>
-        <span class="nav__label">Historial</span>
-      </a>
-    </nav>
-
-    <div class="side__foot">
-      <a class="nav__item" href="#" title="Configuración">
-        <svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg>
-        <span class="nav__label">Configuración</span>
-      </a>
-      <a class="nav__item" href="#" title="Soporte HIS">
-        <svg class="icon" aria-hidden="true"><use href="#i-support"></use></svg>
-        <span class="nav__label">Soporte HIS</span>
-      </a>
-    </div>
-  </aside>
+  <!-- Agregado por Edil: navegación limitada a los flujos disponibles. -->
+<aside class="sidebar"><div class="side__unit"><span class="side__unit-text"><span class="side__unit-name">Documentos clínicos</span><span class="side__unit-sub">Carga, análisis y revisión</span></span></div><nav class="side__nav" aria-label="Navegación principal"><a class="nav__item is-active" data-nav="ingesta" href="../ingesta/index.html" title="Subir documento" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-inbox"></use></svg><span class="nav__label">Subir documento</span></a>
+<a class="nav__item" data-nav="historial" href="../historial/index.html" title="Historial"><svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg><span class="nav__label">Historial</span></a>
+<a class="nav__item" data-nav="auditoria" href="../auditoria/index.html" title="Auditoría humana"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg><span class="nav__label">Auditoría humana</span></a></nav></aside>
 
   <!-- ================= MAIN ================= -->
   <main class="main" id="main">
     <div class="page-head">
       <div class="page-head__text">
-        <p class="page-head__eyebrow"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-inbox"></use></svg>Urgencias · ED-1</p>
-        <h1 class="page-head__title">Ingesta de documentos</h1>
-        <p class="page-head__sub">Envía un documento al backend de MediFlow y consulta su resultado real.</p>
+        <p class="page-head__eyebrow"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-inbox"></use></svg>Carga documental</p>
+        <h1 class="page-head__title">Subir documento</h1>
+        <p class="page-head__sub">Carga un documento clínico para extraer, clasificar y consultar su información.</p>
       </div>
-      <div class="page-head__actions">
-        <span class="badge badge--navy"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-calendar"></use></svg>Turno noche · 22:41</span>
-        <button type="button" class="btn" data-toast="Borrador guardado en el HIS. Recuperable durante 24 h.">
-          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-clipboard"></use></svg>Guardar borrador
-        </button>
-      </div>
+
     </div>
 
+    <!-- Agregado por Edil: etapas informativas; no representan porcentajes de avance. -->
+    <ol class="upload-steps" aria-label="Etapas del documento"><li><span>1</span>Seleccionar archivo</li><li><span>2</span>Enviar y analizar</li><li><span>3</span>Consultar resultado</li></ol>
+    <div class="upload-workspace">
     <!-- Agregado por Edil: carga multipart real, sin reutilizar datos ficticios del prototipo. -->
     <section class="card upload-card" aria-labelledby="uploadTitle">
       <div class="card__head"><h2 class="card__title" id="uploadTitle">Subir y analizar documento</h2></div>
       <div class="card__body stack">
-        <p>PDF, JPG, PNG o TXT · máximo 10 MiB. Un archivo por envío.</p>
+        <p class="hint">El original se conserva en OCI y el análisis se realiza con Gemini.</p>
         <form id="uploadForm" class="stack" aria-busy="false">
-          <label class="label" for="uploadFile">Documento</label>
-          <input class="input" id="uploadFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.txt" required aria-describedby="uploadHelp">
+          <div class="upload-dropzone">
+            <svg class="upload-cloud" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18H5a4 4 0 0 1-.5-8 7 7 0 0 1 13.5-2 5 5 0 0 1 1 10h-2M12 21V10m-4 4 4-4 4 4"/></svg>
+            <label class="label" for="uploadFile">Selecciona un documento de tu equipo</label>
+            <p>PDF, JPG, JPEG, PNG o TXT · hasta 10 MiB</p>
+            <input class="input" id="uploadFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.txt" required aria-describedby="uploadHelp">
+            <span class="hint">Un archivo por envío. Puedes reemplazarlo antes de enviarlo.</span>
+          </div>
           <p class="hint" id="uploadHelp">Se enviará al servidor, se almacenará en OCI y se analizará con Gemini. Los documentos ilegibles pueden requerir revisión.</p>
           <label class="upload-consent"><input id="uploadConsent" type="checkbox" required> Autorizo el envío, almacenamiento y análisis de este documento y confirmo que tengo permiso para compartirlo.</label>
           <div class="upload-actions">
@@ -196,7 +98,7 @@
         </form>
         <!-- Agregado por Edil: distinguir el archivo local del resultado almacenado. -->
         <section id="uploadSelected" class="upload-file-row" hidden aria-label="Documento añadido">
-          <span id="uploadFileInfo"></span>
+          <span id="uploadFileType" class="upload-filetype" aria-label="Formato seleccionado">DOC</span><span id="uploadFileInfo"></span>
           <a id="uploadPreviewLink" class="btn upload-eye" target="_blank" rel="noopener noreferrer" title="Ver original guardado en OCI" aria-label="Ver documento en otra pestaña, original de OCI" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></a>
         </section>
         <!-- Agregado por Edil: copia local efímera, independiente de la confirmación de OCI. -->
@@ -208,10 +110,14 @@
           <pre id="uploadLocalText" hidden></pre>
           <a id="uploadLocalLink" target="_blank" rel="noopener noreferrer" hidden>Abrir copia local en otra pestaña</a>
         </details>
-        <p id="uploadStatus" role="status" aria-live="polite"></p>
+        <p id="uploadStatus" class="surface-note" role="status" aria-live="polite"></p>
         <div id="uploadResult" class="upload-result" hidden></div>
       </div>
     </section>
+    <aside class="upload-guide card" aria-labelledby="uploadGuideTitle"><div class="card__body"><span class="guide-icon" aria-hidden="true"><svg class="icon"><use href="#i-shield"></use></svg></span><h2 id="uploadGuideTitle">Del documento al análisis</h2><dl><dt>Original disponible</dt><dd>Consulta la copia guardada cuando el servidor confirme su recepción.</dd><dt>Resultado trazable</dt><dd>Cada carga tiene un identificador para recuperar su resultado sin repetir el envío.</dd><dt>Supervisión humana</dt><dd>Los documentos que lo requieren pasan a la bandeja de auditoría.</dd></dl><a class="btn" href="../historial/index.html">Consultar historial</a></div></aside>
+    </div>
+    <!-- Agregado por Edil: se conserva el prototipo como referencia inerte. -->
+    <template id="ingestaLegacyForm">
     <details class="upload-prototype">
       <summary>Formulario MTS de demostración (sin conexión al backend)</summary>
       <p class="notice">Los controles de este prototipo no cargan archivos ni guardan ingresos reales. Usa la tarjeta superior para enviar documentos.</p>
@@ -433,9 +339,11 @@
       </button>
     </div>
     </details>
+    </template>
   </main>
 </div>
 
+<template id="ingestaLegacyDialog">
 <!-- Modal de confirmación -->
 <div class="modal" id="modalConfirmar" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" hidden>
   <div class="modal__dialog">
@@ -453,12 +361,13 @@
   </div>
 </div>
 
+</template>
 <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
 <script src="../assets/js/api-config.js?v=ingesta-real-1"></script>
-<script src="../assets/js/documents-api.js?v=visor-privado-6"></script>
+<script src="../assets/js/documents-api.js?v=pitch-1"></script>
 <script src="../assets/js/triage-api.js?v=ingesta-real-1"></script>
-<script src="upload.js?v=visor-privado-6"></script>
-<script src="app.js"></script>
+<script src="upload.js?v=pitch-1"></script>
+<!-- Agregado por Edil: el prototipo MTS no se ejecuta en la ingesta real. -->
 </body>
 </html>

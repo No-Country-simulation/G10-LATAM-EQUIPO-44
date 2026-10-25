@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Historial · MediFlow Clinical Portal</title>
 <link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon.png">
-<meta name="description" content="Repositorio documental clínico de ED-1: informes, analíticas, pruebas de imagen y recetas, con triaje MTS, estado de procesamiento y ruta de almacenamiento en el HIS.">
+<meta name="description" content="Historial de documentos de ED-1: informes, analíticas, pruebas de imagen y recetas, con triaje MTS, estado de procesamiento y ruta de almacenamiento en el HIS.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/styles.css">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../assets/css/styles.css?v=bandejas-1">
+<link rel="stylesheet" href="styles.css?v=bandejas-1">
 </head>
 
 <body data-screen="historial">
@@ -64,136 +64,47 @@
 <div class="app">
 
   <!-- ================= HEADER ================= -->
-  <header class="topbar">
-    <div class="topbar__brand">
-      <span class="brand__mark" aria-hidden="true"><img src="../assets/img/mediflow-icon.png" width="36" height="36" alt="" style="display:block;width:100%;height:100%;object-fit:contain"></span>
-      <span class="brand__text">
-        <span class="brand__name">MediFlow Clinical Portal</span>
-        <span id="historyConnection" class="conn" title="Estado de la consulta al backend"><span class="conn__dot" aria-hidden="true"></span>Conectando</span>
-      </span>
-    </div>
-
-    <div class="topbar__search">
-      <label class="sr-only" for="q">Buscar en el historial por identificador de documento, paciente o ruta de almacenamiento</label>
-      <svg class="icon topbar__search-icon" aria-hidden="true"><use href="#i-search"></use></svg>
-      <input id="q" class="input" type="search" autocomplete="off"
-             placeholder="Buscar por ID, paciente o ruta…">
-      <kbd>Ctrl K</kbd>
-    </div>
-
-    <div class="topbar__actions">
-      <button type="button" class="btn btn--danger" data-toast="Escalación de emergencia enviada a la Jefatura de ED-1 (canal rojo).">
-        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-alert"></use></svg>
-        <span class="nowrap">Emergency Escalation</span>
-      </button>
-      <button type="button" class="icon-btn" title="Notificaciones: 3 nuevas" aria-label="Notificaciones, 3 nuevas">
-        <svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg>
-        <span class="dot" aria-hidden="true"></span>
-      </button>
-      <button type="button" class="icon-btn" data-optional title="Modo demostración, sin conexión HIS" aria-label="Modo demostración">
-        <svg class="icon" aria-hidden="true"><use href="#i-signal"></use></svg>
-      </button>
-      <button type="button" class="icon-btn" data-optional title="Centro de ayuda y protocolos ED-1" aria-label="Ayuda">
-        <svg class="icon" aria-hidden="true"><use href="#i-help"></use></svg>
-      </button>
-
-      <div class="menu">
-        <button type="button" class="user" id="userBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
-          <span class="avatar" aria-hidden="true">MV</span>
-          <span class="user__text">
-            <span class="user__name">Dr. M. Vance, MD</span>
-            <span class="user__role">Chief Attending ED-1</span>
-          </span>
-        </button>
-        <div class="menu__panel" id="userMenu" role="menu" hidden>
-          <div class="menu__head">
-            <div class="nowrap" style="font-weight:600">Dr. M. Vance, MD</div>
-            <div class="menu__meta">Matrícula 4482-A · Turno noche 19:00–07:00</div>
-          </div>
-          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-user"></use></svg>Mi perfil clínico</button>
-          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-calendar"></use></svg>Mi turno</button>
-          <div class="menu__sep" role="separator"></div>
-          <button type="button" class="menu__item" role="menuitem"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-logout"></use></svg>Cerrar sesión</button>
-        </div>
-      </div>
-    </div>
-  </header>
+  <header class="topbar"><a class="topbar__brand portal-brand" href="../index.html" aria-label="MediFlow, inicio"><span class="brand__mark" aria-hidden="true"><img src="../assets/img/mediflow-icon.png" width="36" height="36" alt="" style="display:block;width:100%;height:100%;object-fit:contain"></span><span class="brand__text"><span class="brand__name">MediFlow</span><span class="conn" id="historyConnection" role="status">Preparando consulta</span></span></a><a class="btn portal-access" href="../login/index.html">Acceso a mi cuenta</a></header>
 
   <!-- ================= SIDEBAR ================= -->
-  <aside class="sidebar">
-    <div class="side__unit">
-      <span class="side__unit-icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-stethoscope"></use></svg></span>
-      <span class="side__unit-text">
-        <span class="side__unit-name">ED-1 Triage</span>
-        <span class="side__unit-sub" title="Sistema de triaje Manchester">Manchester System MTS</span>
-      </span>
-    </div>
-
-    <div class="side__primary">
-      <button type="button" class="btn btn--primary btn--block" data-nav="ingesta" title="Nuevo Ingreso">
-        <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
-        <span class="btn__label">Nuevo Ingreso</span>
-      </button>
-    </div>
-
-    <nav class="side__nav" aria-label="Navegación principal">
-      <a class="nav__item" data-nav="ingesta" href="../ingesta/index.html" title="Ingesta">
-        <svg class="icon" aria-hidden="true"><use href="#i-inbox"></use></svg>
-        <span class="nav__label">Ingesta</span>
-      </a>
-      <a class="nav__item" data-nav="resultado" href="../resultado/index.html" title="Resultado">
-        <svg class="icon" aria-hidden="true"><use href="#i-file-check"></use></svg>
-        <span class="nav__label">Resultado</span>
-      </a>
-      <a class="nav__item" data-nav="colas" href="../colas/index.html" title="Colas">
-        <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>
-        <span class="nav__label">Colas</span>
-        <span class="nav__badge" id="navQueueTotal" title="Pacientes en cola de triaje">0</span>
-      </a>
-      <a class="nav__item" data-nav="auditoria" href="../auditoria/index.html" title="Auditoría">
-        <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
-        <span class="nav__label">Auditoría</span>
-        <span class="nav__badge nav__badge--alerta" id="navAuditTotal" title="Revisiones pendientes">5</span>
-      </a>
-      <a class="nav__item is-active" data-nav="historial" href="./index.html" title="Historial" aria-current="page">
-        <svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg>
-        <span class="nav__label">Historial</span>
-      </a>
-    </nav>
-
-    <div class="side__foot">
-      <a class="nav__item" href="#" title="Configuración">
-        <svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg>
-        <span class="nav__label">Configuración</span>
-      </a>
-      <a class="nav__item" href="#" title="Soporte HIS">
-        <svg class="icon" aria-hidden="true"><use href="#i-support"></use></svg>
-        <span class="nav__label">Soporte HIS</span>
-      </a>
-    </div>
-  </aside>
+  <!-- Agregado por Edil: navegación limitada a los flujos disponibles. -->
+<aside class="sidebar"><div class="side__unit"><span class="side__unit-text"><span class="side__unit-name">Documentos clínicos</span><span class="side__unit-sub">Carga, análisis y revisión</span></span></div><nav class="side__nav" aria-label="Navegación principal"><a class="nav__item" data-nav="ingesta" href="../ingesta/index.html" title="Subir documento"><svg class="icon" aria-hidden="true"><use href="#i-inbox"></use></svg><span class="nav__label">Subir documento</span></a>
+<a class="nav__item is-active" data-nav="historial" href="../historial/index.html" title="Historial" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg><span class="nav__label">Historial</span></a>
+<a class="nav__item" data-nav="auditoria" href="../auditoria/index.html" title="Auditoría humana"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg><span class="nav__label">Auditoría humana</span></a></nav></aside>
 
   <!-- ================= MAIN ================= -->
   <main class="main" id="main">
     <div class="page-head">
       <div class="page-head__text">
-        <p class="page-head__eyebrow"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-history"></use></svg>Historial · ED-1</p>
-        <h1 class="page-head__title">Repositorio documental clínico</h1>
-        <p class="page-head__sub">Documentos consultados al backend. La prioridad es una propuesta pendiente de validación clínica.</p>
+        <p class="page-head__eyebrow"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-history"></use></svg>Consulta documental</p>
+        <h1 class="page-head__title">Historial de documentos</h1>
+        <p class="page-head__sub">Consulta el análisis y el estado de cada documento. La prioridad automática es orientativa.</p>
       </div>
       <div class="page-head__actions">
         <!-- Agregado por Edil: GET real; no procesa documentos ni llama a Gemini. -->
         <button type="button" class="btn" id="refreshDocuments">Actualizar documentos</button>
-        <button type="button" class="btn" data-toast="Índice documental impreso para el expediente de referencia.">
-          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-print"></use></svg>Imprimir índice
-        </button>
-        <button type="button" class="btn btn--soft" data-toast="Repositorio exportado como manifiesto DICOMweb FHIR.">
-          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-download"></use></svg>Exportar manifiesto
-        </button>
+
+
       </div>
     </div>
 
-    <p id="documentLoadStatus" role="status" aria-live="polite">Consultando documentos...</p>
+    <!-- Agregado por Edil: contadores de la respuesta actual, no totales globales. -->
+    <section class="metric-grid" aria-label="Resumen de los documentos consultados">
+      <div class="metric-card"><span class="metric-icon" aria-hidden="true"><svg class="icon"><use href="#i-notes"></use></svg></span><div class="metric-body"><strong class="metric-value" id="historyTotal">—</strong><span class="metric-label">Documentos consultados</span></div></div>
+      <div class="metric-card metric-card--success"><span class="metric-icon" aria-hidden="true"><svg class="icon"><use href="#i-file-check"></use></svg></span><div class="metric-body"><strong class="metric-value" id="historyProcessed">—</strong><span class="metric-label">Procesados</span></div></div>
+      <div class="metric-card metric-card--violet"><span class="metric-icon" aria-hidden="true"><svg class="icon"><use href="#i-shield"></use></svg></span><div class="metric-body"><strong class="metric-value" id="historyAudit">—</strong><span class="metric-label">En auditoría humana</span></div></div>
+      <div class="metric-card metric-card--danger"><span class="metric-icon" aria-hidden="true"><svg class="icon"><use href="#i-alert"></use></svg></span><div class="metric-body"><strong class="metric-value" id="historyUrgent">—</strong><span class="metric-label">Prioridad urgente</span></div></div>
+    </section>
+    <p class="hint history-scope">Resumen de esta consulta, hasta 500 documentos. No representa el total global del sistema.</p>
+    <p id="documentLoadStatus" class="surface-note" data-state="loading" role="status" aria-live="polite">Consultando documentos...</p>
+    <!-- Agregado por Edil: bandejas de lectura sobre la respuesta existente. -->
+    <section class="destination-section" aria-labelledby="destinationTitle"><div class="destination-heading"><h2 id="destinationTitle">Bandejas de destino</h2><span class="hint" id="destinationSelection">Bandeja: Todos los destinos</span></div><p class="hint">Contadores de esta consulta (hasta 500 documentos), antes de aplicar filtros y paginación.</p><div class="destination-trays" id="destinationTrays" role="group" aria-label="Filtrar documentos por bandeja"><button type="button" class="destination-tray" id="tray-todos" data-tray="todos" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg><span>Todos los destinos</span><strong id="tray-count-todos">—</strong></button>
+<button type="button" class="destination-tray" id="tray-urgencias" data-tray="urgencias" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-alert"></use></svg><span>Urgencias</span><strong id="tray-count-urgencias">—</strong></button>
+<button type="button" class="destination-tray" id="tray-farmacia" data-tray="farmacia" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-pill"></use></svg><span>Farmacia</span><strong id="tray-count-farmacia">—</strong></button>
+<button type="button" class="destination-tray" id="tray-historia" data-tray="historia" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-notes"></use></svg><span>Historia clínica</span><strong id="tray-count-historia">—</strong></button>
+<button type="button" class="destination-tray" id="tray-auditoria" data-tray="auditoria" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg><span>Auditoría humana</span><strong id="tray-count-auditoria">—</strong></button>
+<button type="button" class="destination-tray" id="tray-recibidos" data-tray="recibidos" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg><span>Sin procesar</span><strong id="tray-count-recibidos">—</strong></button>
+<button type="button" class="destination-tray" id="tray-otros" data-tray="otros" aria-pressed="false" hidden><svg class="icon" aria-hidden="true"><use href="#i-funnel"></use></svg><span>Otros destinos</span><strong id="tray-count-otros">—</strong></button></div><p class="destination-help">Auditoría humana muestra el destino del análisis, no las revisiones pendientes. <a href="../auditoria/index.html">Consultar pendientes reales</a>.</p><p class="hint">Estas bandejas no aplican permisos por departamento. Para la demostración, utiliza únicamente documentos sintéticos.</p></section>
     <!-- ---------- 1. BARRA SUPERIOR DE TABLA ---------- -->
     <section class="toolbar toolbar--panel" aria-label="Filtros del repositorio documental">
       <div class="toolbar__row">
@@ -264,11 +175,12 @@
         </div>
 
         <!-- Estado vacío -->
-        <div class="empty" id="vacio" hidden>
+        <div class="empty empty-state" id="vacio" hidden>
           <span class="empty__icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-funnel"></use></svg></span>
-          <span class="empty__title">No hay registros que coincidan</span>
-          <span class="empty__text">Ningún documento cargado cumple el texto buscado y los filtros de prioridad y estado.</span>
-          <button type="button" class="btn btn--primary" id="btnLimpiarVacio">
+          <span id="historyEmptyTitle" class="empty__title empty-state__title">No hay registros que coincidan</span>
+          <span id="historyEmptyText" class="empty__text empty-state__text">Ningún documento cargado cumple el texto buscado y los filtros de prioridad y estado.</span>
+          <a class="btn btn--primary" id="historyEmptyUpload" href="../ingesta/index.html" hidden>Subir el primer documento</a>
+          <button type="button" class="btn" id="btnLimpiarVacio">
             <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>Limpiar filtros
           </button>
         </div>
@@ -305,17 +217,18 @@
 
 <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
-<dialog id="documentDetail" aria-labelledby="documentDetailTitle" style="max-width:720px;width:90%;padding:24px;border-radius:16px">
+<dialog id="documentDetail" class="history-detail" aria-labelledby="documentDetailTitle">
   <h2 id="documentDetailTitle">Detalle del documento</h2>
-  <p>Vista de lectura. La revisión y aprobación conectadas se implementarán en un sprint posterior.</p>
+  <p>Consulta del análisis guardado. Para revisar un documento, abre Auditoría humana.</p>
   <p id="documentDetailStatus" role="status" aria-live="polite"></p>
-  <pre id="documentDetailJson" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+  <div class="history-detail-grid"><section aria-label="Análisis documental"><h3>Resultado del análisis</h3><p id="documentDetailSummary" class="history-summary"></p><details><summary>Ver JSON del análisis</summary><pre id="documentDetailJson" class="history-json"></pre></details></section>
+  <section class="history-original" aria-label="Documento original"><h3>Documento original</h3><button class="btn" id="historyOriginalButton" type="button" hidden>Ver original guardado</button><p class="surface-note" id="historyOriginalStatus" role="status" aria-live="polite"></p><img id="historyOriginalImage" alt="Documento original" hidden><iframe id="historyOriginalPdf" title="PDF original" sandbox referrerpolicy="no-referrer" hidden></iframe><pre id="historyOriginalText" hidden></pre><a id="historyOriginalLink" target="_blank" rel="noopener noreferrer" hidden>Abrir original en otra pestaña</a><p class="hint">Disponible para el autor autenticado o un auditor autorizado.</p></section></div>
   <form method="dialog"><button class="btn" type="submit">Cerrar</button></form>
 </dialog>
 <script src="../assets/js/api-config.js"></script>
-<script src="../assets/js/documents-mock.js"></script>
-<script src="../assets/js/documents-api.js"></script>
-<script src="../assets/js/document-detail.js"></script>
-<script src="app.js"></script>
+
+<script src="../assets/js/documents-api.js?v=bandejas-1"></script>
+<script src="../assets/js/document-detail.js?v=bandejas-1"></script>
+<script src="app.js?v=bandejas-1"></script>
 </body>
 </html>

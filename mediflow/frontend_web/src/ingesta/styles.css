@@ -340,3 +340,33 @@
 .upload-prototype summary { cursor: pointer; padding: 16px 0; font-weight: 600; }
 .upload-card button:disabled { opacity: .6; cursor: not-allowed; }
 @media (max-width: 560px) { .upload-actions > * { width: 100%; justify-content: center; } }
+
+/* Agregado por Edil: selección real, etapas sin porcentajes y ayuda documental. */
+.upload-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 24px; align-items: start; }
+.upload-steps { display: flex; flex-wrap: wrap; gap: 24px; list-style: none; padding: 0; margin: 0 0 24px; color: var(--muted); }
+.upload-steps li { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.upload-steps li > span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--blue-50); color: var(--blue); font-weight: 700; }
+.upload-card .card__body { gap: 16px; }
+.upload-dropzone { padding: 32px 20px 24px; text-align: center; border: 1.5px dashed #8caff7; border-radius: 12px; background: linear-gradient(150deg, #f5f9ff, #f9f7ff); }
+.upload-dropzone:focus-within { outline: 3px solid #2563eb33; border-color: var(--blue); }
+.upload-cloud { display: block; margin: 0 auto 16px; width: 44px; height: 44px; fill: none; stroke: var(--blue); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.upload-dropzone .label { display: block; font-size: 16px; }
+.upload-dropzone p { font-size: 12px; color: var(--muted); margin: 8px 0 16px; }
+.upload-dropzone input[type="file"] { display: block; margin: 0 auto 12px; width: min(100%, 360px); background: white; font-size: 13px; }
+.upload-dropzone input::file-selector-button { border: 0; border-radius: 6px; padding: 8px 12px; margin-right: 10px; background: var(--blue-50); color: var(--navy); font: inherit; font-weight: 600; cursor: pointer; }
+.upload-consent { padding: 16px; border: 1px solid #dbe7fc; border-radius: 10px; background: #f7faff; font-size: 13px; line-height: 1.6; }
+.upload-consent input { accent-color: var(--blue); width: 17px; height: 17px; }
+.upload-filetype { display: grid; place-items: center; flex-shrink: 0; border-radius: 8px; background: var(--blue-50); color: var(--blue); min-width: 42px; height: 38px; font-size: 10px; font-weight: 700; }
+.upload-guide h2 { font-size: 16px; margin: 16px 0; }
+.upload-guide dl { margin: 0 0 24px; }
+.upload-guide dt { font-size: 13px; font-weight: 600; margin-top: 20px; }
+.upload-guide dd { margin: 6px 0 0; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.guide-icon { display: grid; place-items: center; width: 42px; height: 42px; background: #edf9f5; color: #047857; border-radius: 12px; }
+.upload-local-preview { border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+.upload-local-preview summary { cursor: pointer; font-weight: 600; font-size: 13px; }
+.upload-result { border-color: var(--border); background: #f8faff; font-size: 13px; line-height: 1.8; }
+.upload-card #uploadStatus[data-state="error"] { color: #991b1b; border-color: #fecaca; background: #fff5f5; }
+.upload-card #uploadStatus[data-state="procesado"] { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+.upload-card #uploadStatus[data-state="auditoria_humana"] { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+@media (max-width: 1180px) { .upload-workspace { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .upload-steps { gap: 12px; } .upload-steps li { font-size: 11px; gap: 6px; } .upload-steps li > span { width: 24px; height: 24px; } .upload-dropzone { padding: 24px 12px; } .upload-workspace { gap: 16px; } }

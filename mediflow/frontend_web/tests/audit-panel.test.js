@@ -62,11 +62,17 @@ test("bandeja usa fuente real por interfaz, carga y muestra ID/tipo/prioridad/co
   assert.ok(html.includes(v.sample.documento_id)); assert.ok(html.includes("Urgente"));
   assert.ok(html.includes("Confianza de clasificación")); assert.ok(html.includes("auditoria_humana"));
   assert.equal(v.calls.list, 1); assert.equal(v.$("#refreshAudit").disabled, false);
+  // Agregado por Edil: los indicadores resumen únicamente la respuesta recibida.
+  assert.equal(v.$("#navAuditTotal").textContent, "1");
+  assert.equal(v.$("#auditUrgentCount").textContent, "1");
+  assert.equal(v.$("#auditFilteredCount").textContent, "1");
 });
 test("buscador y filtro de prioridad actualizan filas y vacío sin nuevo GET", async () => {
   const v = view(); await v.controller.load();
   v.$("#q").value = "sin coincidencia"; v.$("#q").fire("input");
   assert.equal(v.$("#auditList").innerHTML, ""); assert.equal(v.$("#auditEmpty").hidden, false);
+  assert.equal(v.$("#auditFilteredCount").textContent, "0");
+  assert.equal(v.$("#auditUrgentCount").textContent, "1");
   v.$("#q").value = ""; v.$("#auditPriority").value = "Rutina"; v.$("#auditPriority").fire("change");
   assert.equal(v.$("#auditList").innerHTML, "");
   v.$("#auditPriority").value = "Urgente"; v.$("#auditPriority").fire("change");
@@ -75,6 +81,8 @@ test("buscador y filtro de prioridad actualizan filas y vacío sin nuevo GET", a
 test("bandeja vacía se anuncia sin inventar documentos", async () => {
   const v = view({ rows: [] }); await v.controller.load();
   assert.equal(v.$("#auditEmpty").hidden, false); assert.equal(v.$("#navAuditTotal").textContent, "0");
+  assert.equal(v.$("#auditUrgentCount").textContent, "0");
+  assert.equal(v.$("#auditFilteredCount").textContent, "0");
 });
 test("actualizar fallido conserva bandeja y muestra advertencia de datos antiguos", async () => {
   const v = view(); await v.controller.load(); v.overrides.listError = new ReviewApiError("red");

@@ -34,6 +34,8 @@
       $('#uploadSelected').hidden = !metadata && !documentId && !locked;
       $('#uploadFileInfo').textContent = metadata ? metadata.name + ' · ' + (metadata.type || 'Archivo') + ' · ' + (metadata.size / 1024).toFixed(1) + ' KiB' : 'Documento anterior';
       $('#uploadFileInfo').title = metadata ? metadata.name : documentId || '';
+      // Agregado por Edil: el formato visible procede del archivo seleccionado.
+      $('#uploadFileType').textContent = metadata?.type || 'DOC';
       $('#uploadPreviewLink').hidden = true;
       $('#uploadPreviewLink').removeAttribute?.('href');
       $('#uploadFilePhase').textContent = !metadata && !locked ? 'Selecciona un archivo para ver su contenido.' : busy ? 'Enviando o consultando…' :

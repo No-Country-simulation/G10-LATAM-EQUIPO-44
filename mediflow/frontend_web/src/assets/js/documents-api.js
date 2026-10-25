@@ -153,7 +153,29 @@
     }
     clear(); return { show, clear };
   }
-  const api = { getDocuments, getDocument, getOriginal, createFileViewer, originalUrl, DocumentsApiError, isValidDocument: validDocument };
+  // Agregado por Edil: adaptar documentos reales sin cargar fixtures en producción.
+  function toRow(doc) {
+    if (!doc || typeof doc.documento_id !== "string" || !doc.clasificacion || !doc.almacenamiento_oci) {
+      throw new Error("Documento incompatible con el contrato MediFlow");
+    }
+    const priority = doc.status === "recibido" ? "pendiente" :
+      doc.clasificacion.nivel_prioridad === "Urgente" ? "urgente" :
+      doc.clasificacion.nivel_prioridad === "Rutina" ? "rutina" : "pendiente";
+    return {
+      id: doc.documento_id,
+      paciente: doc.datos_extraidos?.paciente?.nombre || "Sin información",
+      // Codigo anterior: ingreso: "Ejemplo de demostracion".
+      // Agregado por Edil: el adaptador tambien recibe documentos reales; no inventar origen.
+      dni: "No informado", ingreso: "Documento registrado",
+      tipo: doc.clasificacion.tipo_documento,
+      prioridad: priority,
+      estado: doc.status === "auditoria_humana" ? "auditoria" : doc.status,
+      fecha: null,
+      ruta: doc.almacenamiento_oci.bucket + "/" + doc.almacenamiento_oci.ruta_objeto,
+      documento: doc
+    };
+  }
+  const api = { toRow, getDocuments, getDocument, getOriginal, createFileViewer, originalUrl, DocumentsApiError, isValidDocument: validDocument };
   root.MediFlowDocumentsApi = api;
   if (typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);

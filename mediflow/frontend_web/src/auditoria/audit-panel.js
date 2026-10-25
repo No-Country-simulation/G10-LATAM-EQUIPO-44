@@ -89,22 +89,27 @@
       setText("#auditConnection", loading ? "Consultando" : state.listError ? "Consulta fallida" : "Backend conectado");
       $("#auditConnection").dataset.state = state.listStatus;
       setText("#auditContract", state.capabilities.submit
-        ? "Decisiones mediante adaptador de contrato aprobado. El análisis original y la prioridad se conservan."
-        : state.capabilities.pendingReviews ? "API de revisión integrada para consulta. Las decisiones requieren aprobación y habilitación explícita del contrato."
-        : "Lectura conectada. Aprobar y rechazar estarán disponibles cuando el equipo apruebe e implemente la API de revisión.");
+        ? "Compara el original con el análisis y registra una decisión con tu cuenta autorizada."
+        : state.capabilities.pendingReviews ? "Consulta los documentos pendientes. Las decisiones todavía no están habilitadas."
+        : "Consulta los documentos que requieren revisión humana. Las decisiones todavía no están habilitadas.");
       const query = $("#q").value.trim().toLocaleLowerCase("es");
       const priority = $("#auditPriority").value;
       const rows = state.rows.filter(d => [d.documento_id, d.clasificacion.tipo_documento].join(" ").toLocaleLowerCase("es").includes(query) &&
         (priority === "all" || d.clasificacion.nivel_prioridad === priority));
-      setText("#navAuditTotal", state.listStatus === "idle" || (loading && !state.rows.length) ? "—" : String(state.rows.length));
+      setText("#navAuditTotal", state.listStatus === "idle" || ((loading || state.listError) && !state.rows.length) ? "—" : String(state.rows.length));
+      // Agregado por Edil: cifras de la respuesta real, sin inferir estados de revisión.
+      const hasList = state.listStatus === "ready" || state.rows.length > 0;
+      setText("#auditUrgentCount", hasList ? String(state.rows.filter(d => d.clasificacion.nivel_prioridad === "Urgente").length) : "—");
+      setText("#auditFilteredCount", hasList ? String(rows.length) : "—");
       setText("#auditCount", `${rows.length} documento${rows.length === 1 ? "" : "s"} en esta bandeja`);
-      $("#auditList").innerHTML = rows.map(d => `<article class="audit-live-card">
-        <div class="audit-live-card__head"><span class="audit-id">${esc(d.documento_id)}</span><span class="audit-priority ${d.clasificacion.nivel_prioridad === "Urgente" ? "is-urgent" : ""}">${esc(d.clasificacion.nivel_prioridad)}</span></div>
-        <h2>${esc(d.clasificacion.tipo_documento)}</h2><dl class="audit-facts">${field("Estado del análisis", d.status)}${field("Confianza de clasificación", confidence(d))}</dl>
-        <p class="audit-muted">${esc(d.decision_enrutamiento.justificacion_enrutamiento || "Motivo no disponible en el análisis.")}</p>
-        <button type="button" class="btn btn--primary" data-open-document="${esc(d.documento_id)}" ${state.submitStatus === "sending" ? "disabled" : ""}>Abrir detalle y revisar</button></article>`).join("");
+      $("#auditList").innerHTML = rows.map(d => `<article class="audit-live-card" data-status="${esc(d.status)}">
+        <span class="audit-document-icon" aria-hidden="true"><svg class="icon"><use href="#i-file-check"></use></svg></span>
+        <div class="audit-live-card__content"><div class="audit-live-card__head"><span class="audit-id">${esc(d.documento_id)}</span><span class="audit-priority ${d.clasificacion.nivel_prioridad === "Urgente" ? "is-urgent" : ""}">${esc(d.clasificacion.nivel_prioridad)}</span></div>
+        <h2>${esc(d.clasificacion.tipo_documento)}</h2><dl class="audit-card-facts">${field("Estado del análisis", d.status === "auditoria_humana" ? "Auditoría humana" : d.status === "procesado" ? "Procesado" : "Recibido")}${field("Confianza de clasificación", confidence(d))}</dl>
+        <p class="audit-card-reason">${esc(d.decision_enrutamiento.justificacion_enrutamiento || "Motivo no disponible en el análisis.")}</p></div>
+        <button type="button" class="btn btn--primary audit-open" data-open-document="${esc(d.documento_id)}" ${state.submitStatus === "sending" ? "disabled" : ""}>Revisar documento <span aria-hidden="true">→</span></button></article>`).join("");
       $("#auditEmpty").hidden = loading || state.listStatus !== "ready" || rows.length > 0;
-      setText("#auditEmpty", query || priority !== "all" ? "No hay documentos que coincidan con los filtros." : "No hay documentos pendientes en la respuesta recibida.");
+      setText("#auditEmptyMessage", query || priority !== "all" ? "No hay documentos que coincidan con los filtros." : "No hay documentos pendientes en la respuesta recibida.");
       if (!state.selectedId) return;
       const sending = state.submitStatus === "sending";
       $('#auditOriginalRetry').disabled = originalBusy || sending;

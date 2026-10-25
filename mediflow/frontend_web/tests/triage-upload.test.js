@@ -113,11 +113,13 @@ test('error con ID habilita GET sin repetir POST; consulta confirma documento re
   assert.match(v.$('#uploadResult').textContent, /DOC-CLIN-ABC123/);
   assert.equal(v.$('#uploadSubmit').disabled, true);
 });
-test('HTML carga configuración antes del cliente; prototipo queda identificado y responsive', () => {
+test('HTML conserva carga real y deja inerte el prototipo sin ejecutar su script', () => {
   const html = fs.readFileSync(require.resolve('../src/ingesta/index.html'), 'utf8');
   assert.ok(html.indexOf('api-config.js') < html.indexOf('triage-api.js'));
   assert.match(html, /type="file"/); assert.match(html, /aria-live="polite"/);
-  assert.match(html, /demostración \(sin conexión al backend\)/);
+  const active = html.replace(/<template\b[^>]*>[\s\S]*?<\/template>/g, '');
+  assert.match(html, /<template id="ingestaLegacyForm">/);
+  assert.doesNotMatch(active, /formPaciente|data-toast|Dr\. M\. Vance|HIS Connected|<script src="app\.js"/);
 });
 test('el ojo abre el original OCI por ID y persiste al recargar, nunca un archivo local', async () => {
   const v = view({ upload: async () => fixture() });
@@ -166,4 +168,16 @@ test('selección y reemplazo muestran TXT seguro, tipo y tamaño sin enviar; res
   assert.equal(calls, 0);
   v.form.reset(); assert.equal(v.$('#uploadLocalText').textContent, '');
   assert.equal(v.$('#uploadLocalPanel').hidden, true);
+});
+
+// Agregado por Edil: las pantallas visibles solo ofrecen flujos disponibles.
+test('Inicio y navegación no exponen pantallas ficticias ni acciones sin destino', () => {
+  for (const page of ['index.html', 'ingesta/index.html', 'historial/index.html', 'auditoria/index.html', 'resultado/index.html', 'colas/index.html']) {
+    const html = fs.readFileSync(require('node:path').join(__dirname, '../src', page), 'utf8');
+    const active = html.replace(/<template\b[^>]*>[\s\S]*?<\/template>/g, '');
+    assert.doesNotMatch(active, /data-toast|<a[^>]*href="#"|Dr\. M\. Vance|HIS Connected|documents-mock\.js|data-nav="(?:colas|resultado|inicio)"/);
+    for (const screen of ['ingesta', 'historial', 'auditoria']) assert.ok(active.includes('data-nav="' + screen + '"'));
+  }
+  const home = fs.readFileSync(require.resolve('../src/index.html'), 'utf8');
+  for (const screen of ['ingesta', 'historial', 'auditoria']) assert.ok(home.includes('href="' + screen + '/index.html"'));
 });

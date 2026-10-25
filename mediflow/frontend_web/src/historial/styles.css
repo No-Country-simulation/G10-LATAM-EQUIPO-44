@@ -362,3 +362,50 @@ th[aria-sort="descending"] .th-sort__ind::after { color: var(--navy); }
 .prioridad-tag--pendiente { color: var(--prioridad-pendiente-ink); background: var(--prioridad-pendiente-bg); }
 #documentDetail::backdrop { background: rgb(0 0 0 / 40%); }
 [hidden] { display: none !important; }
+
+/* Agregado por Edil: indicadores reales y resultado junto al original privado. */
+.history-scope { margin: 12px 0 20px; }
+.history-open { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; max-width: 270px; }
+.history-open > span { overflow-wrap: anywhere; white-space: normal; font-size: 12px; }
+.history-open small { font-size: 11px; color: var(--blue); font-weight: 500; }
+.tabla-hist tbody tr:hover { background: #f8faff; }
+.tabla-hist .idcell__meta { font-size: 11px; }
+.table-card { overflow: hidden; }
+.toolbar--panel { margin-block: 20px; }
+#vacio .btn { margin-top: 12px; }
+.history-detail { width: min(1100px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 28px; border: 1px solid var(--border); border-radius: 16px; color: var(--text); box-shadow: var(--shadow-lg); }
+.history-detail h2 { font-size: 24px; margin: 0 0 8px; }
+.history-detail h3 { font-size: 15px; margin: 16px 0; }
+.history-detail > p { color: var(--muted); }
+.history-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-block: 24px; }
+.history-detail-grid > section { min-width: 0; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: #fcfdff; }
+.history-summary, .history-json, .history-original pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.8; }
+.history-json { max-height: 400px; overflow: auto; padding: 12px; background: #f1f5fa; border-radius: 8px; }
+.history-original img { max-width: 100%; max-height: 480px; object-fit: contain; display: block; margin: 16px auto; }
+.history-original iframe { width: 100%; height: 450px; border: 0; margin-top: 16px; }
+.history-original pre { max-height: 450px; overflow: auto; }
+.history-detail form { display: flex; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--border); }
+@media (max-width: 860px) { .history-detail-grid { grid-template-columns: minmax(0, 1fr); } .history-detail { padding: 20px; } }
+@media (max-width: 560px) { .history-detail { width: calc(100vw - 16px); padding: 16px; } .tabla-hist th, .tabla-hist td { padding: 12px; } }
+
+/* Agregado por Edil: filtros alineados al ancho disponible, sin margen vacío. */
+.toolbar--panel { align-items: stretch; padding: 20px; }
+.toolbar--panel .toolbar__row { width: 100%; }
+
+/* Agregado por Edil: bandejas de destino; no representan colas hospitalarias. */
+.destination-section { margin-block: 24px; }
+.destination-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.destination-heading h2 { margin: 0; font-size: 18px; color: var(--navy); }
+.destination-trays { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 10px; margin-block: 16px; }
+.destination-tray { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 68px; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: white; color: var(--text); box-shadow: var(--shadow-sm); text-align: left; font: inherit; cursor: pointer; }
+.destination-tray span { flex: 1; font-size: 12px; font-weight: 600; }
+.destination-tray strong { font-size: 20px; font-variant-numeric: tabular-nums; }
+.destination-tray .icon { flex-shrink: 0; color: var(--blue); }
+.destination-tray:hover:not(:disabled) { border-color: var(--blue); background: var(--blue-50); }
+.destination-tray.is-active { border-color: var(--violet, #7c3aed); background: #f4efff; color: #4c1d95; }
+.destination-tray:focus-visible { outline: 3px solid #2563eb66; outline-offset: 2px; }
+.destination-tray:disabled { opacity: .6; cursor: wait; }
+.destination-help { font-size: 12px; line-height: 1.6; color: var(--muted); }
+.destination-label, .destination-raw { display: block; font-size: 11px; margin-top: 6px; color: var(--muted); overflow-wrap: anywhere; white-space: normal; }
+@media (max-width: 680px) { .destination-trays { grid-template-columns: repeat(2, minmax(0, 1fr)); } .destination-tray { flex-wrap: wrap; padding: 12px; } .destination-tray strong { width: 100%; } }
+@media (max-width: 360px) { .destination-trays { grid-template-columns: minmax(0, 1fr); } }

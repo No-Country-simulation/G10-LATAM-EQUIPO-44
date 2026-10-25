@@ -68,6 +68,23 @@
     Consentimiento: "i-file-check"
   };
 
+  // Agregado por Edil: correspondencia exacta con destinos reales, sin inferirlos.
+  const BANDEJAS = {
+    todos: { nombre: "Todos los destinos" },
+    urgencias: { nombre: "Urgencias", destino: "Cola_Emergencia_Medica" },
+    farmacia: { nombre: "Farmacia", destino: "Cola_Farmacia" },
+    historia: { nombre: "Historia clínica", destino: "Cola_Historia_Clinica" },
+    auditoria: { nombre: "Auditoría humana", destino: "Cola_Revision_Humana" },
+    recibidos: { nombre: "Sin procesar" },
+    otros: { nombre: "Otros destinos" }
+  };
+  function bandejaDe(row) {
+    // La recepción no confirma clasificación, aunque tenga un destino provisional.
+    if (row.documento.status === "recibido") return "recibidos";
+    const destino = row.documento.decision_enrutamiento.destino_principal;
+    return Object.keys(BANDEJAS).find(key => BANDEJAS[key].destino !== undefined && BANDEJAS[key].destino === destino) || "otros";
+  }
+
   const COLUMNAS = {
     id: { etiqueta: "ID de documento", tipo: "texto" },
     paciente: { etiqueta: "Paciente", tipo: "texto" },
@@ -78,43 +95,42 @@
     ruta: { etiqueta: "Ruta de almacenamiento", tipo: "texto" }
   };
 
-  /* --------------------------------------------------------------------
-     REGISTROS
-     Filas de ejemplo con marcadores genéricos: sin datos de pacientes.
-     Este array es el único punto de sustitución: reemplazar por la
-     respuesta del endpoint de documentos al conectar el backend.
-     -------------------------------------------------------------------- */
-  // Codigo anterior conservado: datos de demostracion sin conexion.
-  // const records = window.MediFlowDocuments.documents.map(window.MediFlowDocuments.toRow);
-  // Agregado por Edil: fuente real por defecto; demo solo si se solicita ?demo=1.
+  // Agregado por Edil: el historial siempre consulta la API, incluso con ?demo=1.
   let records = [];
-  const demoMode = new URLSearchParams(window.location.search).get("demo") === "1";
+  let loadState = "loading";
+  const historyViewer = window.MediFlowDocumentsApi.createFileViewer(document, "historyOriginal");
+  window.addEventListener("pagehide", () => {
+    $("#documentDetail").close?.();
+    historyViewer.clear();
+  });
   const documentDetail = window.MediFlowDocumentDetail.createDetail({
     dialog: $("#documentDetail"), status: $("#documentDetailStatus"), json: $("#documentDetailJson"),
-    loadDocument: id => {
-      if (!demoMode) return window.MediFlowDocumentsApi.getDocument(id);
-      const row = records.find(record => record.id === id);
-      if (!row) throw new window.MediFlowDocumentsApi.DocumentsApiError("El documento no existe o ya no esta disponible.", 404);
-      return row.documento;
-    }
+    loadDocument: id => window.MediFlowDocumentsApi.getDocument(id),
+    summary: $("#documentDetailSummary"), originalButton: $("#historyOriginalButton"),
+    originalStatus: $("#historyOriginalStatus"),
+    originalViewer: historyViewer,
+    loadOriginal: (id, options) => window.MediFlowDocumentsApi.getOriginal(id, options)
   });
   async function loadRecords() {
     const indicator = $("#documentLoadStatus");
     const refresh = $("#refreshDocuments");
-    const demo = demoMode;
     refresh.disabled = true;
-    indicator.textContent = demo ? "Demostracion explicita: datos simulados." : "Consultando documentos del backend...";
+    loadState = "loading"; indicator.dataset.state = "loading";
+    renderOverview(); renderBandejas();
+    indicator.textContent = "Consultando documentos…";
     try {
-      const source = demo ? window.MediFlowDocuments.documents : await window.MediFlowDocumentsApi.getDocuments();
-      records = source.map(window.MediFlowDocuments.toRow);
-      indicator.textContent = demo ? "Demostracion: no son datos del backend." : "Conectado al backend. Hasta 500 documentos; pulsa Actualizar para ver nuevos envios.";
-      $("#historyConnection").textContent = demo ? "Demostracion" : "Backend conectado";
+      const source = await window.MediFlowDocumentsApi.getDocuments();
+      records = source.map(window.MediFlowDocumentsApi.toRow);
+      loadState = "ready"; indicator.dataset.state = "success";
+      indicator.textContent = "Hasta 500 documentos. Actualiza para consultar nuevas cargas.";
+      $("#historyConnection").textContent = "Consulta actualizada";
       $("#historyConnection").title = indicator.textContent;
     } catch (error) {
       records = [];
+      loadState = "error"; indicator.dataset.state = "error";
       indicator.textContent = error instanceof window.MediFlowDocumentsApi.DocumentsApiError
         ? error.message : "El historial no cumple el contrato de MediFlow.";
-      $("#historyConnection").textContent = "Sin conexion";
+      $("#historyConnection").textContent = "Sin conexión";
       $("#historyConnection").title = indicator.textContent;
     } finally {
       refresh.disabled = false;
@@ -129,13 +145,14 @@
     query: "",
     prioridad: "todos",
     estado: "todos",
+    bandeja: "todos",
     sortBy: "fecha",
     sortDir: "desc",
     page: 1,
     pageSize: 10
   };
 
-  const PARAMETROS = { query: "q", prioridad: "prioridad", estado: "estado", sortBy: "orden", sortDir: "dir", page: "pagina", pageSize: "por" };
+  const PARAMETROS = { bandeja: "bandeja", query: "q", prioridad: "prioridad", estado: "estado", sortBy: "orden", sortDir: "dir", page: "pagina", pageSize: "por" };
 
   /* --------------------------------------------------------------------
      PIPELINE: filtrar -> ordenar -> paginar -> renderizar
@@ -143,6 +160,7 @@
   function filtrar() {
     const q = norm(state.query.trim());
     return records.filter((r) => {
+      if (state.bandeja !== "todos" && bandejaDe(r) !== state.bandeja) return false;
       if (state.prioridad !== "todos" && r.prioridad !== state.prioridad) return false;
       if (state.estado !== "todos" && r.estado !== state.estado) return false;
       if (!q) return true;
@@ -184,12 +202,14 @@
     const desde = (state.page - 1) * state.pageSize;
     const pagina = filtrados.slice(desde, desde + state.pageSize);
 
+    renderOverview();
+    renderBandejas();
     renderCabeceras();
     renderFilas(pagina);
     renderPaginacion(filtrados.length, totalPaginas, desde, pagina.length);
     renderContador(filtrados.length);
     renderFiltrosActivos();
-    if (!(opciones && opciones.silentioURL)) sincronizarURL();
+    if (!(opciones && opciones.silenciosoURL)) sincronizarURL();
   }
 
   /* --------------------------------------------------------------------
@@ -216,6 +236,8 @@
     $("#tbodyHist").innerHTML = lista
       .map((r) => {
         const prioridad = MTS[r.prioridad];
+        const bandeja = bandejaDe(r);
+        const tipoVisible = r.estado === "recibido" ? "Pendiente de procesamiento" : r.tipo;
         const est = ESTADOS[r.estado];
         const f = fechaTexto(r.fecha);
         const alternativa = r.estado === "recibido" && r.recibidoAzul === true;
@@ -223,14 +245,14 @@
            lo trae, se conserva tal cual. */
         return (
           "<tr>" +
-          '<td><button type="button" class="linkbtn" data-document="' + esc(r.id) + '">' + esc(r.id) + '</button></td>' +
+          '<td><button type="button" class="linkbtn history-open" data-document="' + esc(r.id) + '"><span>' + esc(r.id) + '</span><small>' + (r.estado === "recibido" ? "Ver recepción" : "Ver análisis") + ' →</small></button><span class="destination-label">' + esc(BANDEJAS[bandeja].nombre) + '</span>' + (bandeja === "otros" ? '<span class="destination-raw">' + esc(r.documento.decision_enrutamiento.destino_principal || "Destino no informado") + '</span>' : '') + '</td>' +
 
           '<td><div class="idcell"><span class="idcell__avatar" aria-hidden="true">' + esc(iniciales(r.paciente)) + "</span>" +
           '<span class="idcell__text"><span class="idcell__name" title="' + esc(r.paciente) + '">' + esc(r.paciente) + "</span>" +
           '<span class="idcell__meta">DNI ' + esc(r.dni) + " · " + esc(r.ingreso) + "</span></span></div></td>" +
 
-          '<td><div class="tipo-doc" title="' + esc(r.tipo) + '">' + icon(TIPOS[r.tipo] || "i-notes", "icon--sm") +
-          '<span class="tipo-doc__txt">' + esc(r.tipo) + "</span></div></td>" +
+          '<td><div class="tipo-doc" title="' + esc(tipoVisible) + '">' + icon(TIPOS[tipoVisible] || "i-notes", "icon--sm") +
+          '<span class="tipo-doc__txt">' + esc(tipoVisible) + "</span></div></td>" +
 
           '<td><span class="prioridad-tag prioridad-tag--' + r.prioridad + '" title="' + esc(prioridad.nombre) + '">' +
           '<span class="prioridad-tag__dot" aria-hidden="true"></span>' + esc(prioridad.nombre) + "</span></td>" +
@@ -249,7 +271,13 @@
       })
       .join("");
 
-    $("#vacio").hidden = lista.length > 0;
+    $("#vacio").hidden = lista.length > 0 || loadState === "loading";
+    $("#historyEmptyTitle").textContent = loadState === "error" ? "No se pudo consultar el historial" :
+      records.length ? "Sin coincidencias" : "Todavía no hay documentos";
+    $("#historyEmptyText").textContent = loadState === "error" ? "Revisa el mensaje de conexión y vuelve a consultar con Actualizar documentos." :
+      records.length ? "Prueba otra búsqueda o limpia los filtros." : "Los documentos recibidos aparecerán aquí cuando el servidor confirme su carga.";
+    $("#btnLimpiarVacio").hidden = !records.length;
+    $("#historyEmptyUpload").hidden = loadState !== "ready" || records.length > 0;
   }
 
   function iniciales(nombre) {
@@ -261,12 +289,38 @@
       .join("");
   }
 
+  // Agregado por Edil: contar únicamente documentos de una respuesta válida.
+  function renderOverview() {
+    const values = { historyTotal: records.length,
+      historyProcessed: records.filter(r => r.estado === "procesado").length,
+      historyAudit: records.filter(r => r.estado === "auditoria").length,
+      historyUrgent: records.filter(r => r.prioridad === "urgente").length };
+    for (const [id, value] of Object.entries(values)) $("#" + id).textContent = loadState === "ready" ? String(value) : "—";
+  }
+
+  // Agregado por Edil: los contadores usan la consulta completa, antes de filtros/páginas.
+  function renderBandejas() {
+    const counts = Object.fromEntries(Object.keys(BANDEJAS).map(key => [key, 0]));
+    for (const row of records) counts[bandejaDe(row)]++;
+    counts.todos = records.length;
+    for (const key of Object.keys(BANDEJAS)) {
+      const button = $("#tray-" + key);
+      button.setAttribute("aria-pressed", String(state.bandeja === key));
+      button.classList.toggle("is-active", state.bandeja === key);
+      button.disabled = loadState === "loading";
+      button.hidden = key === "otros" && !counts.otros && state.bandeja !== "otros";
+      $("#tray-count-" + key).textContent = loadState === "ready" ? String(counts[key]) : "—";
+    }
+    $("#destinationSelection").textContent = "Bandeja: " + BANDEJAS[state.bandeja].nombre;
+  }
+
   function renderContador(matching) {
     $("#contador").textContent = "Mostrando " + matching + " de " + records.length + " registros";
   }
 
   function renderFiltrosActivos() {
     const partes = [];
+    if (state.bandeja !== "todos") partes.push('<span class="filtro-tag">Bandeja: <b>' + esc(BANDEJAS[state.bandeja].nombre) + "</b></span>");
     if (state.query.trim()) {
       partes.push('<span class="filtro-tag">Búsqueda: <b>' + esc(state.query.trim()) + "</b></span>");
     }
@@ -313,7 +367,11 @@
      SINCRONIZACIÓN CON LA URL
      -------------------------------------------------------------------- */
   function leerURL() {
+    // Agregado por Edil: volver a un enlace sin filtros restaura la vista completa.
+    Object.assign(state, { query: "", prioridad: "todos", estado: "todos", bandeja: "todos", sortBy: "fecha", sortDir: "desc", page: 1, pageSize: 10 });
     const p = new URLSearchParams(window.location.search);
+    const bandeja = p.get(PARAMETROS.bandeja);
+    state.bandeja = Object.hasOwn(BANDEJAS, bandeja) ? bandeja : "todos";
     const q = p.get(PARAMETROS.query);
     if (q !== null) state.query = q;
     const prioridad = p.get(PARAMETROS.prioridad);
@@ -332,6 +390,7 @@
 
   function sincronizarURL() {
     const p = new URLSearchParams();
+    if (state.bandeja !== "todos") p.set(PARAMETROS.bandeja, state.bandeja);
     if (state.query.trim()) p.set(PARAMETROS.query, state.query.trim());
     if (state.prioridad !== "todos") p.set(PARAMETROS.prioridad, state.prioridad);
     if (state.estado !== "todos") p.set(PARAMETROS.estado, state.estado);
@@ -390,6 +449,7 @@
      -------------------------------------------------------------------- */
   function limpiarFiltros(silencioso) {
     state.query = "";
+    state.bandeja = "todos";
     state.prioridad = "todos";
     state.estado = "todos";
     state.page = 1;
@@ -431,32 +491,7 @@
     });
   }
 
-  function initMenu() {
-    const btn = $("#userBtn");
-    const menu = $("#userMenu");
-    const cerrar = () => {
-      menu.hidden = true;
-      btn.setAttribute("aria-expanded", "false");
-    };
-    btn.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      menu.hidden = !menu.hidden;
-      btn.setAttribute("aria-expanded", String(!menu.hidden));
-    });
-    document.addEventListener("click", (ev) => {
-      if (!menu.hidden && !menu.contains(ev.target)) cerrar();
-    });
-    $$(".menu__item").forEach((item) => item.addEventListener("click", cerrar));
-    document.addEventListener("keydown", (ev) => {
-      if (ev.key === "Escape" && !menu.hidden) {
-        cerrar();
-        btn.focus();
-      }
-    });
-  }
-
   function initAvisos() {
-    $$("[data-toast]").forEach((el) => el.addEventListener("click", () => toast(el.dataset.toast, "azul")));
 
     $("#btnCopiarEnlace").addEventListener("click", () => {
       copiarTexto(window.location.href)
@@ -466,6 +501,13 @@
   }
 
   function initInteraccion() {
+    $("#destinationTrays").addEventListener("click", ev => {
+      const button = ev.target.closest("[data-tray]");
+      if (!button || button.disabled || !Object.hasOwn(BANDEJAS, button.dataset.tray)) return;
+      state.bandeja = button.dataset.tray;
+      state.page = 1;
+      apply();
+    });
     let t;
     $("#qHist").addEventListener("input", (ev) => {
       window.clearTimeout(t);
@@ -553,7 +595,6 @@
     $("#selPageSize").value = String(state.pageSize);
     apply({ silenciosoURL: true });
 
-    initMenu();
     initAvisos();
     initInteraccion();
     $("#refreshDocuments").addEventListener("click", loadRecords);

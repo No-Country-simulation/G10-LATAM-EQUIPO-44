@@ -9,9 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/styles.css">
+<link rel="stylesheet" href="../assets/css/styles.css?v=pitch-1">
 <!-- Agregado por Edil: renovar la caché del CSS del cierre S4. -->
-<link rel="stylesheet" href="styles.css?v=visor-privado-6">
+<link rel="stylesheet" href="styles.css?v=pitch-documental-1">
 </head>
 
 <body data-screen="auditoria">
@@ -67,8 +67,7 @@
   <!-- ================= HEADER ================= -->
   <!-- Agregado por Edil: sin identidad, firma o conexión HIS simuladas. -->
   <header class="topbar">
-    <div class="topbar__brand"><span class="brand__mark" aria-hidden="true"><img src="../assets/img/mediflow-icon.png" width="36" height="36" alt="" style="display:block;width:100%;height:100%;object-fit:contain"></span><span class="brand__text"><span class="brand__name">MediFlow</span><span class="conn" id="auditConnection" role="status">Preparando consulta</span></span></div>
-    <div class="topbar__search"><label class="sr-only" for="q">Buscar por ID o tipo documental</label><svg class="icon topbar__search-icon" aria-hidden="true"><use href="#i-search"></use></svg><input id="q" class="input" type="search" autocomplete="off" placeholder="Buscar ID o tipo documental"></div>
+    <a class="topbar__brand portal-brand" href="../index.html" aria-label="MediFlow, inicio"><span class="brand__mark" aria-hidden="true"><img src="../assets/img/mediflow-icon.png" width="36" height="36" alt="" style="display:block;width:100%;height:100%;object-fit:contain"></span><span class="brand__text"><span class="brand__name">MediFlow</span><span class="conn" id="auditConnection" role="status">Preparando consulta</span></span></a>
     <div class="audit-session" aria-label="Sesión de MediFlow">
       <span class="audit-header-note" id="authSessionUser">Sin sesión de MediFlow</span>
       <a class="btn" id="authLoginLink" href="../login/index.html">Iniciar sesión</a>
@@ -78,56 +77,24 @@
   </header>
 
   <!-- ================= SIDEBAR ================= -->
-  <aside class="sidebar">
-    <div class="side__unit">
-      <span class="side__unit-icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-stethoscope"></use></svg></span>
-      <span class="side__unit-text">
-        <span class="side__unit-name">MediFlow</span>
-        <span class="side__unit-sub" title="Revisión de documentos">Documentos MediFlow</span>
-      </span>
-    </div>
-
-    <div class="side__primary">
-      <a class="btn btn--primary btn--block" href="../historial/index.html" title="Ver historial">
-        <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
-        <span class="btn__label">Ver historial</span>
-      </a>
-    </div>
-
-    <nav class="side__nav" aria-label="Navegación principal">
-      <a class="nav__item" data-nav="ingesta" href="../ingesta/index.html" title="Ingesta">
-        <svg class="icon" aria-hidden="true"><use href="#i-inbox"></use></svg>
-        <span class="nav__label">Ingesta</span>
-      </a>
-      <a class="nav__item" data-nav="resultado" href="../resultado/index.html" title="Resultado">
-        <svg class="icon" aria-hidden="true"><use href="#i-file-check"></use></svg>
-        <span class="nav__label">Resultado</span>
-      </a>
-      <a class="nav__item" data-nav="colas" href="../colas/index.html" title="Colas">
-        <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>
-        <span class="nav__label">Colas</span>
-      </a>
-      <a class="nav__item is-active" data-nav="auditoria" href="./index.html" title="Auditoría" aria-current="page">
-        <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
-        <span class="nav__label">Auditoría</span>
-        <span class="nav__badge nav__badge--alerta" id="navAuditTotal" title="Documentos en la bandeja recibida">—</span>
-      </a>
-      <a class="nav__item" data-nav="historial" href="../historial/index.html" title="Historial">
-        <svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg>
-        <span class="nav__label">Historial</span>
-      </a>
-    </nav>
-
-    <div class="side__foot"><p class="audit-muted">Sin firma ni sesión clínica simuladas.</p></div>
-  </aside>
+  <!-- Agregado por Edil: navegación limitada a los flujos disponibles. -->
+<aside class="sidebar"><div class="side__unit"><span class="side__unit-text"><span class="side__unit-name">Documentos clínicos</span><span class="side__unit-sub">Carga, análisis y revisión</span></span></div><nav class="side__nav" aria-label="Navegación principal"><a class="nav__item" data-nav="ingesta" href="../ingesta/index.html" title="Subir documento"><svg class="icon" aria-hidden="true"><use href="#i-inbox"></use></svg><span class="nav__label">Subir documento</span></a>
+<a class="nav__item" data-nav="historial" href="../historial/index.html" title="Historial"><svg class="icon" aria-hidden="true"><use href="#i-history"></use></svg><span class="nav__label">Historial</span></a>
+<a class="nav__item is-active" data-nav="auditoria" href="../auditoria/index.html" title="Auditoría humana" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg><span class="nav__label">Auditoría humana</span></a></nav></aside>
 
   <!-- ================= MAIN ================= -->
   <!-- Agregado por Edil: bandeja conectada; la maqueta original queda inerte. -->
   <main class="main" id="main">
     <div class="page-head"><div class="page-head__text"><p class="page-head__eyebrow">Revisión documental</p><h1>Auditoría humana</h1><p class="audit-muted" id="auditContract">Preparando conexión de lectura…</p></div><button type="button" class="btn btn--primary" id="refreshAudit">Actualizar bandeja</button></div>
     <p id="auditLoadStatus" class="audit-notice" role="status" aria-live="polite">Preparando consulta…</p>
-    <div class="audit-toolbar"><label class="audit-filter" for="auditPriority">Prioridad<select class="select" id="auditPriority"><option value="all">Todas</option><option value="Urgente">Urgente</option><option value="Rutina">Rutina</option></select></label><span id="auditCount" class="audit-muted"></span></div>
-    <div class="audit-list" id="auditList" aria-busy="true"></div><p class="empty" id="auditEmpty" hidden></p>
+    <!-- Agregado por Edil: los indicadores solo resumen la bandeja recibida; no simulan revisiones. -->
+    <section class="metric-grid metric-grid--3 audit-metrics" aria-label="Resumen de la bandeja recibida">
+      <article class="metric-card"><span class="metric-icon" aria-hidden="true"><svg class="icon"><use href="#i-clock"></use></svg></span><div><strong class="metric-value" id="navAuditTotal">—</strong><span class="metric-label">Documentos en bandeja</span></div></article>
+      <article class="metric-card metric-card--urgent"><span class="metric-icon" aria-hidden="true"><svg class="icon"><use href="#i-alert"></use></svg></span><div><strong class="metric-value" id="auditUrgentCount">—</strong><span class="metric-label">Prioridad urgente</span></div></article>
+      <article class="metric-card metric-card--violet"><span class="metric-icon" aria-hidden="true"><svg class="icon"><use href="#i-filter"></use></svg></span><div><strong class="metric-value" id="auditFilteredCount">—</strong><span class="metric-label">Con los filtros actuales</span></div></article>
+    </section>
+    <div class="audit-toolbar"><div class="audit-search"><label class="sr-only" for="q">Buscar por ID o tipo documental</label><svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg><input id="q" class="input" type="search" autocomplete="off" placeholder="Buscar ID o tipo documental"></div><label class="audit-filter" for="auditPriority">Prioridad<select class="select" id="auditPriority"><option value="all">Todas</option><option value="Urgente">Urgente</option><option value="Rutina">Rutina</option></select></label><span id="auditCount" class="audit-muted"></span></div>
+    <div class="audit-list" id="auditList" aria-busy="true"></div><section class="empty-state audit-empty" id="auditEmpty" hidden><span class="empty-state__icon" aria-hidden="true"><svg class="icon icon--lg"><use href="#i-shield"></use></svg></span><h2>Sin documentos para mostrar</h2><p id="auditEmptyMessage"></p></section>
     <p class="audit-muted">La prioridad y el estado del análisis provienen del backend. La confianza mostrada corresponde a clasificación, no a exactitud ni seguridad clínica.</p>
     <noscript><p class="audit-notice">Activa JavaScript para consultar la bandeja. No se cargan datos de demostración.</p></noscript>
   </main>
@@ -355,6 +322,8 @@
   <div class="modal__body">
     <p id="auditDetailStatus" class="audit-notice" role="status"></p><button type="button" class="btn" id="auditRetryDetail">Consultar detalle de nuevo</button>
     <!-- Agregado por Edil: bytes privados recuperados con sesión, nunca enlaces de buckets. -->
+    <!-- Agregado por Edil: comparar original y análisis sin cambiar sus controles. -->
+    <div class="audit-comparison">
     <section class="audit-original" aria-labelledby="auditOriginalTitle">
       <h3 id="auditOriginalTitle">Documento original</h3>
       <p id="auditOriginalStatus" role="status" aria-live="polite"></p>
@@ -365,20 +334,24 @@
       <button id="auditOriginalRetry" type="button" class="btn">Consultar original de nuevo</button>
     </section>
     <section id="auditDetailContent" hidden>
+      <div class="audit-analysis">
       <p id="auditUrgent" class="audit-notice is-urgent" hidden><strong>Prioridad Urgente</strong> indicada por el backend. La revisión humana no reduce esta prioridad.</p>
       <h3>Análisis recibido</h3><dl id="auditSummary" class="audit-facts"></dl>
       <h3>Motivo de auditoría</h3><p id="auditReason" class="audit-preserve"></p>
       <h3>Datos disponibles</h3><dl id="auditExtracted" class="audit-facts"></dl><p id="auditMedicines" class="audit-preserve"></p>
       <details><summary>Ver JSON original del análisis</summary><pre id="auditRawJson" class="audit-json"></pre></details>
-      <hr><h3>Decisión humana</h3>
+      </div>
+      <div class="audit-decision"><h3>Decisión humana</h3>
       <!-- Agregado por Edil: identificación exigida por el contrato de revisión. -->
       <label class="field" id="reviewerField" for="reviewerId"><span class="field__label">Auditor autenticado</span><input class="input" id="reviewerId" autocomplete="off" readonly disabled aria-readonly="true" aria-describedby="reviewerHelp"><span class="field__help" id="reviewerHelp">Identidad recibida del servidor. El backend comprueba los permisos antes de registrar la decisión.</span></label>
       <label class="field" for="reviewObservation"><span class="field__label">Observaciones</span><textarea class="input audit-observation" id="reviewObservation" rows="4" aria-describedby="reviewAvailability" placeholder="Anota observaciones para la revisión"></textarea></label>
       <p id="reviewAvailability" class="audit-muted"></p>
       <div class="audit-actions"><button type="button" class="btn btn--primary" id="approveReview" hidden disabled>Aprobar</button><button type="button" class="btn btn--danger" id="rejectReview" hidden disabled>Rechazar</button></div>
       <p id="reviewResult" class="audit-notice" role="status" aria-live="polite"></p>
-      <h3>Historial persistido de revisión</h3><p id="reviewHistoryStatus" class="audit-muted" role="status"></p><button type="button" class="btn" id="refreshReviewHistory" hidden>Consultar historial</button><ol id="reviewHistory"></ol>
+      </div>
+      <div class="audit-review-history"><h3>Historial de decisiones</h3><p id="reviewHistoryStatus" class="audit-muted" role="status"></p><button type="button" class="btn" id="refreshReviewHistory" hidden>Consultar historial</button><ol id="reviewHistory"></ol></div>
     </section>
+    </div>
   </div>
 </dialog>
 <dialog id="reviewConfirmation" class="audit-dialog audit-dialog--confirmation" aria-labelledby="reviewConfirmationTitle" aria-describedby="reviewConfirmationText">
@@ -406,7 +379,7 @@
 <script src="../assets/js/reviews-api.js"></script>
 <script src="../assets/js/review-http-adapter.js?v=sesion-auditoria-5"></script>
 <script src="../assets/js/audit-controller.js?v=visor-privado-6"></script>
-<script src="audit-panel.js?v=visor-privado-6"></script>
+<script src="audit-panel.js?v=pitch-documental-1"></script>
 <script src="app.js?v=sesion-auditoria-5"></script>
 </body>
 </html>

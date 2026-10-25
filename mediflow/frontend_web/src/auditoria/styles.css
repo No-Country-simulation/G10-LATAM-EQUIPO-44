@@ -1030,3 +1030,63 @@ body.is-locked { overflow: hidden; }
 .audit-original iframe { width: 100%; height: 420px; border: 0; }
 .audit-original pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 420px; overflow: auto; }
 .audit-original [hidden] { display: none !important; }
+
+/* Agregado por Edil: presentación de la bandeja real para el pitch. */
+.audit-session { margin-left: auto; }
+.audit-search { position: relative; flex: 1 1 300px; min-width: 200px; }
+.audit-search > .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.audit-search .input { width: 100%; padding-left: 42px; }
+.audit-toolbar { padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); gap: 16px; margin-bottom: 16px; }
+.audit-toolbar .audit-filter { flex: 0 1 auto; }
+.audit-toolbar #auditCount { margin-left: auto; font-size: 12px; }
+.audit-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.audit-live-card { display: flex; align-items: center; gap: 20px; padding: 20px; border-color: var(--border); box-shadow: 0 2px 8px rgb(15 53 130 / 4%); }
+.audit-document-icon { display: grid; place-items: center; width: 46px; height: 52px; flex-shrink: 0; border-radius: 12px; background: #edf3ff; color: var(--blue); }
+.audit-document-icon .icon { width: 24px; height: 24px; }
+.audit-live-card__content { flex: 1; min-width: 0; }
+.audit-live-card__head { align-items: center; justify-content: flex-start; }
+.audit-id { font-weight: 650; color: var(--navy); font-size: 12px; }
+.audit-live-card h2 { margin: 6px 0 8px; font-size: 16px; color: var(--text); }
+.audit-priority { padding: 3px 9px; font-size: 11px; color: #164a9b; background: #edf3ff; }
+.audit-card-facts { display: flex; gap: 24px; flex-wrap: wrap; margin: 8px 0; }
+.audit-card-facts dt { color: var(--muted); font-size: 11px; }
+.audit-card-facts dd { margin: 2px 0 0; font-size: 12px; font-weight: 600; color: var(--text); }
+.audit-card-reason { margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: var(--muted); overflow-wrap: anywhere; }
+.audit-open { flex-shrink: 0; gap: 12px; }
+.audit-empty { margin-top: 16px; }
+.audit-empty h2 { font-size: 18px; margin-bottom: 6px; }
+.metric-card--urgent .metric-icon { color: #b4232b; background: #fff0f0; }
+.metric-card--violet .metric-icon { color: var(--violet, #7c3aed); background: #f3edff; }
+#auditDetail { width: min(1240px, calc(100vw - 40px)); }
+.audit-comparison { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; margin-top: 16px; }
+.audit-original { margin: 0; padding: 20px; background: #f7f9fd; border-color: var(--border); }
+.audit-original h3, .audit-analysis h3:first-child { margin-top: 0; }
+.audit-original img { max-height: 65vh; }
+.audit-original iframe { height: 65vh; min-height: 400px; }
+.audit-original pre { max-height: 65vh; background: white; border-radius: 8px; padding: 16px; }
+.audit-original #auditOriginalStatus { color: var(--muted); font-size: 12px; }
+.audit-original a { display: inline-block; padding-block: 10px; margin-right: 12px; }
+.audit-analysis, .audit-decision, .audit-review-history { padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 12px; }
+.audit-analysis h3, .audit-decision h3, .audit-review-history h3 { color: var(--navy); }
+.audit-decision h3:first-child, .audit-review-history h3:first-child { margin-top: 0; }
+.audit-facts dt { color: var(--muted); }
+.audit-dialog :focus-visible, .main :focus-visible { outline-color: var(--blue); }
+@media (max-width: 1024px) {
+  .audit-live-card { gap: 16px; }
+  .audit-open { padding-inline: 14px; }
+  .audit-comparison { grid-template-columns: minmax(0, 1fr); }
+  .audit-original iframe { height: 440px; min-height: 0; }
+}
+@media (max-width: 680px) {
+  .audit-live-card { flex-wrap: wrap; align-items: flex-start; padding: 16px; }
+  .audit-document-icon { width: 36px; height: 42px; }
+  .audit-live-card__content { flex-basis: calc(100% - 60px); }
+  .audit-open { width: 100%; justify-content: center; }
+  .audit-toolbar .audit-filter { width: 100%; }
+  .audit-search { min-width: 0; flex-basis: 100%; }
+  .audit-toolbar #auditCount { margin-left: 0; }
+  #auditDetail { width: calc(100vw - 16px); }
+  .audit-comparison { gap: 16px; }
+  .audit-original, .audit-analysis, .audit-decision, .audit-review-history { padding: 16px; }
+  .audit-original iframe { height: 360px; }
+}
