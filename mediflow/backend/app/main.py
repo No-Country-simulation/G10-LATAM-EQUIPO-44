@@ -26,12 +26,16 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=[
+        "http://127.0.0.1:8080",
+        "http://localhost:8080",
+        "https://desktop-edilanti.tailf48a22.ts.net:10000",
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+    expose_headers=["X-Document-ID"],
 )
-
 # Agregado por Edil: la sesión de MediFlow identifica al usuario incluso al
 # ejecutar Uvicorn directamente. Tailscale solamente transporta la conexión.
 app.add_middleware(LocalSessionMiddleware)

@@ -28,7 +28,7 @@
       const timer = setTimeout(() => abort.abort(), timeoutMs);
       try {
         const response = await (fetchImpl || root.fetch)(url, {
-          method, credentials: "same-origin", cache: "no-store", redirect: "error", signal: abort.signal,
+          method, credentials: "include", cache: "no-store", redirect: "error", signal: abort.signal,
           headers: { Accept: "application/json", ...(body ? { "Content-Type": "application/json" } : {}) },
           ...(body ? { body: JSON.stringify(body) } : {}),
         });
