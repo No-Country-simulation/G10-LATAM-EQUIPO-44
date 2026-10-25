@@ -37,7 +37,9 @@ PROMPT_PATH = Path(__file__).resolve().parents[3] / "data_ai/prompts/master_prom
 class GeminiSettings:
     api_key: str = field(repr=False)
     model: str
-    timeout_seconds: int = 30
+    # Agregado por Edil: las fotos requieren más tiempo que una extracción TXT.
+    # Se conserva una sola solicitud; aumentar la espera no duplica consumo.
+    timeout_seconds: int = 120
     structured_output: bool = True
 
     def __post_init__(self):
@@ -56,7 +58,7 @@ class GeminiSettings:
             load_environment()
             environment = os.environ
         try:
-            timeout = int(environment.get("GEMINI_TIMEOUT_SECONDS", "30"))
+            timeout = int(environment.get("GEMINI_TIMEOUT_SECONDS", "120"))
         except (TypeError, ValueError):
             raise LLMConfigurationError("GEMINI_TIMEOUT_SECONDS no es válido.") from None
         structured = environment.get("GEMINI_STRUCTURED_OUTPUT", "true").strip().lower()

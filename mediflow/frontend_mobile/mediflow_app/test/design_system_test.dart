@@ -32,6 +32,15 @@ void main() {
       contrast(AppColors.clinicalBlue, AppColors.card),
       greaterThanOrEqualTo(4.5),
     );
+    // Agregado por Edil: soporte oscuro del nuevo verde y violeta accesibles.
+    expect(
+      contrast(AppColors.successForeground, AppColors.successSoft),
+      greaterThanOrEqualTo(4.5),
+    );
+    expect(
+      contrast(AppColors.secondary, AppColors.secondarySoft),
+      greaterThanOrEqualTo(4.5),
+    );
   });
   for (final size in [const Size(320, 640), const Size(1100, 850)]) {
     for (final page in ['home', 'selection', 'audit', 'urgent']) {

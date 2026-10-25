@@ -24,6 +24,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Agregado por Edil: recurso de marca original proporcionado por el usuario.
+  assets:
+    - lib/assets/Icono.png
   # Agregado por Edil: tipografía local para Android/Windows, sin peticiones a Google Fonts.
   fonts:
     - family: Roboto

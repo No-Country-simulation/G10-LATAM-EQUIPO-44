@@ -21,7 +21,7 @@ void main() {
       '/prefix/api/triage',
     );
     expect(ApiConfig.fileFieldName, 'file');
-    expect(ApiConfig.requestTimeout, const Duration(seconds: 90));
+    expect(ApiConfig.requestTimeout, const Duration(seconds: 180));
   });
   for (final url in [
     '',

@@ -29,6 +29,9 @@ app.add_middleware(
     allow_origins=[
         "http://127.0.0.1:8080",
         "http://localhost:8080",
+        # Agregado por Edil: el servidor web de pruebas usa 10000, API en 8001.
+        "http://127.0.0.1:10000",
+        "http://localhost:10000",
         "https://desktop-edilanti.tailf48a22.ts.net:10000",
     ],
     allow_credentials=True,

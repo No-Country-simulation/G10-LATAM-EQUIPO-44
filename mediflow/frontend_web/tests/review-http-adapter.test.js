@@ -11,6 +11,24 @@ const record = overrides => ({ documento_id: "DOC-SYNTHETIC", review_id: "REV-SY
 const input = overrides => ({ documentId: "DOC-SYNTHETIC", decision: "approve", reviewerId: "test-auditor", observation: "", ...overrides });
 const response = data => ({ ok: true, status: 200, json: async () => data });
 
+test("todas las solicitudes de auditoría conservan credenciales sin alterar contrato ni cabeceras", async () => {
+  const calls = [];
+  const adapter = createAdapter({ decisionApproved: true, authenticatedUser: principal,
+    fetchImpl: async (url, options) => {
+      calls.push({ url, options });
+      return response(url.endsWith('/review') ? record() : []);
+    } });
+  await adapter.listPending(); await adapter.getReviewHistory('DOC-SYNTHETIC'); await adapter.submitReview(input());
+  assert.equal(calls.length, 3);
+  for (const { options } of calls) {
+    assert.equal(options.credentials, 'include'); assert.equal(options.redirect, 'error');
+    assert.equal(options.headers.Accept, 'application/json');
+    assert.equal(options.headers.Authorization, undefined);
+  }
+  assert.equal(calls[2].options.headers['Content-Type'], 'application/json');
+  assert.equal(JSON.parse(calls[2].options.body).reviewer_id, principal.login);
+});
+
 test("sin aprobación explícita del equipo se permiten lecturas y se bloquea POST", async () => {
   let calls = 0;
   const adapter = createAdapter({ fetchImpl: async () => { calls++; return response([]); } });

@@ -7,6 +7,7 @@ import logging
 import uuid
 from pathlib import PurePosixPath
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Query, Request, status, Depends
+from fastapi.responses import Response
 from starlette.concurrency import run_in_threadpool
 from app.core.oci_client import OCIStorageManager
 from app.core.review_auth import Principal, require_auditor
@@ -352,6 +353,51 @@ async def get_document_by_id(document_id: str):
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="El documento almacenado en OCI no cumple el contrato oficial de datos."
         )
+
+
+# Agregado por Edil: el ojo consulta el original privado, nunca una URL pública de OCI.
+# Solo el autor autenticado o un auditor pueden leer sus bytes.
+@router.get("/documents/{document_id}/original", summary="Ver original almacenado en OCI")
+async def get_document_original(document_id: str, request: Request):
+    principal = getattr(request.state, "mediflow_principal", None)
+    if not isinstance(principal, Principal):
+        raise HTTPException(status_code=401, detail="Inicia sesión para ver el archivo original.")
+    document = await get_document_by_id(document_id)
+    if not principal.can_review and document.cargado_por != principal.login:
+        raise HTTPException(status_code=403, detail="No tienes permiso para ver este original.")
+    location = document.almacenamiento_oci
+    extension = PurePosixPath(location.ruta_objeto).suffix.lower()
+    if (extension not in ALLOWED_EXTENSIONS or "\\" in location.ruta_objeto
+        or ".." in PurePosixPath(location.ruta_objeto).parts
+        or PurePosixPath(location.ruta_objeto).name != document_id + extension):
+        raise HTTPException(status_code=502, detail="La referencia del original no es válida.")
+    mime = {".pdf": "application/pdf", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".txt": "text/plain"}[extension]
+    def read_original():
+        gestor = OCIStorageManager()
+        allowed = {gestor.settings.bucket_recibidos, gestor.settings.bucket_procesados, gestor.settings.bucket_auditoria}
+        if location.bucket not in allowed:
+            raise ValueError("Unexpected storage bucket")
+        stored = gestor.object_storage.get_object(namespace_name=gestor.namespace,
+            bucket_name=location.bucket, object_name=location.ruta_objeto)
+        try:
+            content = stored.data.raw.read(MAX_FILE_BYTES + 1)
+        finally:
+            close = getattr(stored.data.raw, "close", None)
+            if callable(close): close()
+        if not isinstance(content, bytes) or not content or len(content) > MAX_FILE_BYTES:
+            raise ValueError("Invalid original size")
+        return content
+    try:
+        content = await run_in_threadpool(read_original)
+    except Exception as error:
+        if getattr(error, "status", None) == 404:
+            raise HTTPException(status_code=404, detail="El original no está disponible en OCI.") from None
+        raise HTTPException(status_code=502, detail="No se pudo recuperar el original de OCI.") from None
+    return Response(content, media_type=mime, headers={
+        "Content-Disposition": f'inline; filename="{document_id}{extension}"',
+        "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'none'; sandbox",
+    })
 
 
 # ==============================================================================

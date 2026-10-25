@@ -25,11 +25,14 @@
       // Agregado por Edil: sesión de aplicación propia. La conexión de red no
       // convierte a sus integrantes en usuarios ni auditores de MediFlow.
       const user = state.authenticatedUser;
+      // Agregado por Edil: sin permiso verificado no se muestran acciones de decisión.
+      $("#approveReview").hidden = $("#rejectReview").hidden = user?.canReview !== true;
       setText("#authSessionUser", user ? "Sesión: " + user.login : "Sin sesión de MediFlow");
       $("#authLoginLink").hidden = !!user && state.submitError?.status !== 401;
       $("#authLogout").hidden = !user;
       $("#authLogout").disabled = state.submitStatus === "sending" || !!logoutTask || logoutComplete || !authClient;
-      setText("#authSessionStatus", state.submitError?.status === 401 ? "La sesión ya no es válida. Inicia sesión de nuevo; se conserva el resultado y las observaciones." : "");
+      setText("#authSessionStatus", state.submitError?.status === 401 ? "La sesión ya no es válida. Inicia sesión de nuevo; se conserva el resultado y las observaciones."
+        : options.sessionError ? "No se pudo verificar la sesión. Las decisiones están deshabilitadas; vuelve a cargar para consultar de nuevo." : "");
       $("#refreshAudit").disabled = loading || state.submitStatus === "sending";
       $("#auditList").setAttribute("aria-busy", String(loading));
       setText("#auditLoadStatus", loading ? "Consultando pendientes…" : state.listError
@@ -181,6 +184,33 @@
     controller.load();
     return controller;
   }
-  root.MediFlowAuditPanel = { mount };
-  if (typeof module !== "undefined") module.exports = { mount };
+  // Agregado por Edil: arrancar la web estática con la sesión real, antes de
+  // crear el adaptador que captura la identidad. No sustituir fallos por la
+  // identidad inyectada: la bandera de contrato sigue siendo independiente.
+  async function mountFromSession(doc, options = {}) {
+    const $ = selector => doc.querySelector(selector);
+    $("#approveReview").hidden = $("#rejectReview").hidden = true;
+    $("#approveReview").disabled = $("#rejectReview").disabled = true;
+    $("#authSessionStatus").textContent = "Verificando sesión…";
+    const authClient = options.authClient || root.MediFlowAuthApi?.createClient();
+    let authenticatedUser = null, sessionError = false;
+    try {
+      const session = await authClient.getSession();
+      if (session?.authenticated === true && typeof session.user?.login === "string" && session.user.login.trim()
+          && typeof session.user.canReview === "boolean") {
+        authenticatedUser = { login: session.user.login, canReview: session.user.canReview };
+      } else if (!(session?.authenticated === false && session.user === null)) {
+        throw Error("Invalid session");
+      }
+    } catch (_) { sessionError = true; }
+    const factory = options.adapterFactory || root.MediFlowReviewHttpAdapter?.createAdapter;
+    const adapter = factory ? factory({
+      decisionApproved: root.MEDIFLOW_REVIEW_CONTRACT_APPROVED === true,
+      authenticatedUser,
+    }) : null;
+    const client = options.client || root.MediFlowReviewsApi.createClient({ approvedAdapter: adapter });
+    return mount(doc, { ...options, authClient, client, authenticatedUser, sessionError });
+  }
+  root.MediFlowAuditPanel = { mount, mountFromSession };
+  if (typeof module !== "undefined") module.exports = { mount, mountFromSession };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -530,6 +530,8 @@
   }
 
   function toast(mensaje, tono) {
+    // Agregado por Edil: este prototipo no debe anunciar guardados reales en HIS.
+    mensaje = "Demostración sin envío al backend: " + mensaje;
     const host = $("#toastHost");
     const el = document.createElement("div");
     el.className = "toast toast--" + (tono || "verde");

@@ -1,5 +1,5 @@
 /* Agregado por Edil: sesión propia de MediFlow con cookie HttpOnly.
-   La contraseña solo viaja al login del mismo origen; no se guarda en el navegador. */
+   La contraseña solo viaja al login configurado del mismo host; no se guarda en el navegador. */
 (function (root) {
   "use strict";
   class AuthApiError extends Error {
@@ -19,9 +19,15 @@
         const base = new URL(configured);
         if (!["http:", "https:"].includes(base.protocol) || (base.protocol === "http:" && !["localhost", "127.0.0.1", "[::1]"].includes(base.hostname)) ||
           base.username || base.password || base.search || base.hash ||
-          !["", "/"].includes(base.pathname) || (root.location?.origin && base.origin !== root.location.origin)) throw Error();
+          !["", "/"].includes(base.pathname)) throw Error();
+        // Agregado por Edil: Funnel separa web y API por puerto, con el mismo host.
+        // No permitir enviar contraseñas a otro host ni degradar HTTPS.
+        if (root.location?.origin && base.origin !== root.location.origin) {
+          const web = new URL(root.location.origin);
+          if (web.hostname !== base.hostname || web.protocol !== base.protocol) throw Error();
+        }
         return base.origin + path;
-      } catch (_) { throw new AuthApiError("La sesión necesita la web y la API en el mismo origen autorizado.", 400); }
+      } catch (_) { throw new AuthApiError("La sesión necesita una API del mismo host y protocolo que la web.", 400); }
     }
     async function request(path, { method = "GET", body, expectEmpty = false } = {}) {
       const url = urlFor(path), abort = new AbortController();

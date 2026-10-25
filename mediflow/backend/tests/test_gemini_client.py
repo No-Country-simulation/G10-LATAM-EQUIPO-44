@@ -244,6 +244,20 @@ def test_sdk_factory_timeout_no_retries_and_close(payload):
         factory.return_value.close.assert_called_once()
 
 
+def test_photo_timeout_default_and_explicit_override():
+    # Agregado por Edil: segundos de entorno se convierten a ms para google-genai.
+    environment = {"GEMINI_API_KEY": "unit-test-key", "GEMINI_MODEL": "unit-test-model"}
+    settings = GeminiSettings.from_environment(environment)
+    assert settings.timeout_seconds == 120
+    with patch("app.services.gemini_client.genai.Client") as factory:
+        with GeminiClinicalClient(settings):
+            pass
+        options = factory.call_args.kwargs["http_options"]
+        assert options.timeout == 120_000
+        assert options.retry_options.attempts == 1
+    assert GeminiSettings.from_environment({**environment, "GEMINI_TIMEOUT_SECONDS": "45"}).timeout_seconds == 45
+
+
 def test_invalid_trusted_context_does_not_call_model(payload):
     service, client = make_client(payload)
     with pytest.raises(LLMInputError):

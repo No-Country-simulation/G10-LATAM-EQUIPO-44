@@ -6,10 +6,24 @@ const baseUrl = "http://127.0.0.1:8787";
 const session = { authenticated: true, user: { login: "synthetic-auditor", canReview: true } };
 const response = (data = session, status = 200) => ({ ok: status >= 200 && status < 300, status, json: async () => data });
 
+test('login Funnel permite mismo host HTTPS en puertos separados sin perder cookie', async () => {
+  const previous = globalThis.location;
+  globalThis.location = { origin: 'https://desktop-edilanti.tailf48a22.ts.net:10000' };
+  try {
+    const client = createClient({ baseUrl: 'https://desktop-edilanti.tailf48a22.ts.net:8443', fetchImpl: async (url, options) => {
+      assert.equal(url, 'https://desktop-edilanti.tailf48a22.ts.net:8443/api/auth/login');
+      assert.equal(options.credentials, 'include');
+      return response();
+    } });
+    assert.deepEqual(await client.login('synthetic-auditor', 'synthetic-test-only'), session);
+  } finally { globalThis.location = previous; }
+});
+
 test("login envía la contraseña solo en JSON al mismo origen con cookie HttpOnly gestionada por navegador", async () => {
   const client = createClient({ baseUrl, fetchImpl: async (url, options) => {
     assert.equal(url, baseUrl + "/api/auth/login");
-    assert.equal(options.method, "POST"); assert.equal(options.credentials, "same-origin");
+    // Agregado por Edil: el cliente existente usa include para transportar la cookie entre puertos.
+    assert.equal(options.method, "POST"); assert.equal(options.credentials, "include");
     assert.equal(options.cache, "no-store"); assert.equal(options.redirect, "error");
     assert.equal(options.headers["Content-Type"], "application/json");
     assert.deepEqual(JSON.parse(options.body), { username: "synthetic-auditor", password: "synthetic-test-only" });

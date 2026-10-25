@@ -104,28 +104,35 @@ class AppStatusPanel extends StatelessWidget {
   final bool loading;
   @override
   Widget build(BuildContext context) {
-    final (color, background, icon) = switch (tone) {
-      AppStatusTone.information => (
-        AppColors.primary,
-        AppColors.primarySoft,
-        Icons.info_outline,
-      ),
-      AppStatusTone.success => (
-        AppColors.success,
-        AppColors.successSoft,
-        Icons.check_circle_outline,
-      ),
-      AppStatusTone.warning => (
-        AppColors.warning,
-        AppColors.warningSoft,
-        Icons.person_search_outlined,
-      ),
-      AppStatusTone.error => (
-        AppColors.error,
-        AppColors.errorSoft,
-        Icons.warning_amber_rounded,
-      ),
-    };
+    // Agregado por Edil: violeta distingue espera de éxito, revisión y error.
+    final (color, background, icon) = loading
+        ? (
+            AppColors.secondary,
+            AppColors.secondarySoft,
+            Icons.hourglass_top_rounded,
+          )
+        : switch (tone) {
+            AppStatusTone.information => (
+              AppColors.primary,
+              AppColors.primarySoft,
+              Icons.info_outline,
+            ),
+            AppStatusTone.success => (
+              AppColors.successForeground,
+              AppColors.successSoft,
+              Icons.check_circle_outline,
+            ),
+            AppStatusTone.warning => (
+              AppColors.warning,
+              AppColors.warningSoft,
+              Icons.person_search_outlined,
+            ),
+            AppStatusTone.error => (
+              AppColors.error,
+              AppColors.errorSoft,
+              Icons.warning_amber_rounded,
+            ),
+          };
     return Semantics(
       liveRegion: true,
       child: Container(

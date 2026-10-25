@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Auditoría humana · MediFlow</title>
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon.png">
 <meta name="description" content="Bandeja de documentos de MediFlow pendientes de revisión humana. Consulta del análisis original mediante la API.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -66,7 +67,7 @@
   <!-- ================= HEADER ================= -->
   <!-- Agregado por Edil: sin identidad, firma o conexión HIS simuladas. -->
   <header class="topbar">
-    <div class="topbar__brand"><span class="brand__mark" aria-hidden="true"><svg class="icon"><use href="#i-cross"></use></svg></span><span class="brand__text"><span class="brand__name">MediFlow</span><span class="conn" id="auditConnection" role="status">Preparando consulta</span></span></div>
+    <div class="topbar__brand"><span class="brand__mark" aria-hidden="true"><img src="../assets/img/mediflow-icon.png" width="36" height="36" alt="" style="display:block;width:100%;height:100%;object-fit:contain"></span><span class="brand__text"><span class="brand__name">MediFlow</span><span class="conn" id="auditConnection" role="status">Preparando consulta</span></span></div>
     <div class="topbar__search"><label class="sr-only" for="q">Buscar por ID o tipo documental</label><svg class="icon topbar__search-icon" aria-hidden="true"><use href="#i-search"></use></svg><input id="q" class="input" type="search" autocomplete="off" placeholder="Buscar ID o tipo documental"></div>
     <div class="audit-session" aria-label="Sesión de MediFlow">
       <span class="audit-header-note" id="authSessionUser">Sin sesión de MediFlow</span>
@@ -364,7 +365,7 @@
       <label class="field" id="reviewerField" for="reviewerId"><span class="field__label">Auditor autenticado</span><input class="input" id="reviewerId" autocomplete="off" readonly disabled aria-readonly="true" aria-describedby="reviewerHelp"><span class="field__help" id="reviewerHelp">Identidad recibida del servidor. El backend comprueba los permisos antes de registrar la decisión.</span></label>
       <label class="field" for="reviewObservation"><span class="field__label">Observaciones</span><textarea class="input audit-observation" id="reviewObservation" rows="4" aria-describedby="reviewAvailability" placeholder="Anota observaciones para la revisión"></textarea></label>
       <p id="reviewAvailability" class="audit-muted"></p>
-      <div class="audit-actions"><button type="button" class="btn btn--primary" id="approveReview" disabled>Aprobar</button><button type="button" class="btn btn--danger" id="rejectReview" disabled>Rechazar</button></div>
+      <div class="audit-actions"><button type="button" class="btn btn--primary" id="approveReview" hidden disabled>Aprobar</button><button type="button" class="btn btn--danger" id="rejectReview" hidden disabled>Rechazar</button></div>
       <p id="reviewResult" class="audit-notice" role="status" aria-live="polite"></p>
       <h3>Historial persistido de revisión</h3><p id="reviewHistoryStatus" class="audit-muted" role="status"></p><button type="button" class="btn" id="refreshReviewHistory" hidden>Consultar historial</button><ol id="reviewHistory"></ol>
     </section>
@@ -383,13 +384,19 @@
   <div class="modal__body"><p>Se cerrará tu sesión de MediFlow. Las observaciones sin enviar se perderán. Los envíos sin confirmación seguirán protegidos contra reenvíos.</p><p id="logoutStatus" role="status" aria-live="polite"></p></div>
   <div class="modal__foot"><button class="btn" id="logoutCancel" type="button">Cancelar</button><button class="btn btn--primary" id="logoutConfirm" type="button">Cerrar sesión</button></div>
 </dialog>
-<script src="../assets/js/auth-api.js?v=s4-login-20261024"></script>
+<!-- Agregado por Edil: contrato aprobado para web estática; respetar la configuración de presentación. -->
+<script id="review-contract-config">
+  if (typeof window.MEDIFLOW_REVIEW_CONTRACT_APPROVED === "undefined") {
+    window.MEDIFLOW_REVIEW_CONTRACT_APPROVED = true;
+  }
+</script>
+<script src="../assets/js/auth-api.js?v=funnel-original-4"></script>
 <script src="../assets/js/api-config.js"></script>
 <script src="../assets/js/documents-api.js"></script>
 <script src="../assets/js/reviews-api.js"></script>
-<script src="../assets/js/review-http-adapter.js?v=s4-identidad-20261024"></script>
+<script src="../assets/js/review-http-adapter.js?v=sesion-auditoria-5"></script>
 <script src="../assets/js/audit-controller.js?v=s4-identidad-20261024"></script>
-<script src="audit-panel.js?v=s4-login-20261024"></script>
-<script src="app.js"></script>
+<script src="audit-panel.js?v=sesion-auditoria-5"></script>
+<script src="app.js?v=sesion-auditoria-5"></script>
 </body>
 </html>

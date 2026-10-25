@@ -15,7 +15,8 @@ class ApiConfig {
   // Agregado por Edil: mismo límite de 10 MiB que acepta el backend.
   static const maxFileBytes = 10 * 1024 * 1024;
   // Agregado por Edil: contempla almacenamiento OCI más análisis autorizado.
-  static const requestTimeout = Duration(seconds: 90);
+  // Agregado por Edil: 120 s de Gemini más margen para subir y persistir en OCI.
+  static const requestTimeout = Duration(seconds: 180);
 
   static Uri triageUri({String? url, bool allowHttp = kDebugMode}) {
     final base = Uri.tryParse((url ?? baseUrl).trim());

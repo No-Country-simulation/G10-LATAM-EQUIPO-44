@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/triage_result.dart';
 import '../design_system/app_spacing.dart';
+import '../design_system/app_colors.dart';
 import 'app_components.dart';
 
 // Agregado por Edil: cambia solo la presentación. No interpreta urgencia ni reglas.
@@ -35,7 +36,10 @@ class TriageResultCard extends StatelessWidget {
           ],
           AppStatusPanel(title: title, tone: tone),
           const SizedBox(height: AppSpacing.lg),
-          Text('Estado: ${result.status}'),
+          Text(
+            'Estado: ${result.status}',
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           if (result.status == 'recibido') ...[
             const SizedBox(height: AppSpacing.sm),
             const Text(
@@ -57,6 +61,19 @@ class TriageResultCard extends StatelessWidget {
               Text(
                 'Confianza de clasificación: ${(confidence * 100).toStringAsFixed(0)} %',
               ),
+              // Agregado por Edil: representación visual del valor recibido,
+              // sin nuevos umbrales ni interpretación clínica.
+              const SizedBox(height: AppSpacing.sm),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppSpacing.xs),
+                child: LinearProgressIndicator(
+                  value: confidence,
+                  minHeight: AppSpacing.sm,
+                  color: AppColors.primary,
+                  backgroundColor: AppColors.primarySoft,
+                  semanticsLabel: 'Confianza sobre el tipo documental',
+                ),
+              ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'Este valor describe la confianza del sistema en el tipo de documento; no mide la calidad de extracción ni la urgencia clínica.',
@@ -64,7 +81,14 @@ class TriageResultCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: AppSpacing.sm),
-            Text('Prioridad: ${result.prioridad}'),
+            Text(
+              'Prioridad: ${result.prioridad}',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: result.isUrgent
+                    ? AppColors.error
+                    : AppColors.clinicalBlue,
+              ),
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text('Destino: ${result.destino}'),
             const SizedBox(height: AppSpacing.sm),

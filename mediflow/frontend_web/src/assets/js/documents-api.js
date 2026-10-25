@@ -29,7 +29,8 @@
     const timer = setTimeout(() => controller.abort(), options.timeoutMs || 20000);
     try {
       const response = await (options.fetchImpl || root.fetch)(endpoint, {
-        method: "GET", headers: { Accept: "application/json" }, signal: controller.signal, redirect: "error"
+        // Agregado por Edil: conservar la sesión también al recuperar una carga entre puertos HTTPS.
+        method: "GET", credentials: "include", headers: { Accept: "application/json" }, signal: controller.signal, redirect: "error"
       });
       if (!response.ok) {
         if (individual && response.status === 404) throw new DocumentsApiError("El documento no existe o ya no esta disponible.", 404);
@@ -68,7 +69,18 @@
   }
   const getDocuments = (options = {}) => requestDocuments(options);
   const getDocument = (id, options = {}) => requestDocuments(options, id === undefined ? null : id);
-  const api = { getDocuments, getDocument, DocumentsApiError, isValidDocument: validDocument };
+  // Agregado por Edil: navegación al original protegido, sin enlaces OCI ni selección local.
+  function originalUrl(id, options = {}) {
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new DocumentsApiError('Identificador inválido.');
+    try {
+      const base = new URL(options.baseUrl || root.MEDIFLOW_API_BASE_URL);
+      if (!['https:', 'http:'].includes(base.protocol) || base.username || base.password || base.search || base.hash ||
+          !['/', '/api', '/api/'].includes(base.pathname) ||
+          (base.protocol === 'http:' && !['localhost', '127.0.0.1', '[::1]'].includes(base.hostname))) throw Error();
+      return new URL('/api/documents/' + encodeURIComponent(id) + '/original', base.origin).href;
+    } catch (_) { throw new DocumentsApiError('La dirección de la API no es válida.'); }
+  }
+  const api = { getDocuments, getDocument, originalUrl, DocumentsApiError, isValidDocument: validDocument };
   root.MediFlowDocumentsApi = api;
   if (typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);
