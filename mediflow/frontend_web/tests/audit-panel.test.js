@@ -30,6 +30,11 @@ function view(overrides = {}) {
   const sample = structuredClone(documents[3]); sample.clasificacion.nivel_prioridad = "Urgente";
   let calls = { list: 0, detail: 0, submit: 0, history: 0 };
   const api = { ...documentsApi,
+    getOriginal: async id => {
+      if (overrides.getOriginal) return overrides.getOriginal(id);
+      if (overrides.originalError) throw overrides.originalError;
+      return { mime: 'text/plain', blob: new Blob(['Original sintético']) };
+    },
     getDocuments: async () => { calls.list++; if (overrides.listError) throw overrides.listError; return overrides.rows || [sample]; },
     getDocument: async id => { calls.detail++; if (overrides.detailError) throw overrides.detailError; return { ...sample, documento_id: id }; } };
   const adapter = overrides.approved ? { approved: true, contractReference: "TEST-ONLY-NOT-PRODUCTION",
@@ -43,10 +48,11 @@ function view(overrides = {}) {
   // Identidad exclusiva de pruebas; producción la recibe del servidor privado.
   const authenticatedUser = Object.prototype.hasOwnProperty.call(overrides, "authenticatedUser")
     ? overrides.authenticatedUser : { login: "synthetic-auditor", canReview: true };
-  const controller = mount(doc, { client, storage, authenticatedUser, authClient: overrides.authClient, onLoggedOut: overrides.onLoggedOut });
+  const controller = mount(doc, { client, storage, originalApi: api, authenticatedUser, authClient: overrides.authClient, onLoggedOut: overrides.onLoggedOut });
   async function open() {
     const button = { disabled: false, dataset: { openDocument: sample.documento_id }, isConnected: false, closest() { return this; } };
     $("#auditList").fire("click", { target: button }); await controller.open(sample.documento_id);
+    await new Promise(resolve => setImmediate(resolve));
   }
   return { $, controller, calls, sample, overrides, open };
 }
@@ -399,4 +405,35 @@ test('contrato explícito se ejecuta antes del adaptador y panel, sin depender d
     applyHtmlContract(target);
     assert.equal(target.MEDIFLOW_REVIEW_CONTRACT_APPROVED, value);
   }
+});
+
+for (const status of [401, 403, 404]) {
+  test('original no disponible HTTP ' + status + ' bloquea decisiones sin ocultar análisis', async () => {
+    const error = new documentsApi.DocumentsApiError('Original no disponible', status);
+    const v = view({ approved: true, originalError: error });
+    await v.controller.load(); await v.open();
+    assert.equal(v.controller.state.detailStatus, 'ready');
+    assert.equal(v.controller.canSubmit('approve'), false);
+    assert.equal(v.controller.confirm('reject'), false);
+    assert.equal(v.$('#approveReview').disabled, true);
+    assert.equal(v.$('#auditOriginalLink').hidden, true);
+    assert.match(v.$('#auditOriginalStatus').textContent, /Original no disponible/);
+    assert.equal(v.calls.submit, 0);
+  });
+}
+test('cambiar ID y cerrar descarta original anterior y respuestas tardías', async () => {
+  let completeOld;
+  const v = view({ approved: true, getOriginal: id => id === documents[3].documento_id
+    ? new Promise(resolve => { completeOld = resolve; })
+    : Promise.resolve({ mime: 'text/plain', blob: new Blob(['Original B']) }) });
+  await v.controller.load(); await v.open();
+  assert.equal(v.controller.canSubmit('approve'), false);
+  await v.controller.open('DOC-OTHER'); await new Promise(resolve => setImmediate(resolve));
+  assert.equal(v.$('#auditOriginalText').textContent, 'Original B');
+  completeOld({ mime: 'text/plain', blob: new Blob(['OLD-PRIVATE']) });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(v.$('#auditOriginalText').textContent, 'Original B');
+  v.controller.close();
+  assert.equal(v.$('#auditOriginalText').textContent, '');
+  assert.equal(v.$('#auditOriginalLink').hidden, true);
 });

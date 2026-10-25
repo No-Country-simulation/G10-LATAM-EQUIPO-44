@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=visor-privado-6">
 </head>
 
 <body data-screen="ingesta">
@@ -199,6 +199,15 @@
           <span id="uploadFileInfo"></span>
           <a id="uploadPreviewLink" class="btn upload-eye" target="_blank" rel="noopener noreferrer" title="Ver original guardado en OCI" aria-label="Ver documento en otra pestaña, original de OCI" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></a>
         </section>
+        <!-- Agregado por Edil: copia local efímera, independiente de la confirmación de OCI. -->
+        <p id="uploadFilePhase" class="hint"></p>
+        <details id="uploadLocalPanel" class="upload-local-preview" open hidden>
+          <summary>Vista previa local</summary>
+          <img id="uploadLocalImage" alt="Documento seleccionado" hidden>
+          <iframe id="uploadLocalPdf" title="PDF seleccionado" sandbox referrerpolicy="no-referrer" hidden></iframe>
+          <pre id="uploadLocalText" hidden></pre>
+          <a id="uploadLocalLink" target="_blank" rel="noopener noreferrer" hidden>Abrir copia local en otra pestaña</a>
+        </details>
         <p id="uploadStatus" role="status" aria-live="polite"></p>
         <div id="uploadResult" class="upload-result" hidden></div>
       </div>
@@ -447,9 +456,9 @@
 <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
 <script src="../assets/js/api-config.js?v=ingesta-real-1"></script>
-<script src="../assets/js/documents-api.js?v=original-oci-4"></script>
+<script src="../assets/js/documents-api.js?v=visor-privado-6"></script>
 <script src="../assets/js/triage-api.js?v=ingesta-real-1"></script>
-<script src="upload.js?v=original-oci-4"></script>
+<script src="upload.js?v=visor-privado-6"></script>
 <script src="app.js"></script>
 </body>
 </html>

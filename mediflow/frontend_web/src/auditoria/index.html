@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
 <!-- Agregado por Edil: renovar la caché del CSS del cierre S4. -->
-<link rel="stylesheet" href="styles.css?v=s4-edil-20261024">
+<link rel="stylesheet" href="styles.css?v=visor-privado-6">
 </head>
 
 <body data-screen="auditoria">
@@ -354,6 +354,16 @@
   <div class="modal__head"><h2 class="modal__title" id="auditDetailTitle">Detalle del documento</h2><button type="button" class="btn audit-close" id="auditClose">Cerrar</button></div>
   <div class="modal__body">
     <p id="auditDetailStatus" class="audit-notice" role="status"></p><button type="button" class="btn" id="auditRetryDetail">Consultar detalle de nuevo</button>
+    <!-- Agregado por Edil: bytes privados recuperados con sesión, nunca enlaces de buckets. -->
+    <section class="audit-original" aria-labelledby="auditOriginalTitle">
+      <h3 id="auditOriginalTitle">Documento original</h3>
+      <p id="auditOriginalStatus" role="status" aria-live="polite"></p>
+      <img id="auditOriginalImage" alt="Original del documento en revisión" hidden>
+      <iframe id="auditOriginalPdf" title="Original PDF en revisión" sandbox referrerpolicy="no-referrer" hidden></iframe>
+      <pre id="auditOriginalText" hidden></pre>
+      <a id="auditOriginalLink" target="_blank" rel="noopener noreferrer" hidden>Abrir original en otra pestaña</a>
+      <button id="auditOriginalRetry" type="button" class="btn">Consultar original de nuevo</button>
+    </section>
     <section id="auditDetailContent" hidden>
       <p id="auditUrgent" class="audit-notice is-urgent" hidden><strong>Prioridad Urgente</strong> indicada por el backend. La revisión humana no reduce esta prioridad.</p>
       <h3>Análisis recibido</h3><dl id="auditSummary" class="audit-facts"></dl>
@@ -392,11 +402,11 @@
 </script>
 <script src="../assets/js/auth-api.js?v=funnel-original-4"></script>
 <script src="../assets/js/api-config.js"></script>
-<script src="../assets/js/documents-api.js"></script>
+<script src="../assets/js/documents-api.js?v=visor-privado-6"></script>
 <script src="../assets/js/reviews-api.js"></script>
 <script src="../assets/js/review-http-adapter.js?v=sesion-auditoria-5"></script>
-<script src="../assets/js/audit-controller.js?v=s4-identidad-20261024"></script>
-<script src="audit-panel.js?v=sesion-auditoria-5"></script>
+<script src="../assets/js/audit-controller.js?v=visor-privado-6"></script>
+<script src="audit-panel.js?v=visor-privado-6"></script>
 <script src="app.js?v=sesion-auditoria-5"></script>
 </body>
 </html>

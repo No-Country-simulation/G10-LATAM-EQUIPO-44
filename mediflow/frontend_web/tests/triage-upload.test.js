@@ -145,9 +145,25 @@ test('URL del original usa servidor configurado y evita duplicar api o referenci
   assert.throws(() => originalUrl('../bad', { baseUrl }));
   assert.throws(() => originalUrl('DOC-1', { baseUrl: 'https://secret:password@other.test' }));
 });
- test('presentacion compacta: nombre y ojo sin visor embebido', () => {
+ test('vista local compacta y original OCI conservan controles separados', () => {
   const html = fs.readFileSync(require.resolve('../src/ingesta/index.html'), 'utf8');
   assert.match(html, /class="upload-file-row"/);
   assert.match(html, /aria-label="Ver documento en otra pesta/);
-  assert.doesNotMatch(html, /<iframe|id="uploadPreviewText"|id="uploadPreviewImage"/);
+  assert.match(html, /id="uploadLocalImage"/);
+  assert.match(html, /id="uploadLocalPdf"[^>]*sandbox/);
+  assert.match(html, /id="uploadLocalText"/);
+});
+test('selección y reemplazo muestran TXT seguro, tipo y tamaño sin enviar; reset limpia la copia local', async () => {
+  let calls = 0;
+  const v = view({ upload: async () => { calls++; return fixture(); } });
+  await v.form.preview(file('primero.txt', '<b>Texto clínico sintético</b>'));
+  assert.equal(v.$('#uploadLocalText').textContent, '<b>Texto clínico sintético</b>');
+  assert.match(v.$('#uploadFileInfo').textContent, /primero.txt.*TXT.*KiB/);
+  assert.match(v.$('#uploadFilePhase').textContent, /todavía sin enviar/);
+  await v.form.preview(file('segundo.txt', 'Segundo documento'));
+  assert.equal(v.$('#uploadLocalText').textContent, 'Segundo documento');
+  assert.ok(!v.$('#uploadFileInfo').textContent.includes('primero.txt'));
+  assert.equal(calls, 0);
+  v.form.reset(); assert.equal(v.$('#uploadLocalText').textContent, '');
+  assert.equal(v.$('#uploadLocalPanel').hidden, true);
 });
