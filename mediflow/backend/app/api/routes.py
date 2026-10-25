@@ -149,28 +149,36 @@ async def post_triage(request: Request, file: UploadFile = File(...), analyze: b
             raise
         except LLMConfigurationError as error:
             code, message = 503, "El análisis IA no está configurado."
-            logger.warning("triage_analysis_failed category=%s http_status=%s document_id=%s", type(error).__name__, code, doc_id)
+            diagnostic_error = error
         except LLMAuthenticationError as error:
             code, message = 502, "No se pudo autenticar el servicio de análisis."
-            logger.warning("triage_analysis_failed category=%s http_status=%s document_id=%s", type(error).__name__, code, doc_id)
+            diagnostic_error = error
         except LLMQuotaError as error:
             code, message = 429, "El servicio de análisis alcanzó su límite de solicitudes."
-            logger.warning("triage_analysis_failed category=%s http_status=%s document_id=%s", type(error).__name__, code, doc_id)
+            diagnostic_error = error
         except LLMTimeoutError as error:
             code, message = 504, "El servicio de análisis agotó el tiempo de espera."
-            logger.warning("triage_analysis_failed category=%s http_status=%s document_id=%s", type(error).__name__, code, doc_id)
+            diagnostic_error = error
         except (LLMNetworkError, LLMUnavailableError) as error:
             code, message = 503, "El servicio de análisis no está disponible."
-            logger.warning("triage_analysis_failed category=%s http_status=%s document_id=%s", type(error).__name__, code, doc_id)
+            diagnostic_error = error
         except (LLMRequestError, LLMResponseError) as error:
             code, message = 502, "El servicio de análisis devolvió una respuesta inválida."
-            logger.warning("triage_analysis_failed category=%s http_status=%s document_id=%s", type(error).__name__, code, doc_id)
+            diagnostic_error = error
         except LLMInputError as error:
             code, message = 422, "El documento no puede analizarse en su formato actual."
-            logger.warning("triage_analysis_failed category=%s http_status=%s document_id=%s", type(error).__name__, code, doc_id)
+            diagnostic_error = error
         except Exception as error:
             code, message = 500, "No se pudo completar el análisis."
-            logger.warning("triage_analysis_failed category=%s http_status=%s document_id=%s", type(error).__name__, code, doc_id)
+            diagnostic_error = error
+        # Agregado por Edil: único registro del fallo, sin mensaje ni traceback del proveedor.
+        logger.warning(
+            "triage_analysis_failed category=%s provider_http_status=%s original_exception_class=%s document_id=%s",
+            type(diagnostic_error).__name__,
+            getattr(diagnostic_error, "provider_http_status", None),
+            getattr(diagnostic_error, "original_exception_class", None),
+            doc_id,
+        )
         raise HTTPException(status_code=code, detail=message, headers={"X-Document-ID": doc_id})
 
     # Agregado por Edil: conservar aquí el código anterior como referencia.

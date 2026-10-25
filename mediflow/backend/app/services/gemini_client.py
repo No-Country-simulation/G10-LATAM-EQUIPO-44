@@ -246,25 +246,27 @@ class GeminiClinicalClient:
             response = self._client.models.generate_content(
                 model=self.settings.model, contents=contents, config=config
             )
+        # Agregado por Edil: conservar solo código y clase; el endpoint registra una vez.
         except errors.APIError as error:
             code = error.code
             if code in (401, 403):
-                raise LLMAuthenticationError("Gemini rechazó la autenticación o los permisos.") from None
+                raise LLMAuthenticationError.from_exception("Gemini rechazó la autenticación o los permisos.", error, provider_http_status=code) from None
             if code == 429:
-                raise LLMQuotaError("La cuota o el límite de solicitudes de Gemini se agotó.") from None
+                raise LLMQuotaError.from_exception("La cuota o el límite de solicitudes de Gemini se agotó.", error, provider_http_status=code) from None
             if code in (408, 504):
-                raise LLMTimeoutError("Gemini no respondió dentro del tiempo permitido.") from None
+                raise LLMTimeoutError.from_exception("Gemini no respondió dentro del tiempo permitido.", error, provider_http_status=code) from None
             if code >= 500:
-                raise LLMUnavailableError("Gemini no está disponible temporalmente.") from None
-            raise LLMRequestError(
-                "Gemini rechazó la solicitud; revisa modelo y soporte de salida estructurada."
+                raise LLMUnavailableError.from_exception("Gemini no está disponible temporalmente.", error, provider_http_status=code) from None
+            raise LLMRequestError.from_exception(
+                "Gemini rechazó la solicitud; revisa modelo y soporte de salida estructurada.",
+                error, provider_http_status=code
             ) from None
-        except (httpx.TimeoutException, TimeoutError):
-            raise LLMTimeoutError("Gemini no respondió dentro del tiempo permitido.") from None
-        except (httpx.RequestError, ConnectionError, OSError):
-            raise LLMNetworkError("No se pudo conectar con Gemini.") from None
-        except Exception:
-            raise LLMUnavailableError("No se pudo completar la solicitud a Gemini.") from None
+        except (httpx.TimeoutException, TimeoutError) as error:
+            raise LLMTimeoutError.from_exception("Gemini no respondió dentro del tiempo permitido.", error) from None
+        except (httpx.RequestError, ConnectionError, OSError) as error:
+            raise LLMNetworkError.from_exception("No se pudo conectar con Gemini.", error) from None
+        except Exception as error:
+            raise LLMUnavailableError.from_exception("No se pudo completar la solicitud a Gemini.", error) from None
         try:
             candidates = getattr(response, "candidates", None)
             if candidates:

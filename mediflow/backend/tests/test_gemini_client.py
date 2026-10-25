@@ -112,13 +112,16 @@ def test_document_too_large_does_not_call_model(payload):
 ])
 def test_timeout_is_controlled(error):
     service, _ = make_client(error=error)
-    with pytest.raises(LLMTimeoutError):
+    with pytest.raises(LLMTimeoutError) as exc:
         service.extract("Documento sintético")
+    assert exc.value.provider_http_status is None
+    assert exc.value.original_exception_class == type(error).__name__
 
 
 @pytest.mark.parametrize("code,expected", [
     (401, LLMAuthenticationError), (403, LLMAuthenticationError),
     (429, LLMQuotaError), (504, LLMTimeoutError), (503, LLMUnavailableError),
+    (500, LLMUnavailableError), (502, LLMUnavailableError),
     (400, LLMRequestError), (404, LLMRequestError),
 ])
 def test_provider_errors_are_sanitized(code, expected, caplog, capsys):
@@ -128,6 +131,8 @@ def test_provider_errors_are_sanitized(code, expected, caplog, capsys):
     with pytest.raises(expected) as exc:
         service.extract("Documento sintético")
     assert secret not in str(exc.value)
+    assert exc.value.provider_http_status == code
+    assert exc.value.original_exception_class == type(error).__name__
     assert exc.value.__suppress_context__
     assert secret not in caplog.text
     assert capsys.readouterr().out == ""
@@ -278,6 +283,18 @@ def test_unknown_failure_does_not_leak_message():
     with pytest.raises(LLMUnavailableError) as exc:
         service.extract("Documento sintético")
     assert "private document body" not in str(exc.value)
+    assert exc.value.provider_http_status is None
+    assert exc.value.original_exception_class == "RuntimeError"
+
+
+def test_diagnostic_metadata_rejects_log_injection():
+    # Agregado por Edil: ningún metadato arbitrario puede agregar líneas al log.
+    error = LLMUnavailableError(
+        "Mensaje público", provider_http_status="503\nprivate",
+        original_exception_class="RuntimeError\nprivate",
+    )
+    assert error.provider_http_status is None
+    assert error.original_exception_class is None
 
 
 def test_manual_entrypoint_is_off_by_default(capsys):

@@ -14,7 +14,7 @@ from app.models.schemas import TriageResponse
 from app.services.gemini_client import GeminiClinicalClient, GeminiSettings
 from app.services.llm_errors import (
     LLMConfigurationError, LLMAuthenticationError, LLMQuotaError, LLMTimeoutError,
-    LLMNetworkError, LLMResponseError, LLMInputError,
+    LLMNetworkError, LLMResponseError, LLMInputError, LLMUnavailableError,
 )
 
 
@@ -81,6 +81,10 @@ def test_full_http_oci_gemini_validation_flow(monkeypatch, review, status):
     (LLMQuotaError("private"),429), (LLMTimeoutError("private"),504),
     (LLMNetworkError("private"),503), (LLMResponseError("private"),502),
     (LLMInputError("private"),422),
+    (LLMUnavailableError("private", provider_http_status=500, original_exception_class="ServerError"),503),
+    (LLMUnavailableError("private", provider_http_status=502, original_exception_class="ServerError"),503),
+    (LLMUnavailableError("private", provider_http_status=503, original_exception_class="ServerError"),503),
+    (LLMUnavailableError("private", original_exception_class="RuntimeError"),503),
 ])
 def test_analysis_failures_keep_received_object_and_hide_details(failure, code, caplog):
     with patch("app.api.routes.OCIStorageManager") as factory, \
@@ -96,6 +100,20 @@ def test_analysis_failures_keep_received_object_and_hide_details(failure, code, 
         assert "private" not in caplog.text
         assert "Nota sintetica" not in caplog.text
         assert response.headers["X-Document-ID"].startswith("DOC-CLIN-")
+        # Agregado por Edil: un solo log seguro; los metadatos no llegan al cliente.
+        records = [r for r in caplog.records if "triage_analysis_failed" in r.getMessage()]
+        assert len(records) == 1
+        assert records[0].exc_info is None
+        assert records[0].getMessage() == (
+            f"triage_analysis_failed category={type(failure).__name__} "
+            f"provider_http_status={failure.provider_http_status} "
+            f"original_exception_class={failure.original_exception_class} "
+            f"document_id={response.headers['X-Document-ID']}"
+        )
+        assert set(response.json()) == {"detail"}
+        assert "provider_http_status" not in response.text
+        assert "original_exception_class" not in response.text
+        assert factory.return_value.guardar_resultado_triage.call_args.args[0]["status"] == "recibido"
         factory.return_value.object_storage.delete_object.assert_not_called()
 
 
