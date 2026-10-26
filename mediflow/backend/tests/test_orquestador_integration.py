@@ -141,6 +141,7 @@ def test_input_contract_is_strict_and_error_does_not_include_data(bad_value):
     with pytest.raises(LLMResponseError) as error:
         procesar_con_orquestador(original)
     assert "DATO_SINTETICO_NO_DIVULGAR" not in str(error.value)
+    assert (error.value.stage, error.value.reason) == ("orchestration_input", "schema_mismatch")
 
 
 def test_unanalyzed_receipt_is_not_promoted_to_processed():
@@ -167,3 +168,4 @@ def test_catalog_failure_is_controlled_and_does_not_echo_original_error(monkeypa
     with pytest.raises(LLMResponseError) as error:
         procesar_con_orquestador(document())
     assert "DATO_SINTETICO_NO_DIVULGAR" not in str(error.value)
+    assert (error.value.stage, error.value.reason) == ("orchestration_rules", "evaluation_failed")

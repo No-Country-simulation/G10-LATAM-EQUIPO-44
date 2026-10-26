@@ -173,10 +173,12 @@ async def post_triage(request: Request, file: UploadFile = File(...), analyze: b
             diagnostic_error = error
         # Agregado por Edil: único registro del fallo, sin mensaje ni traceback del proveedor.
         logger.warning(
-            "triage_analysis_failed category=%s provider_http_status=%s original_exception_class=%s document_id=%s",
+            "triage_analysis_failed category=%s provider_http_status=%s original_exception_class=%s stage=%s reason=%s document_id=%s",
             type(diagnostic_error).__name__,
             getattr(diagnostic_error, "provider_http_status", None),
             getattr(diagnostic_error, "original_exception_class", None),
+            diagnostic_error.stage if isinstance(diagnostic_error, LLMResponseError) else None,
+            diagnostic_error.reason if isinstance(diagnostic_error, LLMResponseError) else None,
             doc_id,
         )
         raise HTTPException(status_code=code, detail=message, headers={"X-Document-ID": doc_id})

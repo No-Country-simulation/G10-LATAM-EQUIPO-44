@@ -117,7 +117,8 @@ def _check_shape(value: Any, schema: dict, definitions: dict) -> None:
     if isinstance(value, dict) and "properties" in schema:
         allowed = schema["properties"]
         if set(value) - set(allowed) or set(schema.get("required", [])) - set(value):
-            raise LLMResponseError("La respuesta no cumple las claves del contrato.")
+            raise LLMResponseError("La respuesta no cumple las claves del contrato.",
+                stage="clinical_schema", reason="missing_fields" if set(schema.get("required", [])) - set(value) else "unexpected_fields")
         for key, item in value.items():
             _check_shape(item, allowed[key], definitions)
     # Agregado por Edil: aplica también la validación estricta a medicamentos.
@@ -140,14 +141,19 @@ def _reject_constant(_value):
 
 
 def validate_clinical_response(text: str) -> ClinicalExtraction:
+    # Agregado por Edil: códigos estáticos para localizar el rechazo sin registrar contenido.
+    stage, reason = "clinical_json", "empty_or_oversized"
     try:
         if not isinstance(text, str) or not text.strip() or len(text) > 100_000:
             raise ValueError()
+        reason = "invalid_json"
         payload = json.loads(
             text, object_pairs_hook=_unique_object, parse_constant=_reject_constant
         )
+        reason = "invalid_root"
         if not isinstance(payload, dict):
             raise ValueError()
+        stage, reason = "clinical_schema", "schema_mismatch"
         schema = clinical_validation_schema()
         _check_shape(payload, schema, schema.get("$defs", {}))
         clinical = ClinicalExtraction.model_validate(payload, strict=True)
@@ -158,20 +164,23 @@ def validate_clinical_response(text: str) -> ClinicalExtraction:
         return clinical
     except LLMResponseError:
         raise
-    except (ValueError, TypeError, ValidationError, RecursionError):
-        raise LLMResponseError("Gemini devolvió un JSON inválido o incompatible.") from None
+    except (ValueError, TypeError, ValidationError, RecursionError) as error:
+        raise LLMResponseError("Gemini devolvió un JSON inválido o incompatible.",
+            stage=stage, reason=reason, original_exception_class=type(error).__name__) from None
 
 
 def validate_routing_consistency(clinical: ClinicalExtraction) -> None:
     """Agregado por Edil: evita respuestas contradictorias antes de entregarlas."""
     routing = clinical.decision_enrutamiento
     if routing.requiere_auditoria_humana != (routing.destino_principal == "Cola_Revision_Humana"):
-        raise LLMResponseError("La revisión humana y su cola de destino no coinciden.")
+        raise LLMResponseError("La revisión humana y su cola de destino no coinciden.",
+            stage="routing_consistency", reason="review_destination_mismatch")
     # Conservamos la comprobación útil de Nicolás para dosis ilegibles.
     # No buscamos 'datos_extraidos encampados': esa clave no existe en el contrato.
     if any(item.dosis == "ILLEGIBLE" for item in clinical.datos_extraidos.medicamentos_recetados):
         if not routing.requiere_auditoria_humana:
-            raise LLMResponseError("Una dosis ilegible requiere revisión humana.")
+            raise LLMResponseError("Una dosis ilegible requiere revisión humana.",
+                stage="routing_consistency", reason="illegible_dose_without_review")
 
 
 class GeminiClinicalClient:
@@ -272,25 +281,36 @@ class GeminiClinicalClient:
             if candidates:
                 reason = candidates[0].finish_reason
                 if reason is not None and reason != types.FinishReason.STOP:
-                    raise LLMResponseError("La generación fue bloqueada o quedó incompleta.")
+                    # Agregado por Edil: traducir solo causas conocidas; no registrar finish_reason libre.
+                    causes = {"MAX_TOKENS": "max_tokens", "SAFETY": "safety", "RECITATION": "recitation",
+                              "BLOCKLIST": "blocklist", "PROHIBITED_CONTENT": "prohibited_content", "SPII": "spii"}
+                    safe_reason = causes.get(reason, "non_stop_finish")
+                    raise LLMResponseError("La generación fue bloqueada o quedó incompleta.",
+                        stage="generation", reason=safe_reason)
             raw_text = response.text
         except LLMResponseError:
             raise
-        except Exception:
-            raise LLMResponseError("Gemini no devolvió una respuesta textual válida.") from None
+        except Exception as error:
+            raise LLMResponseError("Gemini no devolvió una respuesta textual válida.",
+                stage="response_read", reason="text_unavailable", original_exception_class=type(error).__name__) from None
         if include_source:
+            reason = "empty_or_oversized"
             try:
                 if not isinstance(raw_text, str) or len(raw_text) > 200_000:
                     raise ValueError()
+                reason = "invalid_json"
                 data = json.loads(raw_text, object_pairs_hook=_unique_object,
                                   parse_constant=_reject_constant)
+                reason = "invalid_envelope"
                 if not isinstance(data, dict) or set(data) != {"analysis", "document_text"}:
                     raise ValueError()
+                reason = "invalid_source_text"
                 text = validate_document_text(data["document_text"])
                 clinical = validate_clinical_response(json.dumps(data["analysis"], ensure_ascii=False))
                 return clinical, text
-            except (ValueError, TypeError, LLMInputError):
-                raise LLMResponseError("No se obtuvo evidencia textual válida del documento.") from None
+            except (ValueError, TypeError, LLMInputError) as error:
+                raise LLMResponseError("No se obtuvo evidencia textual válida del documento.",
+                    stage="source_evidence", reason=reason, original_exception_class=type(error).__name__) from None
         return validate_clinical_response(raw_text)
 
     def process(
@@ -314,8 +334,9 @@ class GeminiClinicalClient:
         }
         try:
             return TriageResponse.model_validate(result, strict=True)
-        except ValidationError:
-            raise LLMResponseError("La salida no cumple el contrato MediFlow.") from None
+        except ValidationError as error:
+            raise LLMResponseError("La salida no cumple el contrato MediFlow.",
+                stage="response_assembly", reason="schema_mismatch", original_exception_class=type(error).__name__) from None
 
     # Agregado por Edil: Gemini recibe media nativa; no se afirma disponer de OCR.
     def extract_document(self, content: bytes, filename: str, *, include_source: bool = False):

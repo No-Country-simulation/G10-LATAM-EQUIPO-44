@@ -81,6 +81,8 @@ def test_full_http_oci_gemini_validation_flow(monkeypatch, review, status):
     (LLMQuotaError("private"),429), (LLMTimeoutError("private"),504),
     (LLMNetworkError("private"),503), (LLMResponseError("private"),502),
     (LLMInputError("private"),422),
+    (LLMResponseError("private", stage="clinical_json", reason="invalid_json"),502),
+    (LLMResponseError("private", stage="generation", reason="max_tokens"),502),
     (LLMUnavailableError("private", provider_http_status=500, original_exception_class="ServerError"),503),
     (LLMUnavailableError("private", provider_http_status=502, original_exception_class="ServerError"),503),
     (LLMUnavailableError("private", provider_http_status=503, original_exception_class="ServerError"),503),
@@ -108,11 +110,15 @@ def test_analysis_failures_keep_received_object_and_hide_details(failure, code, 
             f"triage_analysis_failed category={type(failure).__name__} "
             f"provider_http_status={failure.provider_http_status} "
             f"original_exception_class={failure.original_exception_class} "
+            f"stage={getattr(failure, 'stage', None)} reason={getattr(failure, 'reason', None)} "
             f"document_id={response.headers['X-Document-ID']}"
         )
         assert set(response.json()) == {"detail"}
         assert "provider_http_status" not in response.text
         assert "original_exception_class" not in response.text
+        assert "stage" not in response.text and "reason" not in response.text
+        if isinstance(failure, LLMResponseError):
+            assert response.json()["detail"] == "El servicio de análisis devolvió una respuesta inválida."
         assert factory.return_value.guardar_resultado_triage.call_args.args[0]["status"] == "recibido"
         factory.return_value.object_storage.delete_object.assert_not_called()
 

@@ -56,8 +56,10 @@ def test_multimodal_source_is_internal_and_uses_one_generation(structured):
 ])
 def test_bad_evidence_is_not_replaced_by_serialized_json(payload):
     service, _ = client(payload)
-    with pytest.raises(LLMResponseError):
+    with pytest.raises(LLMResponseError) as exc:
         service.extract_document(b"\xff\xd8\xffsynthetic", "archivo.jpg", include_source=True)
+    expected = ("clinical_schema", "missing_fields") if payload.get("analysis") == {} else ("source_evidence", "invalid_envelope" if set(payload) != {"analysis", "document_text"} else "invalid_source_text")
+    assert (exc.value.stage, exc.value.reason) == expected
 
 
 def test_txt_uses_original_text_and_original_clinical_schema():

@@ -37,7 +37,28 @@ class LLMInputError(LLMError):
 
 
 class LLMResponseError(LLMError):
-    pass
+    # Agregado por Edil: catálogo cerrado; nunca usar mensajes ni datos de IA
+    # como etapa/motivo. Estos atributos son internos, no campos del contrato.
+    _DIAGNOSTICS = {
+        "generation": {"max_tokens", "safety", "recitation", "blocklist",
+                       "prohibited_content", "spii", "non_stop_finish"},
+        "response_read": {"text_unavailable"},
+        "clinical_json": {"empty_or_oversized", "invalid_json", "invalid_root"},
+        "clinical_schema": {"missing_fields", "unexpected_fields", "schema_mismatch"},
+        "routing_consistency": {"review_destination_mismatch", "illegible_dose_without_review"},
+        "source_evidence": {"empty_or_oversized", "invalid_json", "invalid_envelope", "invalid_source_text"},
+        "response_assembly": {"schema_mismatch"},
+        "orchestration_input": {"invalid_input", "schema_mismatch", "unprocessed_document"},
+        "orchestration_rules": {"evaluation_failed"},
+        "orchestration_output": {"invalid_output", "schema_mismatch"},
+    }
+
+    def __init__(self, message, *, stage=None, reason=None, **metadata):
+        super().__init__(message, **metadata)
+        valid = (isinstance(stage, str) and isinstance(reason, str)
+                 and reason in self._DIAGNOSTICS.get(stage, ()))
+        self.stage = stage if valid else None
+        self.reason = reason if valid else None
 
 
 class LLMTimeoutError(LLMError):

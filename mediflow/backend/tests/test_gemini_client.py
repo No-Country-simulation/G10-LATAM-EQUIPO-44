@@ -70,19 +70,21 @@ def test_valid_json_and_full_existing_contract(payload):
     assert config.response_json_schema["type"] == "object"
 
 
-@pytest.mark.parametrize("text", ["not json", "[]", "null", '{"x": NaN}', '{"x":1,"x":2}', ""])
-def test_malformed_json_is_controlled(text):
+@pytest.mark.parametrize("text,reason", [("not json", "invalid_json"), ("[]", "invalid_root"), ("null", "invalid_root"), ('{"x": NaN}', "invalid_json"), ('{"x":1,"x":2}', "invalid_json"), ("", "empty_or_oversized")])
+def test_malformed_json_is_controlled(text, reason):
     service, _ = make_client(text=text)
-    with pytest.raises(LLMResponseError):
+    with pytest.raises(LLMResponseError) as exc:
         service.extract("Documento sintético")
+    assert (exc.value.stage, exc.value.reason) == ("clinical_json", reason)
 
 
 @pytest.mark.parametrize("block", ["clasificacion", "datos_extraidos", "decision_enrutamiento"])
 def test_missing_blocks_are_rejected(payload, block):
     del payload[block]
     service, _ = make_client(payload)
-    with pytest.raises(LLMResponseError):
+    with pytest.raises(LLMResponseError) as exc:
         service.extract("Documento sintético")
+    assert (exc.value.stage, exc.value.reason) == ("clinical_schema", "missing_fields")
 
 
 def test_missing_priority_is_not_defaulted_to_routine(payload):
@@ -154,14 +156,16 @@ def test_network_failure_is_controlled(error):
 ])
 def test_wrong_types_and_confidence_are_rejected(payload, field, value):
     payload["clasificacion"][field] = value
-    with pytest.raises(LLMResponseError):
+    with pytest.raises(LLMResponseError) as exc:
         validate_clinical_response(json.dumps(payload))
+    assert (exc.value.stage, exc.value.reason) == ("clinical_schema", "schema_mismatch")
 
 
 def test_unknown_nested_fields_are_rejected(payload):
     payload["datos_extraidos"]["paciente"]["api_key"] = "exfiltrate"
-    with pytest.raises(LLMResponseError):
+    with pytest.raises(LLMResponseError) as exc:
         validate_clinical_response(json.dumps(payload))
+    assert (exc.value.stage, exc.value.reason) == ("clinical_schema", "unexpected_fields")
 
 
 def test_missing_nested_patient_fields_are_rejected(payload):
@@ -202,13 +206,15 @@ def test_explicit_non_structured_mode_still_validates_json(payload):
         service.extract("Documento sintético")
 
 
-def test_truncated_generation_is_not_accepted(payload):
+@pytest.mark.parametrize("finish,reason", [(types.FinishReason.MAX_TOKENS, "max_tokens"), (types.FinishReason.SAFETY, "safety"), ("private-provider-data", "non_stop_finish")])
+def test_truncated_generation_is_not_accepted(payload, finish, reason):
     service, client = make_client(payload)
     client.models.generate_content.return_value.candidates = [
-        SimpleNamespace(finish_reason=types.FinishReason.MAX_TOKENS)
+        SimpleNamespace(finish_reason=finish)
     ]
-    with pytest.raises(LLMResponseError):
+    with pytest.raises(LLMResponseError) as exc:
         service.extract("Documento sintético")
+    assert (exc.value.stage, exc.value.reason) == ("generation", reason)
 
 
 def test_credentials_and_model_are_required_and_key_is_not_in_repr():
@@ -348,15 +354,17 @@ def test_official_medication_names_and_missing_dose_value(payload):
 def test_illegible_dose_requires_review(payload):
     payload["datos_extraidos"]["medicamentos_recetados"] = [{"medicamento":"Ficticio", "dosis":"ILLEGIBLE"}]
     payload["decision_enrutamiento"].update(requiere_auditoria_humana=False, destino_principal="Cola_Farmacia")
-    with pytest.raises(LLMResponseError, match="ilegible"):
+    with pytest.raises(LLMResponseError, match="ilegible") as exc:
         validate_clinical_response(json.dumps(payload))
+    assert (exc.value.stage, exc.value.reason) == ("routing_consistency", "illegible_dose_without_review")
 
 
 @pytest.mark.parametrize("review,destination", [(True,"Cola_Farmacia"),(False,"Cola_Revision_Humana")])
 def test_inconsistent_review_destination_is_rejected(payload, review, destination):
     payload["decision_enrutamiento"].update(requiere_auditoria_humana=review, destino_principal=destination)
-    with pytest.raises(LLMResponseError):
+    with pytest.raises(LLMResponseError) as exc:
         validate_clinical_response(json.dumps(payload))
+    assert (exc.value.stage, exc.value.reason) == ("routing_consistency", "review_destination_mismatch")
 
 
 def test_pending_is_not_an_official_priority(payload):
@@ -376,3 +384,8 @@ def test_nico_schema_field_names_match_backend():
     fields = active["$defs"]["DatosExtraidosSchema"]["properties"]
     assert set(original["properties"]["datos_extraidos"]["properties"]) == set(fields)
     assert original["properties"]["clasificacion"]["properties"]["nivel_prioridad"]["enum"] == active["$defs"]["ClasificacionSchema"]["properties"]["nivel_prioridad"]["enum"]
+
+@pytest.mark.parametrize("stage,reason", [("private\nfield", "invalid_json"), ("clinical_json", "private-patient-value"), ("clinical_json", "max_tokens")])
+def test_response_diagnostics_only_accept_approved_pairs(stage, reason):
+    error = LLMResponseError("Mensaje público", stage=stage, reason=reason)
+    assert error.stage is None and error.reason is None
