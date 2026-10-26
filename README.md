@@ -238,7 +238,7 @@ Se conservan maquetas y entregas históricas, identificadas como tales. Las aler
 | --- | --- |
 | Nicolás | Dataset, prompt y detección de urgencias |
 | Laura | Estados, confianza, completitud y perfiles documentales |
-| Drazen | API de documentos y revisión |
+| Drazen | Diseño de la arquitectura inicial del proyecto, configuración integral del Tenancy y buckets de OCI Object Storage y API de documentos y revisión |
 | Eliana | Contratos, orquestación e integración |
 | Brando | Persistencia OCI, errores y copia verificada |
 | Flor | Wireframes y maquetas web originales |
